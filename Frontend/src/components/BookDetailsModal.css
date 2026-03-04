@@ -1,0 +1,39 @@
+.details-modal .modal-panel {
+  max-width: 28rem;
+}
+
+.details-title {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.35rem;
+  margin: 0 0 1.25rem 0;
+  color: var(--color-text);
+}
+
+.details-list {
+  margin: 0 0 1.25rem 0;
+  padding: 0;
+}
+
+.details-row {
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.details-row:last-child {
+  border-bottom: none;
+}
+
+.details-row dt {
+  margin: 0;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  min-width: 5rem;
+}
+
+.details-row dd {
+  margin: 0;
+  flex: 1;
+  color: var(--color-text);
+}

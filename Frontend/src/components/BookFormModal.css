@@ -1,0 +1,63 @@
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(44, 40, 37, 0.4);
+}
+
+.modal-panel {
+  position: relative;
+  width: 100%;
+  max-width: 24rem;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 40px rgba(44, 40, 37, 0.2);
+  padding: 1.5rem;
+}
+
+.modal-title {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.35rem;
+  margin: 0 0 1.25rem 0;
+  color: var(--color-text);
+}
+
+.book-form label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.35rem;
+  color: var(--color-text);
+}
+
+.book-form input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  font: inherit;
+  color: var(--color-text);
+}
+
+.book-form input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}

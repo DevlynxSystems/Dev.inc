@@ -1,0 +1,31 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --color-bg: #f5f0e8;
+  --color-surface: #fffef9;
+  --color-border: #e0d9cc;
+  --color-text: #2c2825;
+  --color-text-muted: #6b6560;
+  --color-accent: #8b4513;
+  --color-accent-hover: #6d3612;
+  --color-secondary: #5c5c5c;
+  --shadow: 0 2px 8px rgba(44, 40, 37, 0.08);
+  --radius: 8px;
+}
+
+body {
+  margin: 0;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
