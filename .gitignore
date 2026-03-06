@@ -26,12 +26,7 @@ Thumbs.db
 
 # Vite
 *.local
-
 backend/node_modules/
 backend/.env
-frontend/node_modules/
 **/.env
 **/node_modules/
-.DS_Store
-**/package.json
-**/package-lock.json

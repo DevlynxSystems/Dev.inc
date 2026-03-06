@@ -1,16 +1,27 @@
 class Book{
-    Title;
-    Date;
-    Author;
-    Cover;
-    PageCount
+    _Title;
+    _Date;
+    _Author;
+    _Cover;
+    _PageCount
 
     constructor(Title, date, Author, Cover, PageCount){
-        this.Title = Title
-        this.date = date
-        this.Author = Author
-        this.Cover = Cover;
-        this.PageCount = PageCount;
+        this._Title = Title;
+        this._Date = date;
+        this._Author = Author;
+        this._Cover = Cover;
+        this._PageCount = PageCount;
+    }
+
+    insertIntoDatabase(database){
+        const data = new manager.BookModel({
+            title: this._Title,
+            author: this._Author,
+            cover: this._Cover,
+            pageCount: this._PageCount,
+            date: this._Date
+        });
+        
     }
 
     get Title() {
@@ -18,21 +29,21 @@ class Book{
     }
 
     set Title(value) {
-        if (typeof name !== "string") {
+        if (typeof value !== "string") {
             throw new TypeError("name must be a string");
         }
         this._Title = value;
     }
 
-    get date() {
-        return this._date;
+    get Date() {
+        return this._Date;
     }
 
     set date(value) {
-        if (typeof date !== "string") {
+        if (typeof value !== "string") {
             throw new TypeError("name must be a string");
         }
-        this._date = value;
+        this._Date = value;
     }
 
     get Author() {
@@ -40,7 +51,7 @@ class Book{
     }
 
     set Author(value) {
-        if (typeof Author !== "string") {
+        if (typeof value !== "string") {
             throw new TypeError("name must be a string");
         }
         this._Author = value;
@@ -52,7 +63,7 @@ class Book{
 
     set Cover(value) {
         if (value.isBuffer()) {
-            throw new TypeError("name must be a string");
+            throw new TypeError("name must be a image");
         }
         this._Cover = value;
     }
@@ -68,4 +79,7 @@ class Book{
         this._PageCount = value;
     }
 
+    
+
 }
+module.exports = Book;

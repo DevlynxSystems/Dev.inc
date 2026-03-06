@@ -1,5 +1,6 @@
 
 const mongoose = require("mongoose");
+const Book = require('./BooksClass');
 
 
 
@@ -10,6 +11,15 @@ class DatabaseManager{
        this.connection = null 
     }
 
+    bookSchema = new mongoose.Schema({
+        title: { type: String, required: true },
+        author: { type: String, required: true },
+        cover: { type: Buffer }, // Buffers are used for images/binary data
+        pageCount: { type: Number, required: true }, // Changed to Number
+        date: { type: Date, default: Date.now }
+    });
+    BookModel = mongoose.model("Book", this.bookSchema);
+    
     async connect(uri){
         console.log(uri)
         if(this.connection){
@@ -31,6 +41,10 @@ class DatabaseManager{
     }
 
 
+    addBook(Title, date, Author, Cover, PageCount){
+        const book = new Book(Title, date, Author, Cover, PageCount)
+        book.insertIntoDatabase(this)
+    }
 
 }
 
