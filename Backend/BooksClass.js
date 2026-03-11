@@ -13,14 +13,15 @@ class Book{
         this._PageCount = PageCount;
     }
 
-    insertIntoDatabase(database){
-        const data = new manager.BookModel({
+    async insertIntoDatabase(database){
+        const data = new database.BookModel({
             title: this._Title,
             author: this._Author,
             cover: this._Cover,
             pageCount: this._PageCount,
             date: this._Date
         });
+        await data.save();
         
     }
 
