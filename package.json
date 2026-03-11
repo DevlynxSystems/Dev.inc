@@ -4,6 +4,7 @@
   "description": "A sample package.json",
   "dependencies": {
     "@primer/css": "17.0.1",
+    "express": "^5.2.1",
     "mongodb": "^7.1.0"
   },
   "license": "MIT"

@@ -20,4 +20,5 @@ app.listen(PORT, ()=>{
 })
 
 
-dataBaseManager.addBook("the great bear2", Date(), "you", null, 1);
+dataBaseManager.addBook("Big bad wolf", Date(), "joe mama", null, 50);
+

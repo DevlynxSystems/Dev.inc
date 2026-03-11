@@ -1,3 +1,9 @@
+
+
+/**
+ * Represents a book in the catalog
+ */
+
 class Book{
     _Title;
     _Date;
@@ -5,6 +11,16 @@ class Book{
     _Cover;
     _PageCount
 
+
+
+    /**
+     *  This constructor Creates a new Book.
+     * @param {string} Title - Title of the book
+     * @param {string} date - Publication date of book
+     * @param {string} Author - Author of the book
+     * @param {Buffer|string} Cover - The Cover image
+     * @param {number} PageCount - The  Number of pages
+     */
     constructor(Title, date, Author, Cover, PageCount){
         this._Title = Title;
         this._Date = date;
