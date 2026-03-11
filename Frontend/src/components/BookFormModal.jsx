@@ -6,12 +6,14 @@ export function BookFormModal({ open, onClose, onSave }) {
   const [author, setAuthor] = useState('')
   const [year, setYear] = useState('')
   const [genre, setGenre] = useState('')
+  const [coverUrl, setCoverUrl] = useState('')
 
   const reset = () => {
     setTitle('')
     setAuthor('')
     setYear('')
     setGenre('')
+    setCoverUrl('')
   }
 
   const handleSubmit = (e) => {
@@ -21,6 +23,7 @@ export function BookFormModal({ open, onClose, onSave }) {
       author: author.trim(),
       year: year ? parseInt(year, 10) : null,
       genre: genre.trim() || null,
+      coverUrl: coverUrl.trim() || null,
     })
     reset()
   }
@@ -84,6 +87,14 @@ export function BookFormModal({ open, onClose, onSave }) {
             value={genre}
             onChange={(e) => setGenre(e.target.value)}
             placeholder="e.g. Fiction"
+          />
+          <label htmlFor="coverUrl">Cover image URL (optional)</label>
+          <input
+            type="url"
+            id="coverUrl"
+            value={coverUrl}
+            onChange={(e) => setCoverUrl(e.target.value)}
+            placeholder="https://..."
           />
           <div className="form-actions">
             <button type="button" className="btn btn-secondary" onClick={handleClose}>

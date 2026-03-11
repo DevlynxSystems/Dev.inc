@@ -1,8 +1,25 @@
+import { useState } from 'react'
 import './BookCard.css'
 
 export function BookCard({ book, onView, onRemove }) {
+  const [coverError, setCoverError] = useState(false)
+  const showImg = book.coverUrl && !coverError
+
   return (
     <article className="book-card" data-book-id={book.id}>
+      <div className="book-card-cover" aria-hidden="true">
+        {showImg ? (
+          <img
+            src={book.coverUrl}
+            alt={`Cover: ${book.title}`}
+            className="book-card-cover-img"
+            loading="eager"
+            onError={() => setCoverError(true)}
+          />
+        ) : (
+          <span className="book-card-cover-inner">{book.title.charAt(0)}</span>
+        )}
+      </div>
       <div className="book-card-body">
         <h3 className="book-title">{book.title}</h3>
         <p className="book-author">{book.author}</p>

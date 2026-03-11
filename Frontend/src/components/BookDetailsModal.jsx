@@ -20,6 +20,15 @@ export function BookDetailsModal({ book, open, onClose }) {
         <h2 id="details-title" className="details-title">
           Book details
         </h2>
+        {book.coverUrl && (
+          <div className="details-cover-wrap">
+            <img
+              src={book.coverUrl}
+              alt={`Cover of ${book.title}`}
+              className="details-cover-img"
+            />
+          </div>
+        )}
         <dl className="details-list">
           <div className="details-row">
             <dt>Title</dt>

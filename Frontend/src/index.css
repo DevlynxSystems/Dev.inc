@@ -7,14 +7,16 @@
 :root {
   --color-bg: #f5f0e8;
   --color-surface: #fffef9;
+  --color-navbar-bg: #fffef9;
   --color-border: #e0d9cc;
   --color-text: #2c2825;
   --color-text-muted: #6b6560;
-  --color-accent: #8b4513;
-  --color-accent-hover: #6d3612;
+  --color-accent: #c45c26;
+  --color-accent-hover: #a34a1e;
   --color-secondary: #5c5c5c;
   --shadow: 0 2px 8px rgba(44, 40, 37, 0.08);
   --radius: 8px;
+  --navbar-height: 4rem;
 }
 
 body {
