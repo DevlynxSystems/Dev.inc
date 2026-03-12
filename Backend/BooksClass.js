@@ -1,7 +1,7 @@
 
 
 /**
- * Represents a book in the catalog
+ * This class represents a book in the catalog
  */
 
 class Book{
@@ -10,7 +10,6 @@ class Book{
     _Author;
     _Cover;
     _PageCount
-
 
 
     /**
@@ -29,6 +28,11 @@ class Book{
         this._PageCount = PageCount;
     }
 
+    /**
+     *  Saves the book into the database
+     * @param {Object} database  - Database object that contains BookModel
+     */
+
     async insertIntoDatabase(database){
         const data = new database.BookModel({
             title: this._Title,
@@ -41,9 +45,16 @@ class Book{
         
     }
 
+
+    /**
+     * Gets the title of the book
+     * @returns {string} - book title
+     */
+
     get Title() {
         return this._Title;
     }
+
 
     set Title(value) {
         if (typeof value !== "string") {
