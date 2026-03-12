@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BookCard } from './components/BookCard'
 import { BookDetailsModal } from './components/BookDetailsModal'
 import { BookFormModal } from './components/BookFormModal'
@@ -7,19 +7,39 @@ import { sampleBooks } from './data/books'
 import './App.css'
 
 export default function App() {
-  const [books, setBooks] = useState(sampleBooks)
+  const [books, setBooks] = useState([]) // Start empty
+
+useEffect(() => {
+  const fetchBooks = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/books')
+      const data = await response.json()
+      setBooks(data)
+    } catch (err) {
+      console.error("Failed to fetch books:", err)
+    }
+  }
+  fetchBooks()
+}, [])
+
   const [detailsBook, setDetailsBook] = useState(null)
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-  const removeBook = (id) => {
-    setBooks((prev) => prev.filter((b) => b.id !== id))
+  const removeBook = async (id) => {
+    await fetch(`http://localhost:5000/api/books/${id}`, { method: 'DELETE' });
+    setBooks((prev) => prev.filter((b) => b._id !== id));
   }
 
-  const addBook = (bookData) => {
-    const id = String(Date.now())
-    setBooks((prev) => [{ id, ...bookData }, ...prev])
-    setAddModalOpen(false)
+  const addBook = async (bookData) => {
+    const response = await fetch('http://localhost:5000/api/books', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bookData),
+    });
+    const savedBook = await response.json();
+    setBooks((prev) => [savedBook, ...prev]);
+    setAddModalOpen(false);
   }
 
   const query = searchQuery.trim().toLowerCase()
@@ -48,10 +68,10 @@ export default function App() {
           ) : (
             filteredBooks.map((book) => (
               <BookCard
-                key={book.id}
+                key={book._id}
                 book={book}
                 onView={setDetailsBook}
-                onRemove={() => removeBook(book.id)}
+                onRemove={() => removeBook(book._id)}
               />
             ))
           )}

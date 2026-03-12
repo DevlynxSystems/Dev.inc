@@ -46,8 +46,23 @@ class DatabaseManager{
         book.insertIntoDatabase(this)
     }
 
-    async deleteBook(id){
-        await db.deleteOne({ _id: ObjectId(String(id))});
+    async deleteBook(id) {
+        try {
+            // Use this.BookModel (the model you initialized in the constructor)
+            return await this.BookModel.findByIdAndDelete(id);
+        } catch (error) {
+            console.error("Error deleting book from database:", error);
+            throw error;
+        }
+    }
+
+    async getAllBooks() {
+        try {
+            return await this.BookModel.find({});
+        } catch (error) {
+            console.error("Error fetching books:", error);
+            return [];
+        }
     }
 
 }

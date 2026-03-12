@@ -21,9 +21,11 @@ export function BookFormModal({ open, onClose, onSave }) {
     onSave({
       title: title.trim(),
       author: author.trim(),
-      year: year ? parseInt(year, 10) : null,
-      genre: genre.trim() || null,
-      coverUrl: coverUrl.trim() || null,
+      // We must add pageCount because your schema says 'required: true'
+      pageCount: year ? parseInt(year, 10) : 0, 
+      // If you want to store the URL, your schema needs a 'cover' String field
+      // For now, let's just send the data your schema expects
+      date: new Date() 
     })
     reset()
   }
