@@ -23,8 +23,8 @@ export function BookFormModal({ open, onClose, onSave }) {
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (!file) return
-    if (file.size > 20 * 1024 * 1024) {
-    setError("Image must be under 20MB.");
+    if (file.size > 2000 * 1024 * 1024) {
+    setError("Image must be under 2000MB.");
     return;
   }
   setError("")
