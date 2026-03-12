@@ -4,29 +4,28 @@ import './BookFormModal.css'
 export function BookFormModal({ open, onClose, onSave }) {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
-  const [year, setYear] = useState('')
-  const [genre, setGenre] = useState('')
+  const [pages, setPages] = useState('') // Renamed from year to match schema
   const [coverUrl, setCoverUrl] = useState('')
 
   const reset = () => {
     setTitle('')
     setAuthor('')
-    setYear('')
-    setGenre('')
+    setPages('')
     setCoverUrl('')
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    
+    // This object now matches your Mongoose Schema keys
     onSave({
       title: title.trim(),
       author: author.trim(),
-      // We must add pageCount because your schema says 'required: true'
-      pageCount: year ? parseInt(year, 10) : 0, 
-      // If you want to store the URL, your schema needs a 'cover' String field
-      // For now, let's just send the data your schema expects
-      date: new Date() 
+      pageCount: parseInt(pages, 10) || 0, // Maps to pageCount: { type: Number, required: true }
+      cover: coverUrl.trim() || null,      // Maps to cover: { type: String/Buffer }
+      date: new Date()
     })
+    
     reset()
   }
 
@@ -52,7 +51,7 @@ export function BookFormModal({ open, onClose, onSave }) {
         onClick={(e) => e.stopPropagation()}
       >
         <h2 id="modal-title" className="modal-title">
-          Add book
+          Add new book
         </h2>
         <form className="book-form" onSubmit={handleSubmit}>
           <label htmlFor="title">Title</label>
@@ -64,6 +63,7 @@ export function BookFormModal({ open, onClose, onSave }) {
             required
             autoFocus
           />
+
           <label htmlFor="author">Author</label>
           <input
             type="text"
@@ -72,38 +72,33 @@ export function BookFormModal({ open, onClose, onSave }) {
             onChange={(e) => setAuthor(e.target.value)}
             required
           />
-          <label htmlFor="year">Year</label>
+
+          <label htmlFor="pages">Page Count</label>
           <input
             type="number"
-            id="year"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            min="1000"
-            max="2100"
-            placeholder="e.g. 2020"
+            id="pages"
+            value={pages}
+            onChange={(e) => setPages(e.target.value)}
+            required
+            min="1"
+            placeholder="e.g. 350"
           />
-          <label htmlFor="genre">Genre</label>
-          <input
-            type="text"
-            id="genre"
-            value={genre}
-            onChange={(e) => setGenre(e.target.value)}
-            placeholder="e.g. Fiction"
-          />
-          <label htmlFor="coverUrl">Cover image URL (optional)</label>
+
+          <label htmlFor="coverUrl">Cover Image URL</label>
           <input
             type="url"
             id="coverUrl"
             value={coverUrl}
             onChange={(e) => setCoverUrl(e.target.value)}
-            placeholder="https://..."
+            placeholder="https://example.com/image.jpg"
           />
+
           <div className="form-actions">
             <button type="button" className="btn btn-secondary" onClick={handleClose}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary">
-              Save
+              Save Book
             </button>
           </div>
         </form>

@@ -14,7 +14,7 @@ class DatabaseManager{
     bookSchema = new mongoose.Schema({
         title: { type: String, required: true },
         author: { type: String, required: true },
-        cover: { type: Buffer }, 
+        cover: { type: String }, 
         pageCount: { type: Number, required: true }, 
         date: { type: Date, default: Date.now }
     });
@@ -41,9 +41,22 @@ class DatabaseManager{
     }
 
 
-    addBook(Title, date, Author, Cover, PageCount){
-        const book = new Book(Title, date, Author, Cover, PageCount)
-        book.insertIntoDatabase(this)
+    // addBook(Title, date, Author, Cover, PageCount){
+    //     const book = new Book(Title, date, Author, Cover, PageCount)
+    //     book.insertIntoDatabase(this)
+    // }
+    // DatabaseManager.js
+
+    addBook(bookData) {
+        // 1. Destructure the data coming from req.body
+        const { title, date, author, cover, pageCount } = bookData;
+
+        // 2. Pass them individually into the Book constructor
+        // Note: The order here must match your constructor in BooksClass.js
+        const book = new Book(title, date, author, cover, pageCount);
+
+        // 3. Trigger the database save
+        book.insertIntoDatabase(this);
     }
 
     async deleteBook(id) {
