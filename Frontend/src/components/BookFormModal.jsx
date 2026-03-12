@@ -5,6 +5,7 @@ export function BookFormModal({ open, onClose, onSave }) {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [pages, setPages] = useState('')
+  const [error, setError] = useState('')
   const [coverBase64, setCoverBase64] = useState(null)
   const [coverPreview, setCoverPreview] = useState(null)
   const fileInputRef = useRef(null)
@@ -15,12 +16,19 @@ export function BookFormModal({ open, onClose, onSave }) {
     setPages('')
     setCoverBase64(null)
     setCoverPreview(null)
+    setError('')
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (!file) return
+    if (file.size > 2 * 1024 * 1024) {
+    setError("Image must be under 2MB.");
+    return;
+  }
+  setError("")
+
     const reader = new FileReader()
     reader.onload = () => {
       setCoverBase64(reader.result)   // full data URL (base64)
@@ -66,6 +74,7 @@ export function BookFormModal({ open, onClose, onSave }) {
             Add new book
           </h2>
           <form className="book-form" onSubmit={handleSubmit}>
+            {error && <p className="form-error">{error}</p>}
             <label htmlFor="title">Title</label>
             <input
                 type="text"
