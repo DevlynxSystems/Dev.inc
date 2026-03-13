@@ -5,7 +5,7 @@ import { BookFormModal } from './components/BookFormModal'
 import { Navbar } from './components/Navbar'
 import { Footer } from './components/Footer'
 import { SuggestionsSection } from './components/SuggestionsSection'
-import { sampleBooks } from './data/books'
+import { CatalogFilters, filterByDateFilter, sortBooks } from './components/CatalogFilters'
 import './App.css'
 
 export default function App() {
@@ -28,6 +28,8 @@ useEffect(() => {
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [editingBook, setEditingBook] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState('newest')
+  const [dateFilter, setDateFilter] = useState('all')
 
   const removeBook = async (id) => {
     await fetch(`http://localhost:5000/api/books/${id}`, { method: 'DELETE' });
@@ -64,7 +66,7 @@ useEffect(() => {
   }
 
   const query = searchQuery.trim().toLowerCase()
-  const filteredBooks = query
+  const searchFiltered = query
     ? books.filter(
         (b) =>
           b.title?.toLowerCase().includes(query) ||
@@ -72,6 +74,8 @@ useEffect(() => {
           (b.genre && b.genre.toLowerCase().includes(query))
       )
     : books
+  const dateFiltered = filterByDateFilter(searchFiltered, dateFilter)
+  const filteredBooks = sortBooks(dateFiltered, sortBy)
 
   return (
     <div className="app-layout">
@@ -88,12 +92,22 @@ useEffect(() => {
           onRemove={removeBook}
         />
         <section id="catalog" className="catalog-section" aria-label="All books">
-          <h2 className="catalog-heading">All books</h2>
+          <div className="catalog-section-header">
+            <h2 className="catalog-heading">All books</h2>
+            <CatalogFilters
+              sortBy={sortBy}
+              dateFilter={dateFilter}
+              onSortChange={setSortBy}
+              onDateFilterChange={setDateFilter}
+            />
+          </div>
           <div className="catalog" role="list">
           {books.length === 0 ? (
             <p className="catalog-empty">No books in the catalog.</p>
           ) : filteredBooks.length === 0 ? (
-            <p className="catalog-empty">No books match your search.</p>
+            <p className="catalog-empty">
+              {searchFiltered.length === 0 ? 'No books match your search.' : 'No books match the current filters.'}
+            </p>
           ) : (
             filteredBooks.map((book) => (
               <BookCard
