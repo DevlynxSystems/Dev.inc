@@ -173,7 +173,36 @@
   }
 }
 
+.catalog-empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: var(--radius);
+  border: 1px solid var(--glass-border-subtle);
+  box-shadow: 0 1px 0 var(--glass-border);
+}
+
+.catalog-empty-state-text {
+  margin: 0 0 1.25rem 0;
+  color: var(--color-text-muted);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  max-width: 24rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.catalog-empty-cta {
+  min-height: 2.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
 .catalog-empty {
+  grid-column: 1 / -1;
   text-align: center;
   color: var(--color-text-muted);
   padding: 4rem 1.5rem;

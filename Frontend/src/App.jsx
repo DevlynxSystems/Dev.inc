@@ -107,15 +107,24 @@ useEffect(() => {
               onDateFilterChange={setDateFilter}
             />
           </div>
-          <p className="catalog-intro">
-            {books.length === 0
-              ? 'No books yet. Add your first book to get started.'
-              : `${books.length} ${books.length === 1 ? 'book' : 'books'} in your catalog.`}
-          </p>
+          {books.length > 0 && (
+            <p className="catalog-intro">
+              {books.length} {books.length === 1 ? 'book' : 'books'} in your catalog.
+            </p>
+          )}
           </div>
           <div className="catalog" role="list">
           {books.length === 0 ? (
-            <p className="catalog-empty">No books in the catalog.</p>
+            <div className="catalog-empty-state">
+              <p className="catalog-empty-state-text">Your library is empty. Add your first book to get started.</p>
+              <button
+                type="button"
+                className="btn btn-primary catalog-empty-cta"
+                onClick={() => setAddModalOpen(true)}
+              >
+                Add your first book
+              </button>
+            </div>
           ) : filteredBooks.length === 0 ? (
             <p className="catalog-empty">
               {searchFiltered.length === 0 ? 'No books match your search.' : 'No books match the current filters.'}
