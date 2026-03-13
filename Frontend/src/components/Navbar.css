@@ -19,6 +19,13 @@
   align-items: center;
   gap: 0.75rem;
   flex-shrink: 0;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity var(--transition);
+}
+
+.navbar-brand:hover {
+  opacity: 0.85;
 }
 
 .navbar-logo {

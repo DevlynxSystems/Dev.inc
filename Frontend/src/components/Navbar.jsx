@@ -29,16 +29,21 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
     setTheme(next)
   }
 
+  const goHome = (e) => {
+    e.preventDefault()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <header className="navbar" role="banner">
-      <div className="navbar-brand">
+      <a href="#" className="navbar-brand" onClick={goHome} aria-label="Home – Book Catalog">
         <img
           src="/logo.png"
-          alt="Dev.inc – Book & ideas"
+          alt=""
           className="navbar-logo"
         />
         <span className="navbar-title">Book Catalog</span>
-      </div>
+      </a>
       <div className="navbar-center">
         <input
           type="search"

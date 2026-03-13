@@ -4,7 +4,9 @@ import { BookDetailsModal } from './components/BookDetailsModal'
 import { BookFormModal } from './components/BookFormModal'
 import { Navbar } from './components/Navbar'
 import { Footer } from './components/Footer'
-import { SuggestionsSection } from './components/SuggestionsSection'
+import { Hero } from './components/Hero'
+import { FeaturesSection } from './components/FeaturesSection'
+// import { SuggestionsSection } from './components/SuggestionsSection'
 import { CatalogFilters, filterByDateFilter, sortBooks } from './components/CatalogFilters'
 import './App.css'
 
@@ -84,22 +86,32 @@ useEffect(() => {
         onSearchChange={setSearchQuery}
         onAddBook={() => setAddModalOpen(true)}
       />
-      <main className="main">
-        <SuggestionsSection
+      <main className="main home-page">
+        <Hero onAddBook={() => setAddModalOpen(true)} />
+        <FeaturesSection />
+        {/* SuggestionsSection (Trending / Classic reads) temporarily disabled */}
+        {/* <SuggestionsSection
           books={books}
           onView={setDetailsBook}
           onEdit={openEdit}
           onRemove={removeBook}
-        />
-        <section id="catalog" className="catalog-section" aria-label="All books">
-          <div className="catalog-section-header">
-            <h2 className="catalog-heading">All books</h2>
-            <CatalogFilters
+        /> */}
+        <section id="catalog" className="catalog-section" aria-label="Your library">
+          <div className="catalog-section-intro">
+            <div className="catalog-section-header">
+              <h2 className="catalog-heading">Your library</h2>
+              <CatalogFilters
               sortBy={sortBy}
               dateFilter={dateFilter}
               onSortChange={setSortBy}
               onDateFilterChange={setDateFilter}
             />
+          </div>
+          <p className="catalog-intro">
+            {books.length === 0
+              ? 'No books yet. Add your first book to get started.'
+              : `${books.length} ${books.length === 1 ? 'book' : 'books'} in your catalog.`}
+          </p>
           </div>
           <div className="catalog" role="list">
           {books.length === 0 ? (
