@@ -1,0 +1,111 @@
+.suggestions {
+  margin-bottom: 2.5rem;
+}
+
+.suggestions-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
+
+.suggestion-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border-subtle);
+  box-shadow: var(--shadow-sm), 0 1px 0 var(--glass-border);
+}
+
+.suggestion-heading {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.suggestion-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.suggestion-row {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25rem 0 1rem;
+  margin: 0 -0.25rem;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.suggestion-row::-webkit-scrollbar {
+  height: 6px;
+}
+
+.suggestion-row::-webkit-scrollbar-track {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.suggestion-row::-webkit-scrollbar-thumb {
+  background: var(--color-text-muted);
+  border-radius: 3px;
+}
+
+.suggestion-row::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text);
+}
+
+.suggestion-card-wrap {
+  flex: 0 0 200px;
+  width: 200px;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.suggestion-card-wrap .book-card {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.suggestion-empty {
+  margin: 0;
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius);
+  border: 1px solid var(--glass-border-subtle);
+  box-shadow: 0 1px 0 var(--glass-border);
+}
+
+@media (min-width: 640px) {
+  .suggestion-card-wrap {
+    flex: 0 0 220px;
+    width: 220px;
+  }
+}
+
+@media (min-width: 900px) {
+  .suggestion-card-wrap {
+    flex: 0 0 240px;
+    width: 240px;
+  }
+
+  .suggestion-heading {
+    font-size: 1.65rem;
+  }
+}

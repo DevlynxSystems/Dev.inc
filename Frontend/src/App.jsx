@@ -4,6 +4,7 @@ import { BookDetailsModal } from './components/BookDetailsModal'
 import { BookFormModal } from './components/BookFormModal'
 import { Navbar } from './components/Navbar'
 import { Footer } from './components/Footer'
+import { SuggestionsSection } from './components/SuggestionsSection'
 import { sampleBooks } from './data/books'
 import './App.css'
 
@@ -25,6 +26,7 @@ useEffect(() => {
 
   const [detailsBook, setDetailsBook] = useState(null)
   const [addModalOpen, setAddModalOpen] = useState(false)
+  const [editingBook, setEditingBook] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
 
   const removeBook = async (id) => {
@@ -32,15 +34,33 @@ useEffect(() => {
     setBooks((prev) => prev.filter((b) => b._id !== id));
   }
 
-  const addBook = async (bookData) => {
-    const response = await fetch('http://localhost:5000/api/books', {
-      method: 'POST',
+  const saveBook = async (bookData, bookId) => {
+    const isEdit = !!bookId
+    const url = isEdit ? `http://localhost:5000/api/books/${bookId}` : 'http://localhost:5000/api/books'
+    const response = await fetch(url, {
+      method: isEdit ? 'PUT' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(bookData),
     });
-    const savedBook = await response.json();
-    setBooks((prev) => [savedBook, ...prev]);
-    setAddModalOpen(false);
+    const text = await response.text();
+    const data = text ? (() => { try { return JSON.parse(text); } catch { return {}; } })() : {};
+    if (!response.ok) {
+      const msg = data.error || (response.status === 413 ? 'Cover image is too large. Try a smaller image.' : (isEdit ? 'Failed to update book' : 'Failed to add book'));
+      throw new Error(msg);
+    }
+    if (isEdit) {
+      setBooks((prev) => prev.map((b) => (b._id === bookId ? data : b)));
+      setEditingBook(null);
+      setDetailsBook(null);
+    } else {
+      setBooks((prev) => [data, ...prev]);
+      setAddModalOpen(false);
+    }
+  }
+
+  const openEdit = (book) => {
+    setDetailsBook(null)
+    setEditingBook(book)
   }
 
   const query = searchQuery.trim().toLowerCase()
@@ -61,7 +81,15 @@ useEffect(() => {
         onAddBook={() => setAddModalOpen(true)}
       />
       <main className="main">
-        <section className="catalog" role="list">
+        <SuggestionsSection
+          books={books}
+          onView={setDetailsBook}
+          onEdit={openEdit}
+          onRemove={removeBook}
+        />
+        <section id="catalog" className="catalog-section" aria-label="All books">
+          <h2 className="catalog-heading">All books</h2>
+          <div className="catalog" role="list">
           {books.length === 0 ? (
             <p className="catalog-empty">No books in the catalog.</p>
           ) : filteredBooks.length === 0 ? (
@@ -72,10 +100,12 @@ useEffect(() => {
                 key={book._id}
                 book={book}
                 onView={setDetailsBook}
+                onEdit={openEdit}
                 onRemove={() => removeBook(book._id)}
               />
             ))
           )}
+          </div>
         </section>
       </main>
 
@@ -85,12 +115,14 @@ useEffect(() => {
         book={detailsBook}
         open={!!detailsBook}
         onClose={() => setDetailsBook(null)}
+        onEdit={openEdit}
       />
 
       <BookFormModal
-        open={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
-        onSave={addBook}
+        open={addModalOpen || !!editingBook}
+        onClose={() => { setAddModalOpen(false); setEditingBook(null) }}
+        onSave={saveBook}
+        book={editingBook}
       />
     </div>
   )

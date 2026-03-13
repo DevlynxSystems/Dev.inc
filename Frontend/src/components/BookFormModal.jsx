@@ -1,7 +1,70 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import './BookFormModal.css'
 
-export function BookFormModal({ open, onClose, onSave }) {
+const MAX_COVER_PIXELS = 800
+const COVER_JPEG_QUALITY = 0.82
+const MAX_COVER_BASE64_BYTES = 500 * 1024
+
+const IMAGE_ACCEPT = 'image/png,image/jpeg,image/jpg,image/gif,image/webp,image/svg+xml,image/bmp,image/x-icon,image/*'
+
+function isImageFile(file) {
+  if (file.type && file.type.startsWith('image/')) return true
+  const name = (file.name || '').toLowerCase()
+  return /\.(png|jpe?g|gif|webp|svg|bmp|ico)$/.test(name)
+}
+
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    if (file.type === 'image/svg+xml') {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result)
+      reader.onerror = () => reject(new Error('Could not read image'))
+      reader.readAsDataURL(file)
+      return
+    }
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const w = img.naturalWidth || img.width
+      const h = img.naturalHeight || img.height
+      let width = w
+      let height = h
+      if (w > MAX_COVER_PIXELS || h > MAX_COVER_PIXELS) {
+        if (w >= h) {
+          width = MAX_COVER_PIXELS
+          height = Math.round((h * MAX_COVER_PIXELS) / w)
+        } else {
+          height = MAX_COVER_PIXELS
+          width = Math.round((w * MAX_COVER_PIXELS) / h)
+        }
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, width, height)
+      const dataUrl = canvas.toDataURL('image/jpeg', COVER_JPEG_QUALITY)
+      const base64Length = (dataUrl.length * 3) / 4
+      if (base64Length > MAX_COVER_BASE64_BYTES) {
+        const scale = Math.sqrt(MAX_COVER_BASE64_BYTES / base64Length)
+        canvas.width = Math.max(1, Math.round(width * scale))
+        canvas.height = Math.max(1, Math.round(height * scale))
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+        resolve(canvas.toDataURL('image/jpeg', 0.75))
+      } else {
+        resolve(dataUrl)
+      }
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('Invalid image'))
+    }
+    img.src = url
+  })
+}
+
+export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [publishDate, setPublishDate] = useState('')
@@ -9,7 +72,26 @@ export function BookFormModal({ open, onClose, onSave }) {
   const [error, setError] = useState('')
   const [coverBase64, setCoverBase64] = useState(null)
   const [coverPreview, setCoverPreview] = useState(null)
+  const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) {
+      reset()
+      return
+    }
+    if (editingBook) {
+      setTitle(editingBook.title || '')
+      setAuthor(editingBook.author || '')
+      setPublishDate(editingBook.date ? new Date(editingBook.date).toISOString().slice(0, 10) : '')
+      setPageNumber(editingBook.pageCount != null ? String(editingBook.pageCount) : '')
+      setCoverBase64(editingBook.cover || null)
+      setCoverPreview(editingBook.cover || null)
+      setError('')
+    } else {
+      reset()
+    }
+  }, [open, editingBook])
 
   const reset = () => {
     setTitle('')
@@ -19,14 +101,15 @@ export function BookFormModal({ open, onClose, onSave }) {
     setCoverBase64(null)
     setCoverPreview(null)
     setError('')
+    setUploading(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0]
     if (!file) return
-    if (!file.type.startsWith('image/')) {
-      setError('Please select an image file (e.g. JPEG, PNG, GIF, WebP, SVG, BMP).')
+    if (!isImageFile(file)) {
+      setError('Please select an image file (PNG, JPEG, JPG, GIF, WebP, SVG, BMP, etc.).')
       return
     }
     if (file.size > 20 * 1024 * 1024) {
@@ -34,25 +117,34 @@ export function BookFormModal({ open, onClose, onSave }) {
       return
     }
     setError('')
-
-    const reader = new FileReader()
-    reader.onload = () => {
-      setCoverBase64(reader.result)
-      setCoverPreview(reader.result)
+    setUploading(true)
+    try {
+      const dataUrl = await compressImage(file)
+      setCoverBase64(dataUrl)
+      setCoverPreview(dataUrl)
+    } catch (err) {
+      setError(err.message || 'Could not process image')
+    } finally {
+      setUploading(false)
     }
-    reader.readAsDataURL(file)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    onSave({
+    setError('')
+    const payload = {
       title: title.trim(),
       author: author.trim(),
       pageCount: parseInt(pageNumber, 10) || 0,
-      cover: coverBase64 || null,
-      date: publishDate ? new Date(publishDate) : new Date()
-    })
-    reset()
+      cover: coverBase64 !== null ? coverBase64 : (editingBook?.cover ?? null),
+      date: publishDate ? new Date(publishDate) : (editingBook?.date ? new Date(editingBook.date) : new Date())
+    }
+    try {
+      await onSave(payload, editingBook?._id)
+      reset()
+    } catch (err) {
+      setError(err.message || (editingBook ? 'Failed to update book' : 'Failed to add book'))
+    }
   }
 
   const handleClose = () => {
@@ -77,7 +169,7 @@ export function BookFormModal({ open, onClose, onSave }) {
             onClick={(e) => e.stopPropagation()}
         >
           <h2 id="modal-title" className="modal-title">
-            Add new book
+            {editingBook ? 'Edit book' : 'Add new book'}
           </h2>
           <form className="book-form" onSubmit={handleSubmit}>
             {error && <p className="form-error">{error}</p>}
@@ -128,8 +220,9 @@ export function BookFormModal({ open, onClose, onSave }) {
                   type="button"
                   className="btn btn-secondary cover-upload-btn"
                   onClick={() => fileInputRef.current.click()}
+                  disabled={uploading}
               >
-                {coverPreview ? 'Change Image' : 'Upload Image'}
+                {uploading ? 'Processing…' : coverPreview ? 'Change Image' : 'Upload Image'}
               </button>
               {coverPreview && (
                   <button
@@ -143,10 +236,10 @@ export function BookFormModal({ open, onClose, onSave }) {
               <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept={IMAGE_ACCEPT}
                   onChange={handleFileChange}
                   style={{ display: 'none' }}
-                  title="Any image type (JPEG, PNG, GIF, WebP, SVG, BMP, etc.)"
+                  title="PNG, JPEG, JPG, GIF, WebP, SVG, BMP, and other image types"
               />
             </div>
 
@@ -155,7 +248,7 @@ export function BookFormModal({ open, onClose, onSave }) {
                 Cancel
               </button>
               <button type="submit" className="btn btn-primary">
-                Save Book
+                {editingBook ? 'Save changes' : 'Save Book'}
               </button>
             </div>
           </form>

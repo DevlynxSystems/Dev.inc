@@ -5,10 +5,10 @@ const cors = require("cors");
 require("dotenv").config()
 const app = express();
 app.use(cors())
-app.use(express.json())
+// Allow larger payloads for base64 cover images (default is 100kb)
+app.use(express.json({ limit: "10mb" }))
 
 const dataBaseManager = require("./DatabaseManager");
-dataBaseManager.connect(process.env.MONGO_URI)
 
 app.get("/", (req, res) =>{
     res.send("Database is up and running");
@@ -25,11 +25,33 @@ app.get("/api/books", async (req, res) => {
 
 app.post("/api/books", async (req, res) => {
     try {
-        // req.body contains the bookData object sent from React
         const savedBook = await dataBaseManager.addBook(req.body);
         res.status(201).json(savedBook);
     } catch (err) {
-        res.status(400).json({ error: "Failed to add book" });
+        let message = "Failed to add book";
+        if (err.name === "ValidationError" && err.errors) {
+            message = Object.values(err.errors)
+                .map((e) => e.message)
+                .join("; ");
+        } else if (err.message) {
+            message = err.message;
+        }
+        console.error("POST /api/books error:", message, err);
+        res.status(400).json({ error: message });
+    }
+});
+
+app.put("/api/books/:id", async (req, res) => {
+    try {
+        const updated = await dataBaseManager.updateBook(req.params.id, req.body);
+        res.json(updated);
+    } catch (err) {
+        let message = "Failed to update book";
+        if (err.name === "ValidationError" && err.errors) {
+            message = Object.values(err.errors).map((e) => e.message).join("; ");
+        } else if (err.message) message = err.message;
+        console.error("PUT /api/books/:id error:", message, err);
+        res.status(err.message === "Book not found" ? 404 : 400).json({ error: message });
     }
 });
 
@@ -43,9 +65,20 @@ app.delete("/api/books/:id", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, ()=>{
-    console.log(`Server is running on port ${PORT}`);
-})
+
+async function start() {
+    try {
+        await dataBaseManager.connect(process.env.MONGO_URI);
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    } catch (err) {
+        console.error("Failed to start server:", err.message);
+        process.exit(1);
+    }
+}
+
+start();
 
 
 //dataBaseManager.addBook("Big bad wolf", Date(), "joe mama", null, 50);

@@ -1,6 +1,6 @@
 import './BookDetailsModal.css'
 
-export function BookDetailsModal({ book, open, onClose }) {
+export function BookDetailsModal({ book, open, onClose, onEdit }) {
   if (!open || !book) return null
 
   return (
@@ -58,6 +58,11 @@ export function BookDetailsModal({ book, open, onClose }) {
             )}
           </dl>
           <div className="form-actions">
+            {onEdit && (
+              <button type="button" className="btn btn-secondary" onClick={() => { onEdit(book); onClose() }}>
+                Edit
+              </button>
+            )}
             <button type="button" className="btn btn-primary" onClick={onClose}>
               Close
             </button>
