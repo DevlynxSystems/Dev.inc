@@ -3,6 +3,7 @@ import { BookCard } from './components/BookCard'
 import { BookDetailsModal } from './components/BookDetailsModal'
 import { BookFormModal } from './components/BookFormModal'
 import { Navbar } from './components/Navbar'
+import { Footer } from './components/Footer'
 import { sampleBooks } from './data/books'
 import './App.css'
 
@@ -77,6 +78,8 @@ useEffect(() => {
           )}
         </section>
       </main>
+
+      <Footer />
 
       <BookDetailsModal
         book={detailsBook}

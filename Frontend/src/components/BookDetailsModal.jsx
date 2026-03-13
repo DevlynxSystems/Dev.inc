@@ -38,10 +38,16 @@ export function BookDetailsModal({ book, open, onClose }) {
               <dt>Author</dt>
               <dd>{book.author}</dd>
             </div>
-            {book.year != null && (
+            {book.date && (
                 <div className="details-row">
-                  <dt>Year</dt>
-                  <dd>{book.year}</dd>
+                  <dt>Publish Date</dt>
+                  <dd>{new Date(book.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</dd>
+                </div>
+            )}
+            {book.pageCount != null && (
+                <div className="details-row">
+                  <dt>Page Number</dt>
+                  <dd>{book.pageCount}</dd>
                 </div>
             )}
             {book.genre && (

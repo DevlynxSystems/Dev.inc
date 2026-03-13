@@ -24,7 +24,14 @@ export function BookCard({ book, onView, onRemove }) {
                 <h3 className="book-title">{book.title}</h3>
                 <p className="book-author">{book.author}</p>
                 <div className="book-meta">
-                    {book.year && <span className="book-year">{book.year}</span>}
+                    {book.date && (
+                      <span className="book-year">
+                        {new Date(book.date).getFullYear()}
+                      </span>
+                    )}
+                    {book.pageCount != null && (
+                      <span className="book-pages">{book.pageCount} pp.</span>
+                    )}
                     {book.genre && <span className="book-genre">{book.genre}</span>}
                 </div>
             </div>

@@ -84,7 +84,8 @@
   color: var(--color-text-muted);
 }
 
-.book-year::after {
+.book-year::after,
+.book-pages::after {
   content: '·';
   margin-left: 0.35rem;
   opacity: 0.7;

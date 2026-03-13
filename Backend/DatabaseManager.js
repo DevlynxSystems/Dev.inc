@@ -47,7 +47,7 @@ class DatabaseManager{
     // }
     // DatabaseManager.js
 
-    addBook(bookData) {
+    async addBook(bookData) {
         // 1. Destructure the data coming from req.body
         const { title, date, author, cover, pageCount } = bookData;
 
@@ -55,8 +55,8 @@ class DatabaseManager{
         // Note: The order here must match your constructor in BooksClass.js
         const book = new Book(title, date, author, cover, pageCount);
 
-        // 3. Trigger the database save
-        book.insertIntoDatabase(this);
+        // 3. Save and return the saved document
+        return await book.insertIntoDatabase(this);
     }
 
     async deleteBook(id) {

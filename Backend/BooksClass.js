@@ -41,8 +41,8 @@ class Book{
             pageCount: this._PageCount,
             date: this._Date
         });
-        await data.save();
-        
+        const saved = await data.save();
+        return saved;
     }
 
 

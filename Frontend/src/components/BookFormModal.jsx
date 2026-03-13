@@ -4,7 +4,8 @@ import './BookFormModal.css'
 export function BookFormModal({ open, onClose, onSave }) {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
-  const [pages, setPages] = useState('')
+  const [publishDate, setPublishDate] = useState('')
+  const [pageNumber, setPageNumber] = useState('')
   const [error, setError] = useState('')
   const [coverBase64, setCoverBase64] = useState(null)
   const [coverPreview, setCoverPreview] = useState(null)
@@ -13,7 +14,8 @@ export function BookFormModal({ open, onClose, onSave }) {
   const reset = () => {
     setTitle('')
     setAuthor('')
-    setPages('')
+    setPublishDate('')
+    setPageNumber('')
     setCoverBase64(null)
     setCoverPreview(null)
     setError('')
@@ -23,15 +25,19 @@ export function BookFormModal({ open, onClose, onSave }) {
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (!file) return
-    if (file.size > 2000 * 1024 * 1024) {
-    setError("Image must be under 2000MB.");
-    return;
-  }
-  setError("")
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file (e.g. JPEG, PNG, GIF, WebP, SVG, BMP).')
+      return
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      setError('Image must be under 20MB.')
+      return
+    }
+    setError('')
 
     const reader = new FileReader()
     reader.onload = () => {
-      setCoverBase64(reader.result)   // full data URL (base64)
+      setCoverBase64(reader.result)
       setCoverPreview(reader.result)
     }
     reader.readAsDataURL(file)
@@ -42,9 +48,9 @@ export function BookFormModal({ open, onClose, onSave }) {
     onSave({
       title: title.trim(),
       author: author.trim(),
-      pageCount: parseInt(pages, 10) || 0,
+      pageCount: parseInt(pageNumber, 10) || 0,
       cover: coverBase64 || null,
-      date: new Date()
+      date: publishDate ? new Date(publishDate) : new Date()
     })
     reset()
   }
@@ -94,12 +100,20 @@ export function BookFormModal({ open, onClose, onSave }) {
                 required
             />
 
-            <label htmlFor="pages">Page Count</label>
+            <label htmlFor="publishDate">Publish Date</label>
+            <input
+                type="date"
+                id="publishDate"
+                value={publishDate}
+                onChange={(e) => setPublishDate(e.target.value)}
+            />
+
+            <label htmlFor="pageNumber">Page Number</label>
             <input
                 type="number"
-                id="pages"
-                value={pages}
-                onChange={(e) => setPages(e.target.value)}
+                id="pageNumber"
+                value={pageNumber}
+                onChange={(e) => setPageNumber(e.target.value)}
                 required
                 min="1"
                 placeholder="e.g. 350"
@@ -132,6 +146,7 @@ export function BookFormModal({ open, onClose, onSave }) {
                   accept="image/*"
                   onChange={handleFileChange}
                   style={{ display: 'none' }}
+                  title="Any image type (JPEG, PNG, GIF, WebP, SVG, BMP, etc.)"
               />
             </div>
 
