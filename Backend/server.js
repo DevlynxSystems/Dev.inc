@@ -4,71 +4,40 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config()
 const app = express();
-app.use(cors())
+app.use(
+    cors({
+        origin: true,
+        allowedHeaders: ["Content-Type", "Authorization"],
+    })
+)
 // Allow larger payloads for base64 cover images (default is 100kb)
 app.use(express.json({ limit: "10mb" }))
 
 const dataBaseManager = require("./DatabaseManager");
+const authRoutes = require("./routes/authRoutes");
+const bookRoutes = require("./routes/bookRoutes");
 
 app.get("/", (req, res) =>{
     res.send("Database is up and running");
 })
 
-app.get("/api/books", async (req, res) => {
-    try {
-        const books = await dataBaseManager.getAllBooks();
-        res.json(books);
-    } catch (err) {
-        res.status(500).json({ error: "Failed to fetch books" });
-    }
-});
-
-app.post("/api/books", async (req, res) => {
-    try {
-        const savedBook = await dataBaseManager.addBook(req.body);
-        res.status(201).json(savedBook);
-    } catch (err) {
-        let message = "Failed to add book";
-        if (err.name === "ValidationError" && err.errors) {
-            message = Object.values(err.errors)
-                .map((e) => e.message)
-                .join("; ");
-        } else if (err.message) {
-            message = err.message;
-        }
-        console.error("POST /api/books error:", message, err);
-        res.status(400).json({ error: message });
-    }
-});
-
-app.put("/api/books/:id", async (req, res) => {
-    try {
-        const updated = await dataBaseManager.updateBook(req.params.id, req.body);
-        res.json(updated);
-    } catch (err) {
-        let message = "Failed to update book";
-        if (err.name === "ValidationError" && err.errors) {
-            message = Object.values(err.errors).map((e) => e.message).join("; ");
-        } else if (err.message) message = err.message;
-        console.error("PUT /api/books/:id error:", message, err);
-        res.status(err.message === "Book not found" ? 404 : 400).json({ error: message });
-    }
-});
-
-app.delete("/api/books/:id", async (req, res) => {
-    try {
-        await dataBaseManager.deleteBook(req.params.id);
-        res.status(200).json({ message: "Book deleted successfully" });
-    } catch (err) {
-        res.status(500).json({ error: "Failed to delete book" });
-    }
-});
+app.use("/api/auth", authRoutes);
+app.use("/api/books", bookRoutes);
 
 const PORT = process.env.PORT || 5000;
+const mongoUri =
+    process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/devinc_book_catalog';
+
+if (!process.env.MONGO_URI) {
+    console.warn(
+        'Warning: Backend/.env is missing MONGO_URI. Falling back to local MongoDB:'
+    );
+    console.warn(`  ${mongoUri}`);
+}
 
 async function start() {
     try {
-        await dataBaseManager.connect(process.env.MONGO_URI);
+        await dataBaseManager.connect(mongoUri);
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
         });

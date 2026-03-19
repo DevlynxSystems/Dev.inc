@@ -57,14 +57,16 @@ export function BookCard({ book, onView, onEdit, onRemove }) {
                         Edit
                     </button>
                 )}
-                <button
-                    type="button"
-                    className="btn btn-danger book-remove"
-                    onClick={onRemove}
-                    aria-label={`Remove ${book.title}`}
-                >
-                    Delete
-                </button>
+                {onRemove && (
+                    <button
+                        type="button"
+                        className="btn btn-danger book-remove"
+                        onClick={onRemove}
+                        aria-label={`Remove ${book.title}`}
+                    >
+                        Delete
+                    </button>
+                )}
             </div>
         </article>
     )

@@ -1,4 +1,5 @@
 import './Footer.css'
+import { Link } from 'react-router-dom'
 
 const SITE_PUBLISHED = '2025'
 
@@ -23,9 +24,9 @@ export function Footer() {
           <nav className="footer-nav" aria-label="Footer navigation">
             <div className="footer-col">
               <span className="footer-col-title">Product</span>
-              <a href="#catalog" className="footer-link">All books</a>
-              <a href="#" className="footer-link">Add book</a>
-              <a href="#" className="footer-link">Suggestions</a>
+              <Link to="/catalog" className="footer-link">All books</Link>
+              <Link to="/admin" className="footer-link">Add book</Link>
+              <Link to="/catalog" className="footer-link">Suggestions</Link>
             </div>
             <div className="footer-col">
               <span className="footer-col-title">Company</span>

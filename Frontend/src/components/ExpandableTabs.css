@@ -1,0 +1,117 @@
+.exp-tabs {
+  width: 100%;
+}
+
+.exp-tabs-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0 0 1rem 0;
+}
+
+.exp-tab {
+  border: 1px solid var(--glass-border-subtle);
+  background: var(--glass-bg-strong);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  box-shadow: 0 1px 0 var(--glass-border);
+  transition: background var(--transition), border-color var(--transition), transform 0.15s ease;
+}
+
+.exp-tab:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--glass-border);
+}
+
+.exp-tab:active {
+  transform: scale(0.98);
+}
+
+.exp-tab.is-active {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.exp-panels {
+  display: block;
+}
+
+.exp-panel {
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm), 0 1px 0 var(--glass-border);
+  padding: 1.25rem;
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+.exp-panel.is-active {
+  border-color: var(--glass-border);
+}
+
+.exp-accordion {
+  display: none;
+}
+
+.exp-acc-item {
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 0 var(--glass-border);
+  overflow: hidden;
+}
+
+.exp-acc-item + .exp-acc-item {
+  margin-top: 0.75rem;
+}
+
+.exp-acc-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  user-select: none;
+}
+
+.exp-acc-summary::-webkit-details-marker {
+  display: none;
+}
+
+.exp-acc-title {
+  font-weight: 700;
+}
+
+.exp-acc-chevron {
+  opacity: 0.8;
+  transition: transform var(--transition);
+}
+
+.exp-acc-item[open] .exp-acc-chevron {
+  transform: rotate(180deg);
+}
+
+.exp-acc-body {
+  padding: 0 1rem 1rem 1rem;
+}
+
+@media (max-width: 720px) {
+  .exp-tabs-bar,
+  .exp-panels {
+    display: none;
+  }
+
+  .exp-accordion {
+    display: block;
+  }
+}
+

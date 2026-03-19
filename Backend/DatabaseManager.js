@@ -90,6 +90,16 @@ class DatabaseManager{
         }
     }
 
+    async getBookById(id) {
+        try {
+            if (!id) return null;
+            return await this.BookModel.findById(id);
+        } catch (error) {
+            console.error("Error fetching book by id:", error);
+            return null;
+        }
+    }
+
 }
 
 const dbInstance = new DatabaseManager();

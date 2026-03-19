@@ -121,6 +121,53 @@
   flex-direction: column;
 }
 
+.page-transition {
+  animation: pageIn 240ms ease both;
+  width: 100%;
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition {
+    animation: none;
+  }
+}
+
+/* Landing page spacing overrides to keep content above the fold */
+.landing-page .features-section {
+  padding: 1.65rem 0 1.1rem;
+  margin-bottom: 0.4rem;
+}
+
+.landing-page .catalog-section {
+  border-top: none;
+  padding-top: 1rem;
+  margin-top: 0;
+}
+
+.landing-page .catalog-section-intro {
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 640px) {
+  .landing-page .features-section {
+    padding: 1.2rem 0 0.9rem;
+  }
+  .landing-page .catalog-section {
+    padding-top: 0.75rem;
+  }
+}
+
 /* Catalog section */
 .catalog-section {
   margin-top: 0;
@@ -164,6 +211,12 @@
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+.catalog--featured {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 220px));
+  justify-content: center;
+  align-items: start;
 }
 
 @media (min-width: 900px) {

@@ -1,14 +1,42 @@
 import { useState, useRef, useEffect } from 'react'
+import { NavLink, useLocation, useNavigate, Link } from 'react-router-dom'
 import './Navbar.css'
+import { useAuth } from '../auth/AuthContext'
 
 function getTheme() {
   return document.documentElement.getAttribute('data-theme') || 'light'
+}
+
+function TabLink({ to, label, icon }) {
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) => `nav-tab ${isActive ? 'is-active' : ''}`}
+      aria-label={label}
+      title={label}
+    >
+      {icon && <span className="nav-tab-icon" aria-hidden="true">{icon}</span>}
+      <span className="nav-tab-label">{label}</span>
+    </NavLink>
+  )
+}
+
+function TabButton({ onClick, label, icon }) {
+  return (
+    <button type="button" className="nav-tab nav-tab-btn" onClick={onClick} aria-label={label} title={label}>
+      {icon && <span className="nav-tab-icon" aria-hidden="true">{icon}</span>}
+      <span className="nav-tab-label">{label}</span>
+    </button>
+  )
 }
 
 export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
   const [profileOpen, setProfileOpen] = useState(false)
   const [theme, setTheme] = useState(getTheme)
   const profileRef = useRef(null)
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { user, logout } = useAuth()
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -29,90 +57,237 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
     setTheme(next)
   }
 
-  const goHome = (e) => {
-    e.preventDefault()
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+  const isCatalogRoute = location.pathname === '/catalog'
+
+  const doLogout = () => {
+    setProfileOpen(false)
+    logout()
+    navigate('/')
   }
+
+  const initial = user?.name?.[0]?.toUpperCase() || '?'
 
   return (
     <header className="navbar" role="banner">
-      <a href="#" className="navbar-brand" onClick={goHome} aria-label="Home – Book Catalog">
-        <img
-          src="/logo.png"
-          alt=""
-          className="navbar-logo"
-        />
-        <span className="navbar-title">Book Catalog</span>
-      </a>
       <div className="navbar-center">
-        <input
-          type="search"
-          className="navbar-search"
-          placeholder="Search by title, author, or genre…"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          aria-label="Search books"
-        />
-      </div>
-      <div className="navbar-actions">
-        <button
-          type="button"
-          className="btn btn-primary navbar-add"
-          onClick={onAddBook}
-          aria-label="Add a new book"
-        >
-          Add book
-        </button>
-        <button
-          type="button"
-          className="theme-toggle"
-          onClick={toggleTheme}
-          aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-          title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
-        >
-          <svg className="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-          </svg>
-          <svg className="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-          </svg>
-        </button>
-        <div className="navbar-profile-wrap" ref={profileRef}>
-          <button
-            type="button"
-            className="navbar-profile-trigger"
-            onClick={() => setProfileOpen((o) => !o)}
-            aria-expanded={profileOpen}
-            aria-haspopup="true"
-            aria-label="Admin profile menu"
-          >
-            <span className="navbar-profile-avatar" aria-hidden="true">
-              A
-            </span>
-            <span className="navbar-profile-label">Admin</span>
-            <svg className="navbar-profile-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          {profileOpen && (
-            <div className="navbar-profile-dropdown" role="menu">
-              <div className="navbar-profile-head">
-                <span className="navbar-profile-dropdown-avatar">A</span>
-                <div>
-                  <span className="navbar-profile-name">Admin User</span>
-                  <span className="navbar-profile-email">admin@dev.inc</span>
-                </div>
-              </div>
-              <div className="navbar-profile-divider" />
-              <a href="#" className="navbar-profile-item" role="menuitem">Profile</a>
-              <a href="#" className="navbar-profile-item" role="menuitem">Settings</a>
-              <div className="navbar-profile-divider" />
-              <a href="#" className="navbar-profile-item navbar-profile-item--danger" role="menuitem">Log out</a>
-            </div>
+        <nav className="nav-shell" aria-label="Primary">
+          <Link to="/" className="nav-brand-chip" aria-label="Book Catalog Home">
+            {!user ? (
+              <>
+                <img src="/logo.png" alt="" className="nav-brand-chip-img" />
+                <span className="nav-brand-chip-title">Book Catalog</span>
+              </>
+            ) : (
+              <>
+                <span className="nav-user-chip-avatar" aria-hidden="true">
+                  {initial}
+                </span>
+                <span className="nav-brand-chip-title">
+                  {user.name?.split(' ')[0] || 'User'}
+                </span>
+              </>
+            )}
+          </Link>
+
+          <div className="nav-shell-tabs" role="navigation" aria-label="Main navigation">
+            <TabLink
+              to="/"
+              label="Home"
+              icon={
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 10.5 12 3l9 7.5" />
+                  <path d="M5 10v10a1 1 0 0 0 1 1h4v-7h4v7h4a1 1 0 0 0 1-1V10" />
+                </svg>
+              }
+            />
+
+            <TabLink
+              to="/catalog"
+              label="Catalog"
+              icon={
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                  <path d="M8 7h8" />
+                  <path d="M8 11h8" />
+                </svg>
+              }
+            />
+
+          {!user && (
+            <>
+              <span className="nav-shell-divider" aria-hidden="true" />
+              <TabLink
+                to="/login"
+                label="Login"
+                icon={
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                    <path d="M10 17l5-5-5-5" />
+                    <path d="M15 12H3" />
+                  </svg>
+                }
+              />
+              <TabLink
+                to="/signup"
+                label="Signup"
+                icon={
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="8.5" cy="7" r="4" />
+                    <path d="M20 8v6" />
+                    <path d="M23 11h-6" />
+                  </svg>
+                }
+              />
+            </>
           )}
-        </div>
+
+          {user?.role === 'user' && (
+            <>
+              <span className="nav-shell-divider" aria-hidden="true" />
+              <TabLink
+                to="/dashboard"
+                label="Dashboard"
+                icon={
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 13h8V3H3v10z" />
+                    <path d="M13 21h8V11h-8v10z" />
+                    <path d="M13 3h8v6h-8V3z" />
+                    <path d="M3 21h8v-6H3v6z" />
+                  </svg>
+                }
+              />
+              <TabButton
+                onClick={doLogout}
+                label="Logout"
+                icon={
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <path d="M16 17l5-5-5-5" />
+                    <path d="M21 12H9" />
+                  </svg>
+                }
+              />
+            </>
+          )}
+
+          {user?.role === 'admin' && (
+            <>
+              <span className="nav-shell-divider" aria-hidden="true" />
+              <TabLink
+                to="/admin"
+                label="Admin"
+                icon={
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z" />
+                    <path d="M9 12l2 2 4-4" />
+                  </svg>
+                }
+              />
+              <TabButton
+                onClick={doLogout}
+                label="Logout"
+                icon={
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <path d="M16 17l5-5-5-5" />
+                    <path d="M21 12H9" />
+                  </svg>
+                }
+              />
+            </>
+          )}
+          </div>
+
+          <div className="nav-shell-right">
+            <TabButton
+              onClick={toggleTheme}
+              label="Theme"
+              icon={
+                theme === 'dark' ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                  </svg>
+                )
+              }
+            />
+
+            {user && (
+              <div className="navbar-profile-wrap" ref={profileRef}>
+                <button
+                  type="button"
+                  className="navbar-profile-trigger"
+                  onClick={() => setProfileOpen((o) => !o)}
+                  aria-expanded={profileOpen}
+                  aria-haspopup="true"
+                  aria-label="User profile menu"
+                  title={user.email}
+                >
+                  <span className="navbar-profile-avatar" aria-hidden="true">
+                    {initial}
+                  </span>
+                  <svg
+                    className="navbar-profile-chevron"
+                    width="12"
+                    height="12"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M2.5 4.5L6 8l3.5-3.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+                {profileOpen && (
+                  <div className="navbar-profile-dropdown" role="menu">
+                    <div className="navbar-profile-head">
+                      <span className="navbar-profile-dropdown-avatar">{initial}</span>
+                      <div>
+                        <span className="navbar-profile-name">{user.name}</span>
+                        <span className="navbar-profile-email">{user.email}</span>
+                      </div>
+                    </div>
+                    <div className="navbar-profile-divider" />
+                    <button
+                      type="button"
+                      className="navbar-profile-item navbar-profile-item--danger"
+                      role="menuitem"
+                      onClick={doLogout}
+                    >
+                      Log out
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </nav>
+
+        {isCatalogRoute && (
+          <div className="navbar-search-wrap">
+            <input
+              type="search"
+              className="navbar-search"
+              placeholder="Search by title, author, or genre…"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              aria-label="Search books"
+            />
+          </div>
+        )}
       </div>
+
     </header>
   )
 }
