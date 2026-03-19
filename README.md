@@ -101,6 +101,21 @@ To create many demo users/admins:
 npm run seed:many-users
 ```
 
+## Deploy frontend to Vercel
+
+1) **Create a new Vercel project** and import this repo.
+
+2) In Vercel project settings, set:
+- **Root Directory**: `Frontend`
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Install Command**: `npm install`
+
+3) Add environment variable(s) in Vercel:
+- **`VITE_API_BASE_URL`**: your deployed backend base URL (example: `https://your-backend.example.com`)
+
+4) SPA routing is handled via `Frontend/vercel.json` (so routes like `/login` work on refresh).
+
 ## API overview
 
 ### Auth (`/api/auth`)
