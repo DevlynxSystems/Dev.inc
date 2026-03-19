@@ -103,18 +103,28 @@ npm run seed:many-users
 
 ## Deploy frontend to Vercel
 
-1) **Create a new Vercel project** and import this repo.
+1) **Import this repository** in Vercel (not a demo template). Under **Settings → Git**, confirm the connected repo is the one that contains the `Frontend/` folder for this Book Catalog app.
 
-2) In Vercel project settings, set:
-- **Root Directory**: `Frontend`
-- **Build Command**: `npm run build`
-- **Output Directory**: `dist`
-- **Install Command**: `npm install`
+2) **Root Directory**: set to `Frontend` (Project Settings → General, or during import).
 
-3) Add environment variable(s) in Vercel:
-- **`VITE_API_BASE_URL`**: your deployed backend base URL (example: `https://your-backend.example.com`)
+3) **Build & output** (Vite builds to `dist`, not `public`):
+   - Prefer **Framework Preset: Vite** if Vercel detects it after the root is `Frontend`.
+   - If the preset stays **Other**, open **Settings → General → Build & Development Settings**, enable **overrides**, and set:
+     - **Build Command**: `npm run build`
+     - **Output Directory**: `dist`
+     - **Install Command**: `npm install` (default is fine)
 
-4) SPA routing is handled via `Frontend/vercel.json` (so routes like `/login` work on refresh).
+4) **Environment variables** (Project Settings → Environment Variables):
+   - **`VITE_API_BASE_URL`**: your **deployed backend** origin only, e.g. `https://your-api.onrender.com` (no `/api` suffix unless your server is actually mounted that way).  
+   - Add for **Production** (and **Preview** if you use preview deployments). **Redeploy** after changing env vars so Vite picks them up at build time.
+
+5) **SPA routing**: `Frontend/vercel.json` rewrites all paths to `/` so React Router routes (e.g. `/login`, `/catalog`) work on refresh.
+
+6) **Troubleshooting**
+   - If the live site shows a generic **“demo repository”** welcome page, the wrong Git repo is linked or an old deployment is cached—fix the repo link and **Redeploy**.
+   - If the build succeeds but the site is blank or 404s on deep links, double-check **Output Directory** is **`dist`**, not `public`.
+
+Local reference for env names: `Frontend/.env.example`.
 
 ## API overview
 
