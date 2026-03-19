@@ -6,8 +6,8 @@
 
 .main {
   flex: 1;
-  max-width: 80rem;
-  margin: 0 auto;
+  max-width: 96rem;
+  margin: 1.25rem auto 1.5rem;
   width: 100%;
   padding: 2rem 1.5rem 3rem;
   overflow: auto;
@@ -17,9 +17,6 @@
   border-radius: var(--radius-lg);
   border: 1px solid var(--glass-border-subtle);
   box-shadow: var(--shadow), 0 1px 0 var(--glass-border);
-  margin-left: 1.5rem;
-  margin-right: 1.5rem;
-  margin-bottom: 1.5rem;
 }
 
 /* Buttons – base */

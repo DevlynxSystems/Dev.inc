@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { Ripple, AuthTabs, TechOrbitDisplay } from '@/components/ui/modern-animated-sign-in';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -16,23 +17,62 @@ export function LoginPage() {
     navigate(user.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
   }, [user, navigate]);
 
-  const validate = () => {
-    const e = email.trim().toLowerCase();
-    if (!e) return 'Email is required';
-    if (!/^\S+@\S+\.\S+$/.test(e)) return 'Enter a valid email';
-    if (!password) return 'Password is required';
-    if (password.length < 6) return 'Password must be at least 6 characters';
-    return '';
-  };
+  const iconsArray = useMemo(
+    () => [
+      {
+        component: () => (
+          <img
+            width="30"
+            height="30"
+            src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg"
+            alt="React"
+          />
+        ),
+        className: 'size-[30px] border-none bg-transparent',
+        duration: 20,
+        delay: 10,
+        radius: 120,
+        path: false,
+        reverse: false,
+      },
+      {
+        component: () => (
+          <img
+            width="30"
+            height="30"
+            src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg"
+            alt="Tailwind"
+          />
+        ),
+        className: 'size-[30px] border-none bg-transparent',
+        duration: 20,
+        delay: 20,
+        radius: 180,
+        path: false,
+        reverse: true,
+      },
+      {
+        component: () => (
+          <img
+            width="30"
+            height="30"
+            src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg"
+            alt="MongoDB"
+          />
+        ),
+        className: 'size-[30px] border-none bg-transparent',
+        duration: 22,
+        delay: 30,
+        radius: 240,
+        path: false,
+        reverse: false,
+      },
+    ],
+    []
+  );
 
-  const onSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const msg = validate();
-    if (msg) {
-      setError(msg);
-      return;
-    }
-
     setSubmitting(true);
     setError('');
     try {
@@ -45,30 +85,49 @@ export function LoginPage() {
     }
   };
 
+  const formFields = {
+    header: 'Welcome back',
+    subHeader: 'Sign in to your account to continue.',
+    fields: [
+      {
+        label: 'Email',
+        required: true,
+        type: 'email',
+        placeholder: 'Enter your email address',
+        onChange: (e) => setEmail(e.target.value),
+      },
+      {
+        label: 'Password',
+        required: true,
+        type: 'password',
+        placeholder: 'Enter your password',
+        onChange: (e) => setPassword(e.target.value),
+      },
+    ],
+    submitButton: submitting ? 'Signing in…' : 'Sign in',
+    textVariantButton: 'Create an account',
+    googleLogin: 'Login with Google',
+  };
+
   return (
-    <div className="home-page">
-      <section className="catalog-section" aria-label="Login">
-        <div className="catalog-section-intro">
-          <h2 className="catalog-heading">Login</h2>
-          <p className="catalog-intro">Access your dashboard to manage books.</p>
-        </div>
+    <section className="flex max-lg:justify-center">
+      <span className="flex flex-col justify-center w-1/2 max-lg:hidden relative">
+        <Ripple mainCircleSize={120} />
+        <TechOrbitDisplay iconsArray={iconsArray} text="Dev.inc" />
+      </span>
 
-        <form onSubmit={onSubmit} className="book-form" style={{ maxWidth: 520, margin: '0 auto' }}>
-          {error && <p className="form-error">{error}</p>}
-          <label htmlFor="login-email">Email</label>
-          <input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
-
-          <label htmlFor="login-password">Password</label>
-          <input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
-
-          <div className="form-actions" style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
-              {submitting ? 'Logging in…' : 'Login'}
-            </button>
-          </div>
-        </form>
-      </section>
-    </div>
+      <span className="w-1/2 h-[100dvh] flex flex-col justify-center items-center max-lg:w-full max-lg:px-[10%]">
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        <AuthTabs
+          formFields={formFields}
+          goTo={(ev) => {
+            ev.preventDefault();
+            navigate('/signup');
+          }}
+          handleSubmit={handleSubmit}
+        />
+      </span>
+    </section>
   );
 }
 

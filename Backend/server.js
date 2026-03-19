@@ -16,6 +16,7 @@ app.use(express.json({ limit: "10mb" }))
 const dataBaseManager = require("./DatabaseManager");
 const authRoutes = require("./routes/authRoutes");
 const bookRoutes = require("./routes/bookRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 app.get("/", (req, res) =>{
     res.send("Database is up and running");
@@ -23,6 +24,7 @@ app.get("/", (req, res) =>{
 
 app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
+app.use("/api/admin", adminRoutes);
 
 const PORT = process.env.PORT || 5000;
 const mongoUri =

@@ -12,6 +12,9 @@ import { SignupPage } from './pages/SignupPage'
 import { UserDashboard } from './pages/UserDashboard'
 import { AdminDashboard } from './pages/AdminDashboard'
 import { ProfilePage } from './pages/ProfilePage'
+import { ManageUsers } from './pages/ManageUsers'
+import { AdminUserProfile } from './pages/AdminUserProfile'
+import { ManageBooks } from './pages/ManageBooks'
 import './App.css'
 
 export default function App() {
@@ -55,6 +58,30 @@ export default function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <ManageUsers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users/:id"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminUserProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/books"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <ManageBooks />
                 </ProtectedRoute>
               }
             />

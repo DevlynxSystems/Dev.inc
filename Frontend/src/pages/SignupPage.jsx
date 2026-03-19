@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { Ripple, AuthTabs, TechOrbitDisplay } from '@/components/ui/modern-animated-sign-in';
 
 export function SignupPage() {
   const navigate = useNavigate();
@@ -19,25 +20,62 @@ export function SignupPage() {
     navigate(user.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
   }, [user, navigate]);
 
-  const validate = () => {
-    if (!name.trim()) return 'Name is required';
-    const e = email.trim().toLowerCase();
-    if (!e) return 'Email is required';
-    if (!/^\S+@\S+\.\S+$/.test(e)) return 'Enter a valid email';
-    if (!password) return 'Password is required';
-    if (password.length < 6) return 'Password must be at least 6 characters';
-    if (!['user', 'admin'].includes(role)) return 'Invalid role';
-    return '';
-  };
+  const iconsArray = useMemo(
+    () => [
+      {
+        component: () => (
+          <img
+            width="30"
+            height="30"
+            src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg"
+            alt="Node.js"
+          />
+        ),
+        className: 'size-[30px] border-none bg-transparent',
+        duration: 20,
+        delay: 10,
+        radius: 120,
+        path: false,
+        reverse: false,
+      },
+      {
+        component: () => (
+          <img
+            width="30"
+            height="30"
+            src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/express/express-original.svg"
+            alt="Express"
+          />
+        ),
+        className: 'size-[30px] border-none bg-transparent',
+        duration: 20,
+        delay: 20,
+        radius: 180,
+        path: false,
+        reverse: true,
+      },
+      {
+        component: () => (
+          <img
+            width="30"
+            height="30"
+            src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongoose/mongoose-original.svg"
+            alt="Mongoose"
+          />
+        ),
+        className: 'size-[30px] border-none bg-transparent',
+        duration: 22,
+        delay: 30,
+        radius: 240,
+        path: false,
+        reverse: false,
+      },
+    ],
+    []
+  );
 
-  const onSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const msg = validate();
-    if (msg) {
-      setError(msg);
-      return;
-    }
-
     setSubmitting(true);
     setError('');
     try {
@@ -55,40 +93,69 @@ export function SignupPage() {
     }
   };
 
+  const formFields = {
+    header: 'Create your account',
+    subHeader: 'Sign up to start building your reading space.',
+    fields: [
+      {
+        label: 'Name',
+        required: true,
+        type: 'text',
+        placeholder: 'Enter your name',
+        onChange: (e) => setName(e.target.value),
+      },
+      {
+        label: 'Email',
+        required: true,
+        type: 'email',
+        placeholder: 'Enter your email address',
+        onChange: (e) => setEmail(e.target.value),
+      },
+      {
+        label: 'Password',
+        required: true,
+        type: 'password',
+        placeholder: 'Create a password (6+ chars)',
+        onChange: (e) => setPassword(e.target.value),
+      },
+    ],
+    submitButton: submitting ? 'Creating…' : 'Create account',
+    textVariantButton: 'Already have an account? Login',
+    googleLogin: 'Signup with Google',
+  };
+
   return (
-    <div className="home-page">
-      <section className="catalog-section" aria-label="Signup">
-        <div className="catalog-section-intro">
-          <h2 className="catalog-heading">Signup</h2>
-          <p className="catalog-intro">Create your account to view your catalog.</p>
-        </div>
+    <section className="flex max-lg:justify-center">
+      <span className="flex flex-col justify-center w-1/2 max-lg:hidden relative">
+        <Ripple mainCircleSize={120} />
+        <TechOrbitDisplay iconsArray={iconsArray} text="Book Catalog" />
+      </span>
 
-        <form onSubmit={onSubmit} className="book-form" style={{ maxWidth: 520, margin: '0 auto' }}>
-          {error && <p className="form-error">{error}</p>}
-
-          <label htmlFor="signup-name">Name</label>
-          <input id="signup-name" type="text" value={name} onChange={(e) => setName(e.target.value)} required autoComplete="name" />
-
-          <label htmlFor="signup-email">Email</label>
-          <input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
-
-          <label htmlFor="signup-password">Password</label>
-          <input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="new-password" />
-
-          <label htmlFor="signup-role">Role</label>
-          <select id="signup-role" value={role} onChange={(e) => setRole(e.target.value)} className="catalog-filter-select" style={{ marginBottom: '1.1rem' }}>
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-          </select>
-
-          <div className="form-actions" style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
-              {submitting ? 'Creating…' : 'Create account'}
-            </button>
+      <span className="w-1/2 h-[100dvh] flex flex-col justify-center items-center max-lg:w-full max-lg:px-[10%]">
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        <div className="w-full max-w-md">
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-sm font-medium">Role</label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="h-10 rounded-md border px-3 bg-transparent"
+            >
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
           </div>
-        </form>
-      </section>
-    </div>
+          <AuthTabs
+            formFields={formFields}
+            goTo={(ev) => {
+              ev.preventDefault();
+              navigate('/login');
+            }}
+            handleSubmit={handleSubmit}
+          />
+        </div>
+      </span>
+    </section>
   );
 }
 
