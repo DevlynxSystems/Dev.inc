@@ -67,7 +67,7 @@ class Book{
         return this._Date;
     }
 
-    set date(value) {
+    set Date(value) {
         if (typeof value !== "string") {
             throw new TypeError("name must be a string");
         }

@@ -54,5 +54,5 @@ async function cleanup() {
   }
 }
 
-cleanup();
+module.exports = cleanup(); // small edit to make cleanup available to test file, shouldnt change how it works but leaving a comment just incase
 
