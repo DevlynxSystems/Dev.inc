@@ -47,7 +47,7 @@ PORT=5000
 
 Notes:
 - If `MONGO_URI` is missing, the backend falls back to a local MongoDB URL (for dev).
-- If `JWT_SECRET` is missing, a dev-only fallback may be used; set a real secret for anything beyond local development.
+- If `JWT_SECRET` is missing, a dev-only fallback may be used; set a real secret for anything beyond local development
 
 For the frontend API base URL, set `Frontend/.env`:
 
@@ -55,7 +55,36 @@ For the frontend API base URL, set `Frontend/.env`:
 VITE_API_BASE_URL=http://localhost:5000
 ```
 
-## Install
+## Install and Run
+
+Installation & Setup
+Before running the app for the first time, you must install the dependencies for both the frontend and backend folders
+
+#### Windows:
+
+```PowerShell
+.\manage.bat setup
+```
+#### Unix / macOS / Git Bash:
+
+```Bash
+chmod +x manage.sh
+./manage.sh setup
+```
+Running the Application
+To start both the backend server and the React frontend concurrently:
+
+ #### Windows:
+
+```PowerShell
+.\manage.bat dev
+```
+Unix / macOS / Git Bash:
+
+```Bash
+./manage.sh dev
+```
+### Alternative Install and Run
 
 ```bash
 cd Backend
@@ -67,7 +96,7 @@ cd ../Frontend
 npm install
 ```
 
-## Run (two terminals)
+### (two terminals)
 
 **Terminal 1 — Backend**
 
@@ -100,19 +129,6 @@ To create many demo users/admins:
 ```bash
 npm run seed:many-users
 ```
-
-## Deploy frontend to Vercel
-
-1) **Import this repository** in Vercel (not a demo template). Under **Settings → Git**, confirm the connected repo is the one that contains the `Frontend/` folder for this Book Catalog app.
-
-2) **Root Directory**: set to `Frontend` (Project Settings → General, or during import).
-
-3) **Build & output** (Vite builds to `dist`, not `public`):
-   - Prefer **Framework Preset: Vite** if Vercel detects it after the root is `Frontend`.
-   - If the preset stays **Other**, open **Settings → General → Build & Development Settings**, enable **overrides**, and set:
-     - **Build Command**: `npm run build`
-     - **Output Directory**: `dist`
-     - **Install Command**: `npm install` (default is fine)
 
 4) **Environment variables** (Project Settings → Environment Variables):
    - **`VITE_API_BASE_URL`**: your **deployed backend** origin only, e.g. `https://your-api.onrender.com` (no `/api` suffix unless your server is actually mounted that way).  

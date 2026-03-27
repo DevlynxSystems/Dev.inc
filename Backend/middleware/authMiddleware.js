@@ -1,5 +1,17 @@
 const jwt = require('jsonwebtoken');
 
+
+
+
+/**
+ * Retrieves the JWT secret key used for signing and verifying tokens.
+ *
+ * In a production environment, this value should always be stored
+ * securely in an environment variable (JWT_SECRET).
+ *
+ * @returns {string} The JWT secret key
+ */
+
 function getJwtSecret() {
   // In production, set `JWT_SECRET` in Backend/.env
   return process.env.JWT_SECRET || 'dev-only-secret-change-me';

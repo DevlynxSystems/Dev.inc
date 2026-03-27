@@ -1,6 +1,6 @@
 // This test suite will test every method in the cleanupDuplicates class. 
 // Altogether, we have the cleanup, including database connection, duplicate detection, deletion logic, and error handling using mocked database objects. 
-
+// https://javascript.info/promise-basics
 // To run tests, navigate to backend and run npm install --save-dev jest
 // Then, run "npm test"
 

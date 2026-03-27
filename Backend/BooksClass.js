@@ -1,8 +1,5 @@
+//This class represents a book in the catalog
 
-
-/**
- * This class represents a book in the catalog
- */
 
 class Book{
     _Title;

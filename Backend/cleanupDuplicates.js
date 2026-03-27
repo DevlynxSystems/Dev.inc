@@ -1,7 +1,6 @@
-/**
- * Cleanup script: remove duplicate books by title, keeping one copy.
- * Run from Backend folder: node cleanupDuplicates.js
- */
+
+ //Cleanup script: remove duplicate books by title, keeping one copy.
+ //Run from Backend folder: node cleanupDuplicates.js
 
 require("dotenv").config();
 const dataBaseManager = require("./DatabaseManager");

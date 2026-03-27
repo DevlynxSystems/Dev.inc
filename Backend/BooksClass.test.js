@@ -1,6 +1,6 @@
 // This test suite will test every method in the BooksClass class. 
 // Altogether, we have the insertIntoDatabase, get/set for title, date, author, page count, and cover. 
-
+// https://jestjs.io/docs/asynchronous
 // To run tests, navigate to backend and run npm install --save-dev jest
 // Then, run "npm test"
 
@@ -59,7 +59,6 @@ describe ("Book Class Tests", () => {
     expect(book.PageCount).toBe(100);
     });
 
-    //Invalid tests, should be thrown.
 
     test("set Title throws error if not string", () => {
         expect(() => {
