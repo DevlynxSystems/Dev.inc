@@ -1,27 +1,39 @@
 import { useState, useRef, useEffect } from 'react'
 import { NavLink, useLocation, useNavigate, Link } from 'react-router-dom'
-import './Navbar.css'
 import { useAuth } from '../auth/AuthContext'
 
 function TabLink({ to, label, icon }) {
   return (
     <NavLink
       to={to}
-      className={({ isActive }) => `nav-tab ${isActive ? 'is-active' : ''}`}
+      className={({ isActive }) =>
+        [
+          'group inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-all duration-300',
+          isActive
+            ? 'border-orange-300/40 bg-orange-500/20 text-orange-100 shadow-[0_0_24px_rgba(251,146,60,0.22)]'
+            : 'border-transparent text-stone-200 hover:border-white/10 hover:bg-white/10 hover:text-white',
+        ].join(' ')
+      }
       aria-label={label}
       title={label}
     >
-      {icon && <span className="nav-tab-icon" aria-hidden="true">{icon}</span>}
-      <span className="nav-tab-label">{label}</span>
+      {icon && <span className="hidden h-4 w-4 md:inline-flex" aria-hidden="true">{icon}</span>}
+      <span className="whitespace-nowrap">{label}</span>
     </NavLink>
   )
 }
 
 function TabButton({ onClick, label, icon }) {
   return (
-    <button type="button" className="nav-tab nav-tab-btn" onClick={onClick} aria-label={label} title={label}>
-      {icon && <span className="nav-tab-icon" aria-hidden="true">{icon}</span>}
-      <span className="nav-tab-label">{label}</span>
+    <button
+      type="button"
+      className="inline-flex items-center gap-2 rounded-full border border-transparent px-3 py-1.5 text-sm font-medium text-stone-200 transition-all duration-300 hover:border-white/10 hover:bg-white/10 hover:text-white"
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+    >
+      {icon && <span className="hidden h-4 w-4 md:inline-flex" aria-hidden="true">{icon}</span>}
+      <span className="whitespace-nowrap">{label}</span>
     </button>
   )
 }
@@ -56,28 +68,31 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
   const initial = user?.name?.[0]?.toUpperCase() || '?'
 
   return (
-    <header className="navbar" role="banner">
-      <div className="navbar-center">
-        <nav className="nav-shell" aria-label="Primary">
-          <Link to="/" className="nav-brand-chip" aria-label="Book Catalog Home">
+    <header className="sticky top-3 z-50 px-4 md:px-6" role="banner">
+      <div className="mx-auto flex w-full max-w-6xl justify-center">
+        <nav
+          className="flex w-full items-center gap-2 overflow-x-auto rounded-full border border-white/10 bg-black/35 px-2.5 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+          aria-label="Primary"
+        >
+          <Link to="/" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-stone-100" aria-label="Book Catalog Home">
             {!user ? (
               <>
-                <img src="/logo.png" alt="" className="nav-brand-chip-img" />
-                <span className="nav-brand-chip-title">Book Catalog</span>
+                <img src="/logo.png" alt="" className="h-5 w-5 object-contain" />
+                <span className="whitespace-nowrap font-semibold tracking-tight">Book Catalog</span>
               </>
             ) : (
               <>
-                <span className="nav-user-chip-avatar" aria-hidden="true">
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 text-xs font-bold text-white" aria-hidden="true">
                   {initial}
                 </span>
-                <span className="nav-brand-chip-title">
+                <span className="whitespace-nowrap font-semibold tracking-tight">
                   {user.name?.split(' ')[0] || 'User'}
                 </span>
               </>
             )}
           </Link>
 
-          <div className="nav-shell-tabs" role="navigation" aria-label="Main navigation">
+          <div className="flex items-center gap-1" role="navigation" aria-label="Main navigation">
             <TabLink
               to="/"
               label="Home"
@@ -106,7 +121,7 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
 
           {!user && (
             <>
-              <span className="nav-shell-divider" aria-hidden="true" />
+              <span className="mx-1 hidden h-6 w-px bg-white/15 md:inline-block" aria-hidden="true" />
               <TabLink
                 to="/login"
                 label="Login"
@@ -135,7 +150,7 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
 
           {user?.role === 'user' && (
             <>
-              <span className="nav-shell-divider" aria-hidden="true" />
+              <span className="mx-1 hidden h-6 w-px bg-white/15 md:inline-block" aria-hidden="true" />
               <TabLink
                 to="/dashboard"
                 label="Dashboard"
@@ -164,7 +179,7 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
 
           {user?.role === 'admin' && (
             <>
-              <span className="nav-shell-divider" aria-hidden="true" />
+              <span className="mx-1 hidden h-6 w-px bg-white/15 md:inline-block" aria-hidden="true" />
               <TabLink
                 to="/admin"
                 label="Admin Dashboard"
@@ -198,23 +213,23 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
           )}
           </div>
 
-          <div className="nav-shell-right">
+          <div className="ml-auto">
             {user && (
-              <div className="navbar-profile-wrap" ref={profileRef}>
+              <div className="relative" ref={profileRef}>
                 <button
                   type="button"
-                  className="navbar-profile-trigger"
+                  className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-stone-200 transition hover:border-white/20 hover:bg-white/10"
                   onClick={() => setProfileOpen((o) => !o)}
                   aria-expanded={profileOpen}
                   aria-haspopup="true"
                   aria-label="User profile menu"
                   title={user.email}
                 >
-                  <span className="navbar-profile-avatar" aria-hidden="true">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-orange-500 font-semibold text-white" aria-hidden="true">
                     {initial}
                   </span>
                   <svg
-                    className="navbar-profile-chevron"
+                    className={`transition-transform ${profileOpen ? 'rotate-180' : ''}`}
                     width="12"
                     height="12"
                     viewBox="0 0 12 12"
@@ -231,18 +246,18 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
                   </svg>
                 </button>
                 {profileOpen && (
-                  <div className="navbar-profile-dropdown" role="menu">
-                    <div className="navbar-profile-head">
-                      <span className="navbar-profile-dropdown-avatar">{initial}</span>
+                  <div className="absolute right-0 top-[calc(100%+0.5rem)] z-20 min-w-52 rounded-2xl border border-white/10 bg-black/70 p-2 shadow-2xl backdrop-blur-xl" role="menu">
+                    <div className="flex items-center gap-3 px-3 py-2">
+                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-orange-500 font-semibold text-white">{initial}</span>
                       <div>
-                        <span className="navbar-profile-name">{user.name}</span>
-                        <span className="navbar-profile-email">{user.email}</span>
+                        <span className="block text-sm font-semibold text-white">{user.name}</span>
+                        <span className="block text-xs text-stone-400">{user.email}</span>
                       </div>
                     </div>
-                    <div className="navbar-profile-divider" />
+                    <div className="my-1 h-px bg-white/10" />
                     <button
                       type="button"
-                      className="navbar-profile-item navbar-profile-item--danger"
+                      className="block w-full rounded-xl px-3 py-2 text-left text-sm text-rose-300 transition hover:bg-rose-500/10 hover:text-rose-200"
                       role="menuitem"
                       onClick={doLogout}
                     >
@@ -256,10 +271,10 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
         </nav>
 
         {isCatalogRoute && (
-          <div className="navbar-search-wrap">
+          <div className="mt-3 w-full max-w-xl">
             <input
               type="search"
-              className="navbar-search"
+              className="h-11 w-full rounded-xl border border-white/10 bg-black/40 px-4 text-sm text-stone-100 placeholder:text-stone-400 focus:border-orange-400/60 focus:outline-none focus:ring-2 focus:ring-orange-500/30"
               placeholder="Search by title, author, or genre…"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
