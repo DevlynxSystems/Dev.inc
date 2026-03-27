@@ -5,10 +5,8 @@ import App from './App'
 import { AuthProvider } from './auth/AuthContext'
 import './index.css'
 
-const stored = localStorage.getItem('theme')
-const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-const theme = stored === 'dark' || stored === 'light' ? stored : (prefersDark ? 'dark' : 'light')
-document.documentElement.setAttribute('data-theme', theme)
+document.documentElement.setAttribute('data-theme', 'dark')
+localStorage.setItem('theme', 'dark')
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
