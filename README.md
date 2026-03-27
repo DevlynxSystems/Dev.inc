@@ -17,11 +17,14 @@ Full‑stack book catalog with **JWT authentication** and **role‑based access 
 
 ```
 Dev.inc/
-├── Frontend/                 # React + Vite app
-│   └── src/
-│       ├── auth/             # AuthContext
-│       ├── components/       # Navbar, ProtectedRoute, UI components
-│       └── pages/            # Landing/Login/Signup/Dashboards/Admin pages
+├── src/                      # React + Vite app (repo root)
+│   ├── auth/                 # AuthContext
+│   ├── components/           # Navbar, ProtectedRoute, UI components
+│   └── pages/                # Landing/Login/Signup/Dashboards/Admin pages
+├── public/                   # Static assets for Vite
+├── index.html
+├── vite.config.js
+├── package.json              # Frontend (Vite) dependencies & scripts
 └── Backend/                  # Express API
     ├── controllers/
     ├── middleware/           # JWT auth + role checks
@@ -49,7 +52,7 @@ Notes:
 - If `MONGO_URI` is missing, the backend falls back to a local MongoDB URL (for dev).
 - If `JWT_SECRET` is missing, a dev-only fallback may be used; set a real secret for anything beyond local development
 
-For the frontend API base URL, set `Frontend/.env`:
+For the frontend API base URL, create `.env` in the **repo root** (same folder as `package.json`):
 
 ```env
 VITE_API_BASE_URL=http://localhost:5000
@@ -58,7 +61,7 @@ VITE_API_BASE_URL=http://localhost:5000
 ## Install and Run
 
 Installation & Setup
-Before running the app for the first time, you must install the dependencies for both the frontend and backend folders
+Before running the app for the first time, install dependencies for **Backend** and the **repo root** (Vite frontend)
 
 #### Windows:
 
@@ -89,10 +92,7 @@ Unix / macOS / Git Bash:
 ```bash
 cd Backend
 npm install
-```
-
-```bash
-cd ../Frontend
+cd ..
 npm install
 ```
 
@@ -107,10 +107,9 @@ npm start
 
 Backend: `http://localhost:5000`
 
-**Terminal 2 — Frontend**
+**Terminal 2 — Frontend** (from repo root)
 
 ```bash
-cd Frontend
 npm run dev
 ```
 
@@ -130,17 +129,19 @@ To create many demo users/admins:
 npm run seed:many-users
 ```
 
-4) **Environment variables** (Project Settings → Environment Variables):
+4) **Root directory** (if you deploy on Vercel or similar): set the project **root** to the repository root (where `package.json` and `vite.config.js` live), not a former `Frontend/` subfolder.
+
+5) **Environment variables** (Project Settings → Environment Variables):
    - **`VITE_API_BASE_URL`**: your **deployed backend** origin only, e.g. `https://your-api.onrender.com` (no `/api` suffix unless your server is actually mounted that way).  
    - Add for **Production** (and **Preview** if you use preview deployments). **Redeploy** after changing env vars so Vite picks them up at build time.
 
-5) **SPA routing**: `Frontend/vercel.json` rewrites all paths to `/` so React Router routes (e.g. `/login`, `/catalog`) work on refresh.
+6) **SPA routing**: `vercel.json` in the repo root rewrites all paths to `/` so React Router routes (e.g. `/login`, `/catalog`) work on refresh.
 
-6) **Troubleshooting**
+7) **Troubleshooting**
    - If the live site shows a generic **“demo repository”** welcome page, the wrong Git repo is linked or an old deployment is cached—fix the repo link and **Redeploy**.
    - If the build succeeds but the site is blank or 404s on deep links, double-check **Output Directory** is **`dist`**, not `public`.
 
-Local reference for env names: `Frontend/.env.example`.
+Local reference for env names: `.env.example` in the repo root.
 
 ## API overview
 

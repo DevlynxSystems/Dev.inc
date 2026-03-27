@@ -33,8 +33,10 @@ State is kept in memory (no backend API calls in the current setup). Sample data
 
 ## Project Structure
 
+The Vite app lives at the **repository root** (alongside `Backend/`), not in a nested `Frontend/` folder.
 
-Frontend/
+```
+./
 ├── index.html              # Entry HTML, fonts, root div
 ├── package.json            # Dependencies and scripts
 ├── vite.config.js          # Vite config (React plugin)
@@ -54,7 +56,7 @@ Frontend/
 │   │   ├── BookFormModal.jsx / .css
 │   │   └── BookDetailsModal.jsx / .css
 │   └── assets/             # Local cover images (imported in books.js)
-
+```
 
 ---
 
@@ -205,7 +207,7 @@ Component-specific styles live in Navbar.css, BookCard.css, BookFormModal.css, a
 
 ## Scripts
 
-From Frontend/ directory:
+From the repository root:
 
 | Command       | Description              |
 |---------------|--------------------------|

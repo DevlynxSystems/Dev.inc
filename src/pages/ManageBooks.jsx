@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Download, Eye, Pencil, Search, Trash2 } from 'lucide-react'
+import { Download, Eye, Pencil, Search, Trash2, Upload } from 'lucide-react'
 import { BookFormModal } from '../components/BookFormModal'
 import { BookDetailsModal } from '../components/BookDetailsModal'
 import { useAuth } from '../auth/AuthContext'
 import { AdminLayout } from '../components/AdminLayout'
+import { logAdminEvent } from '../lib/adminAudit'
 
 export function ManageBooks() {
   const { API_BASE_URL, authFetch } = useAuth()
@@ -12,9 +13,12 @@ export function ManageBooks() {
   const [books, setBooks] = useState([])
   const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
+  const [dateFilter, setDateFilter] = useState('all')
   const [sortBy, setSortBy] = useState('newest')
   const [selectedIds, setSelectedIds] = useState([])
   const [activeBook, setActiveBook] = useState(null)
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 10
   const [detailsBook, setDetailsBook] = useState(null)
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [editingBook, setEditingBook] = useState(null)
@@ -23,6 +27,7 @@ export function ManageBooks() {
     const res = await fetch(`${API_BASE_URL}/api/books`)
     const data = await res.json()
     setBooks(Array.isArray(data) ? data : [])
+    logAdminEvent({ type: 'books.refresh', message: 'Refreshed books list', meta: { count: Array.isArray(data) ? data.length : 0 } })
   }
 
   useEffect(() => {
@@ -40,6 +45,7 @@ export function ManageBooks() {
     const data = await res.json().catch(() => ({}))
     if (!res.ok) throw new Error(data.error || 'Failed to delete book')
     setBooks((prev) => prev.filter((b) => b._id !== id))
+    logAdminEvent({ type: 'books.delete', message: `Deleted book ${id}`, meta: { id } })
   }
 
   const saveBook = async (bookData, bookId) => {
@@ -78,9 +84,11 @@ export function ManageBooks() {
       setBooks((prev) => prev.map((b) => (b._id === bookId ? data : b)))
       setEditingBook(null)
       setDetailsBook(null)
+      logAdminEvent({ type: 'books.edit', message: `Updated book ${data.title || bookId}`, meta: { id: bookId } })
     } else {
       setBooks((prev) => [data, ...prev])
       setAddModalOpen(false)
+      logAdminEvent({ type: 'books.add', message: `Added new book ${data.title || 'Untitled'}`, meta: { id: data._id } })
     }
   }
 
@@ -93,6 +101,8 @@ export function ManageBooks() {
   const filteredBooks = books
     .filter((b) => {
       const q = search.trim().toLowerCase()
+      if (dateFilter === 'recent' && new Date(b.date || 0).getFullYear() < 2000) return false
+      if (dateFilter === 'classic' && new Date(b.date || 0).getFullYear() >= 1980) return false
       if (!q) return true
       return (
         (b.title || '').toLowerCase().includes(q) ||
@@ -105,6 +115,13 @@ export function ManageBooks() {
       if (sortBy === 'author') return (a.author || '').localeCompare(b.author || '')
       return new Date(b.date || 0) - new Date(a.date || 0)
     })
+
+  const pagedBooks = filteredBooks.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const totalPages = Math.max(1, Math.ceil(filteredBooks.length / PAGE_SIZE))
+
+  useEffect(() => {
+    setPage(1)
+  }, [search, sortBy, dateFilter])
 
   const toggleSelected = (id) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
@@ -127,17 +144,53 @@ export function ManageBooks() {
     }
     setBooks((prev) => prev.filter((b) => !selectedIds.includes(b._id)))
     setSelectedIds([])
+    logAdminEvent({ type: 'books.bulk-delete', message: `Deleted ${selectedIds.length} books`, meta: { count: selectedIds.length } })
   }
 
   const bulkExport = () => {
     const rows = filteredBooks.filter((b) => selectedIds.includes(b._id))
-    const blob = new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json' })
+    const header = ['_id', 'title', 'author', 'genre', 'date', 'pageCount']
+    const csv = [
+      header.join(','),
+      ...rows.map((r) => header.map((k) => `"${String(r[k] ?? '').replace(/"/g, '""')}"`).join(',')),
+    ].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'books-export.json'
+    a.download = 'books-export.csv'
     a.click()
     URL.revokeObjectURL(url)
+    logAdminEvent({ type: 'books.export', message: `Exported ${rows.length} books`, meta: { count: rows.length } })
+  }
+
+  const importCsv = async (file) => {
+    const text = await file.text()
+    const lines = text.split(/\r?\n/).filter(Boolean)
+    if (lines.length < 2) return
+    const header = lines[0].split(',').map((s) => s.replace(/"/g, '').trim())
+    const rows = lines.slice(1).map((line) => {
+      const vals = line.split(',').map((s) => s.replace(/^"|"$/g, '').replace(/""/g, '"'))
+      return Object.fromEntries(header.map((h, i) => [h, vals[i] ?? '']))
+    })
+    const normalized = rows.map((r) => ({
+      title: r.title || 'Untitled',
+      author: r.author || 'Unknown author',
+      genre: r.genre || '',
+      pageCount: Number(r.pageCount) || 0,
+      date: r.date ? new Date(r.date) : new Date(),
+      cover: null,
+    }))
+    for (const payload of normalized) {
+      // eslint-disable-next-line no-await-in-loop
+      await authFetch(`${API_BASE_URL}/api/books`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }).catch(() => {})
+    }
+    await loadBooks()
+    logAdminEvent({ type: 'books.import', message: `Imported ${normalized.length} books from CSV`, meta: { count: normalized.length } })
   }
 
   return (
@@ -158,6 +211,25 @@ export function ManageBooks() {
           <option value="title">Title</option>
           <option value="author">Author</option>
         </select>
+        <select className="h-11 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm text-stone-100" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}>
+          <option value="all">All dates</option>
+          <option value="recent">Recent (2000+)</option>
+          <option value="classic">Classic (&lt;1980)</option>
+        </select>
+        <label className="inline-flex cursor-pointer items-center gap-1 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-sm text-stone-200 hover:bg-white/[0.08]">
+          <Upload className="h-4 w-4" />
+          Import CSV
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) importCsv(file).catch(() => {})
+              e.target.value = ''
+            }}
+          />
+        </label>
         <button type="button" className="rounded-xl border border-orange-300/35 bg-orange-500/90 px-4 py-2.5 text-sm font-semibold text-white" onClick={() => { setEditingBook(null); setAddModalOpen(true) }}>
           Add book
         </button>
@@ -201,7 +273,7 @@ export function ManageBooks() {
                   </td>
                 </tr>
               ) : (
-                filteredBooks.map((book) => (
+                pagedBooks.map((book) => (
                   <motion.tr
                     key={book._id}
                     initial={{ opacity: 0, y: 6 }}
@@ -263,6 +335,18 @@ export function ManageBooks() {
           </table>
         </div>
       </section>
+      <div className="mt-3 flex items-center justify-between text-sm text-stone-400">
+        <p>Showing {pagedBooks.length} of {filteredBooks.length} books</p>
+        <div className="flex items-center gap-2">
+          <button type="button" className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 disabled:opacity-50" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+            Prev
+          </button>
+          <span>Page {page} / {totalPages}</span>
+          <button type="button" className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 disabled:opacity-50" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+            Next
+          </button>
+        </div>
+      </div>
 
       <AnimatePresence>
         {activeBook && (

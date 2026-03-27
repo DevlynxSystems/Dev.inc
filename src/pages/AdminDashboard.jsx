@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { ArrowUpRight, BookText, ShieldCheck, Users2, MessageSquare, Activity, UserPlus, LibraryBig } from 'lucide-react'
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useAuth } from '../auth/AuthContext'
 import { AdminLayout } from '../components/AdminLayout'
+import { exportAdminEventsCsv, getAdminEvents } from '../lib/adminAudit'
 
 export function AdminDashboard() {
   const { API_BASE_URL, authFetch } = useAuth()
@@ -11,6 +13,7 @@ export function AdminDashboard() {
   const [users, setUsers] = useState([])
   const [books, setBooks] = useState([])
   const [loading, setLoading] = useState(true)
+  const [events, setEvents] = useState([])
 
   useEffect(() => {
     let cancelled = false
@@ -41,6 +44,10 @@ export function AdminDashboard() {
     return () => { cancelled = true }
   }, [API_BASE_URL, authFetch])
 
+  useEffect(() => {
+    setEvents(getAdminEvents().slice(0, 12))
+  }, [users.length, books.length])
+
   const totalUsers = users.length
   const totalAdmins = users.filter((u) => u.role === 'admin').length
   const totalBooks = books.length
@@ -57,6 +64,20 @@ export function AdminDashboard() {
   const recentBooks = useMemo(() => {
     return [...books].sort((a, b) => String(b._id).localeCompare(String(a._id))).slice(0, 5)
   }, [books])
+
+  const analytics = useMemo(() => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const base = months.map((m, idx) => ({ month: m, users: 0, books: 0, idx }))
+    users.forEach((u) => {
+      const d = new Date(u.createdAt || Date.now())
+      base[d.getMonth()].users += 1
+    })
+    books.forEach((b) => {
+      const d = new Date(b.date || Date.now())
+      base[d.getMonth()].books += 1
+    })
+    return base
+  }, [users, books])
 
   return (
     <AdminLayout title="Dashboard">
@@ -89,6 +110,40 @@ export function AdminDashboard() {
       </div>
 
       <div className="mt-4 grid gap-4 xl:grid-cols-[1.25fr_1.25fr_0.9fr]" aria-label="Recent activity">
+        <div className="xl:col-span-2 rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-white">Analytics Overview</h3>
+            <span className="text-xs uppercase tracking-[0.12em] text-stone-400">Users vs books (monthly)</span>
+          </div>
+          <div className="h-56 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={analytics}>
+                <defs>
+                  <linearGradient id="usersGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#fb923c" stopOpacity={0.5} />
+                    <stop offset="95%" stopColor="#fb923c" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="booksGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.45} />
+                    <stop offset="95%" stopColor="#60a5fa" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="month" stroke="#a8a29e" tickLine={false} axisLine={false} />
+                <YAxis stroke="#a8a29e" tickLine={false} axisLine={false} allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{
+                    background: 'rgba(12, 10, 9, 0.9)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '12px',
+                  }}
+                />
+                <Area type="monotone" dataKey="users" stroke="#fb923c" fill="url(#usersGradient)" strokeWidth={2} />
+                <Area type="monotone" dataKey="books" stroke="#60a5fa" fill="url(#booksGradient)" strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
         <div className="rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
             <h3 className="text-lg font-semibold text-white">Recently joined users</h3>
@@ -182,20 +237,28 @@ export function AdminDashboard() {
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-            <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-orange-200">Activity feed</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-orange-200">Activity feed</h3>
+              <button
+                type="button"
+                className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] uppercase tracking-[0.1em] text-stone-300"
+                onClick={() => exportAdminEventsCsv(events)}
+              >
+                Export
+              </button>
+            </div>
             <ul className="mt-3 space-y-2 text-sm text-stone-300">
-              <li className="flex items-start gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
-                <Activity className="mt-0.5 h-4 w-4 text-emerald-300" />
-                <span>Dashboard refreshed with latest users and books.</span>
-              </li>
-              <li className="flex items-start gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
-                <Activity className="mt-0.5 h-4 w-4 text-blue-300" />
-                <span>Role-based management tools are active.</span>
-              </li>
-              <li className="flex items-start gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
-                <Activity className="mt-0.5 h-4 w-4 text-orange-300" />
-                <span>New catalog entries appear in real time after save.</span>
-              </li>
+              {events.length === 0 ? (
+                <li className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-stone-400">No audit events yet.</li>
+              ) : events.map((evt) => (
+                <li key={evt.id} className="flex items-start gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                  <Activity className="mt-0.5 h-4 w-4 text-orange-300" />
+                  <div>
+                    <p>{evt.message}</p>
+                    <p className="text-xs text-stone-500">{new Date(evt.at).toLocaleString()}</p>
+                  </div>
+                </li>
+              ))}
             </ul>
           </div>
         </div>

@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
-import { Pencil, Search, SlidersHorizontal, Star, Trash2 } from 'lucide-react';
+import { Heart, Pencil, Search, SlidersHorizontal, Star, Trash2 } from 'lucide-react';
 import { BookDetailsModal } from '../components/BookDetailsModal';
 import { BookFormModal } from '../components/BookFormModal';
 import { DATE_FILTER_OPTIONS, SORT_OPTIONS, filterByDateFilter, sortBooks } from '../components/CatalogFilters';
 import { useAuth } from '../auth/AuthContext';
 
 const RECENT_KEY = 'devinc_recent_books';
+const WISHLIST_KEY = 'devinc_wishlist_books';
 
 export function CatalogPage({ searchQuery }) {
   const { user, API_BASE_URL, authFetch } = useAuth();
@@ -16,6 +17,7 @@ export function CatalogPage({ searchQuery }) {
   const [detailsBook, setDetailsBook] = useState(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
+  const [wishlistIds, setWishlistIds] = useState([]);
   const [localQuery, setLocalQuery] = useState('');
 
   const [sortBy, setSortBy] = useState('newest');
@@ -39,11 +41,25 @@ export function CatalogPage({ searchQuery }) {
     };
   }, [API_BASE_URL]);
 
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem(WISHLIST_KEY) || '[]');
+    if (Array.isArray(saved)) setWishlistIds(saved);
+  }, []);
+
   const rememberRecent = (book) => {
     if (!book?._id) return;
     const prev = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
     const next = [book._id, ...prev.filter((id) => id !== book._id)].slice(0, 8);
     localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+  };
+
+  const addToWishlist = (book) => {
+    const id = book?._id;
+    if (!id) return;
+    if (wishlistIds.includes(id)) return;
+    const next = [id, ...wishlistIds].slice(0, 32);
+    setWishlistIds(next);
+    localStorage.setItem(WISHLIST_KEY, JSON.stringify(next));
   };
 
   const removeBook = async (id) => {
@@ -261,6 +277,18 @@ export function CatalogPage({ searchQuery }) {
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => addToWishlist(book)}
+                    className={`rounded-lg border px-2 py-1.5 text-xs font-semibold backdrop-blur ${
+                      wishlistIds.includes(book._id)
+                        ? 'border-rose-300/40 bg-rose-500/20 text-rose-100'
+                        : 'border-white/15 bg-black/55 text-white hover:bg-black/70'
+                    }`}
+                    title="Add to wishlist"
+                  >
+                    <Heart className={`h-3.5 w-3.5 ${wishlistIds.includes(book._id) ? 'fill-current' : ''}`} />
+                  </button>
                 </div>
               </div>
 
@@ -301,6 +329,7 @@ export function CatalogPage({ searchQuery }) {
         open={!!detailsBook}
         onClose={() => setDetailsBook(null)}
         onEdit={isAdmin ? openEdit : undefined}
+        onAddWishlist={addToWishlist}
       />
 
       <BookFormModal

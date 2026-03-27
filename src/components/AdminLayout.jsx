@@ -1,10 +1,18 @@
+import { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { Bell, BookCopy, LayoutDashboard, LogOut, Search, Shield, Users } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
+import { getAdminEvents } from '../lib/adminAudit'
 
 export function AdminLayout({ title, children }) {
   const navigate = useNavigate()
   const { logout, user } = useAuth()
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [events, setEvents] = useState([])
+
+  useEffect(() => {
+    setEvents(getAdminEvents().slice(0, 8))
+  }, [title])
 
   const doLogout = () => {
     logout()
@@ -93,13 +101,36 @@ export function AdminLayout({ title, children }) {
                   className="h-10 w-56 rounded-xl border border-white/10 bg-white/[0.04] pl-9 pr-3 text-sm text-stone-100 placeholder:text-stone-500 outline-none transition focus:border-orange-300/45 focus:ring-2 focus:ring-orange-500/20"
                 />
               </label>
-              <button
-                type="button"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-stone-300 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-                aria-label="Notifications"
-              >
-                <Bell className="h-4 w-4" />
-              </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-stone-300 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+                  aria-label="Notifications"
+                  onClick={() => setNotifOpen((v) => !v)}
+                >
+                  <Bell className="h-4 w-4" />
+                </button>
+                {events.length > 0 && (
+                  <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-orange-500 px-1 text-[10px] font-bold text-white">
+                    {events.length}
+                  </span>
+                )}
+                {notifOpen && (
+                  <div className="absolute right-0 top-[calc(100%+0.4rem)] z-20 w-80 rounded-2xl border border-white/10 bg-black/90 p-2 shadow-2xl backdrop-blur-xl">
+                    <p className="px-2 py-1 text-xs uppercase tracking-[0.12em] text-stone-400">Notifications</p>
+                    <ul className="max-h-72 overflow-auto">
+                      {events.length === 0 ? (
+                        <li className="px-2 py-2 text-sm text-stone-400">No new alerts.</li>
+                      ) : events.map((evt) => (
+                        <li key={evt.id} className="rounded-lg px-2 py-2 text-sm text-stone-200 hover:bg-white/[0.06]">
+                          <p className="line-clamp-1">{evt.message}</p>
+                          <p className="text-xs text-stone-500">{new Date(evt.at).toLocaleString()}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={() => navigate('/admin/books')}
