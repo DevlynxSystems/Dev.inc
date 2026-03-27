@@ -47,7 +47,7 @@ PORT=5000
 
 Notes:
 - If `MONGO_URI` is missing, the backend falls back to a local MongoDB URL (for dev).
-- If `JWT_SECRET` is missing, a dev-only fallback may be used; set a real secret for anything beyond local development.
+- If `JWT_SECRET` is missing, a dev-only fallback may be used; set a real secret for anything beyond local development
 
 For the frontend API base URL, set `Frontend/.env`:
 
@@ -58,7 +58,7 @@ VITE_API_BASE_URL=http://localhost:5000
 ## Install and Run
 
 Installation & Setup
-Before running the app for the first time, you must install the dependencies for both the frontend and backend folders.
+Before running the app for the first time, you must install the dependencies for both the frontend and backend folders
 
 #### Windows:
 
