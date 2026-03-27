@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import './BookFormModal.css'
+import { motion } from 'motion/react'
+import { BookOpenText, CalendarDays, FileText, ImagePlus, PenLine, UserRound } from 'lucide-react'
 
 const MAX_COVER_PIXELS = 800
 const COVER_JPEG_QUALITY = 0.82
@@ -73,6 +74,7 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
   const [coverBase64, setCoverBase64] = useState(null)
   const [coverPreview, setCoverPreview] = useState(null)
   const [uploading, setUploading] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef(null)
 
   useEffect(() => {
@@ -106,8 +108,12 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
   }
 
   const handleFileChange = async (e) => {
-    const file = e.target.files[0]
+    const file = e.target.files?.[0]
     if (!file) return
+    await processFile(file)
+  }
+
+  const processFile = async (file) => {
     if (!isImageFile(file)) {
       setError('Please select an image file (PNG, JPEG, JPG, GIF, WebP, SVG, BMP, etc.).')
       return
@@ -127,6 +133,14 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
     } finally {
       setUploading(false)
     }
+  }
+
+  const handleDrop = async (e) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const file = e.dataTransfer?.files?.[0]
+    if (!file) return
+    await processFile(file)
   }
 
   const handleSubmit = async (e) => {
@@ -155,104 +169,197 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
   if (!open) return null
 
   return (
-      <aside
-          className="modal"
-          aria-hidden="false"
-          onClick={(e) => e.target === e.currentTarget && handleClose()}
+    <aside
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6"
+      aria-hidden="false"
+      onClick={(e) => e.target === e.currentTarget && handleClose()}
+    >
+      <motion.div
+        className="absolute inset-0 bg-black/65 backdrop-blur-xl"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      />
+      <motion.div
+        role="dialog"
+        aria-labelledby="modal-title"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.2 }}
+        className="relative z-10 w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-black/50 shadow-[0_24px_80px_rgba(0,0,0,0.55)] backdrop-blur-2xl"
       >
-        <div className="modal-backdrop" aria-hidden="true" />
-        <div
-            className="modal-panel"
-            role="dialog"
-            aria-labelledby="modal-title"
-            aria-modal="true"
-            onClick={(e) => e.stopPropagation()}
-        >
-          <h2 id="modal-title" className="modal-title">
-            {editingBook ? 'Edit book' : 'Add new book'}
-          </h2>
-          <form className="book-form" onSubmit={handleSubmit}>
-            {error && <p className="form-error">{error}</p>}
-            <label htmlFor="title">Title</label>
-            <input
-                type="text"
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                autoFocus
-            />
-
-            <label htmlFor="author">Author</label>
-            <input
-                type="text"
-                id="author"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                required
-            />
-
-            <label htmlFor="publishDate">Publish Date</label>
-            <input
-                type="date"
-                id="publishDate"
-                value={publishDate}
-                onChange={(e) => setPublishDate(e.target.value)}
-            />
-
-            <label htmlFor="pageNumber">Page Number</label>
-            <input
-                type="number"
-                id="pageNumber"
-                value={pageNumber}
-                onChange={(e) => setPageNumber(e.target.value)}
-                required
-                min="1"
-                placeholder="e.g. 350"
-            />
-
-            <label>Cover Image</label>
-            <div className="cover-upload-wrap">
-              {coverPreview && (
-                  <img src={coverPreview} alt="Cover preview" className="cover-preview" />
-              )}
-              <button
-                  type="button"
-                  className="btn btn-secondary cover-upload-btn"
-                  onClick={() => fileInputRef.current.click()}
-                  disabled={uploading}
-              >
-                {uploading ? 'Processing…' : coverPreview ? 'Change Image' : 'Upload Image'}
-              </button>
-              {coverPreview && (
-                  <button
-                      type="button"
-                      className="btn btn-danger cover-remove-btn"
-                      onClick={() => { setCoverBase64(null); setCoverPreview(null); fileInputRef.current.value = '' }}
-                  >
-                    Remove
-                  </button>
-              )}
-              <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept={IMAGE_ACCEPT}
-                  onChange={handleFileChange}
-                  style={{ display: 'none' }}
-                  title="PNG, JPEG, JPG, GIF, WebP, SVG, BMP, and other image types"
-              />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(249,115,22,0.22),transparent_42%),radial-gradient(circle_at_90%_10%,rgba(59,130,246,0.2),transparent_35%)]" />
+        <form className="relative grid gap-6 p-5 md:grid-cols-[1fr_1.3fr] md:p-7" onSubmit={handleSubmit}>
+          <section className="space-y-4">
+            <div>
+              <h2 id="modal-title" className="text-2xl font-semibold tracking-tight text-white md:text-3xl">
+                {editingBook ? 'Edit Book' : 'Add New Book'}
+              </h2>
+              <p className="mt-1 text-sm text-stone-300">Add a new book to your catalog with complete metadata and a premium cover preview.</p>
             </div>
 
-            <div className="form-actions">
-              <button type="button" className="btn btn-secondary" onClick={handleClose}>
+            <div
+              className={`group relative overflow-hidden rounded-2xl border transition ${
+                isDragging ? 'border-orange-300/55 bg-orange-500/10' : 'border-white/15 bg-white/[0.04]'
+              }`}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setIsDragging(true)
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleDrop}
+            >
+              <div className="aspect-[2/3] w-full">
+                {coverPreview ? (
+                  <img src={coverPreview} alt="Cover preview" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-stone-900 to-stone-800">
+                    <BookOpenText className="h-14 w-14 text-stone-500" />
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 border-t border-white/15 bg-black/50 px-3 py-2 text-sm font-medium text-stone-100 opacity-95 transition group-hover:bg-black/65"
+                disabled={uploading}
+              >
+                <ImagePlus className="h-4 w-4" />
+                {uploading ? 'Processing...' : coverPreview ? 'Upload / Change image' : 'Upload cover image'}
+              </button>
+            </div>
+
+            {coverPreview && (
+              <button
+                type="button"
+                className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm font-medium text-rose-200 transition hover:bg-rose-500/20"
+                onClick={() => {
+                  setCoverBase64(null)
+                  setCoverPreview(null)
+                  if (fileInputRef.current) fileInputRef.current.value = ''
+                }}
+              >
+                Remove image
+              </button>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={IMAGE_ACCEPT}
+              onChange={handleFileChange}
+              className="hidden"
+              title="PNG, JPEG, JPG, GIF, WebP, SVG, BMP, and other image types"
+            />
+          </section>
+
+          <section className="space-y-4">
+            {error && (
+              <p className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
+                {error}
+              </p>
+            )}
+
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="mb-3 text-xs uppercase tracking-[0.12em] text-stone-400">Basic information</p>
+              <div className="space-y-3">
+                <FloatingField
+                  id="title"
+                  label="Book title"
+                  icon={PenLine}
+                  value={title}
+                  onChange={setTitle}
+                  required
+                  autoFocus
+                />
+                <FloatingField
+                  id="author"
+                  label="Author"
+                  icon={UserRound}
+                  value={author}
+                  onChange={setAuthor}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="mb-3 text-xs uppercase tracking-[0.12em] text-stone-400">Metadata</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <FloatingField
+                  id="publishDate"
+                  label="Publish date"
+                  icon={CalendarDays}
+                  value={publishDate}
+                  onChange={setPublishDate}
+                  type="date"
+                />
+                <FloatingField
+                  id="pageNumber"
+                  label="Pages"
+                  icon={FileText}
+                  value={pageNumber}
+                  onChange={setPageNumber}
+                  type="number"
+                  min="1"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                className="rounded-xl border border-white/15 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-stone-100 transition hover:scale-[1.02] hover:border-white/25 hover:bg-white/[0.08]"
+                onClick={handleClose}
+              >
                 Cancel
               </button>
-              <button type="submit" className="btn btn-primary">
+              <button
+                type="submit"
+                className="rounded-xl border border-orange-300/35 bg-orange-500/90 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(249,115,22,0.35)] transition hover:scale-[1.02] hover:bg-orange-400"
+              >
                 {editingBook ? 'Save changes' : 'Save Book'}
               </button>
             </div>
-          </form>
-        </div>
-      </aside>
+          </section>
+        </form>
+      </motion.div>
+    </aside>
+  )
+}
+
+function FloatingField({
+  id,
+  label,
+  icon: Icon,
+  value,
+  onChange,
+  type = 'text',
+  required = false,
+  autoFocus = false,
+  min,
+}) {
+  return (
+    <div className="relative">
+      <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+      <input
+        id={id}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required={required}
+        autoFocus={autoFocus}
+        min={min}
+        placeholder=" "
+        className="peer h-12 w-full rounded-2xl border border-white/10 bg-white/[0.04] pl-10 pr-3 pt-4 text-sm text-stone-100 outline-none transition placeholder:text-transparent hover:border-white/20 focus:border-orange-300/50 focus:bg-white/[0.06] focus:shadow-[0_0_0_3px_rgba(249,115,22,0.18)]"
+      />
+      <label
+        htmlFor={id}
+        className="pointer-events-none absolute left-10 top-3.5 origin-left text-sm text-stone-400 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-focus:top-1.5 peer-focus:text-[11px] peer-focus:text-orange-200 peer-[:not(:placeholder-shown)]:top-1.5 peer-[:not(:placeholder-shown)]:text-[11px]"
+      >
+        {label}
+      </label>
+    </div>
   )
 }

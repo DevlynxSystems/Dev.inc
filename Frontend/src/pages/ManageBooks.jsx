@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
+import { Download, Eye, Pencil, Search, Trash2 } from 'lucide-react'
 import { BookFormModal } from '../components/BookFormModal'
 import { BookDetailsModal } from '../components/BookDetailsModal'
 import { useAuth } from '../auth/AuthContext'
@@ -8,6 +10,11 @@ export function ManageBooks() {
   const { API_BASE_URL, authFetch } = useAuth()
 
   const [books, setBooks] = useState([])
+  const [searchInput, setSearchInput] = useState('')
+  const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState('newest')
+  const [selectedIds, setSelectedIds] = useState([])
+  const [activeBook, setActiveBook] = useState(null)
   const [detailsBook, setDetailsBook] = useState(null)
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [editingBook, setEditingBook] = useState(null)
@@ -22,6 +29,11 @@ export function ManageBooks() {
     loadBooks().catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [API_BASE_URL])
+
+  useEffect(() => {
+    const t = setTimeout(() => setSearch(searchInput), 250)
+    return () => clearTimeout(t)
+  }, [searchInput])
 
   const removeBook = async (id) => {
     const res = await authFetch(`${API_BASE_URL}/api/books/${id}`, { method: 'DELETE' })
@@ -78,70 +90,160 @@ export function ManageBooks() {
     setAddModalOpen(false)
   }
 
+  const filteredBooks = books
+    .filter((b) => {
+      const q = search.trim().toLowerCase()
+      if (!q) return true
+      return (
+        (b.title || '').toLowerCase().includes(q) ||
+        (b.author || '').toLowerCase().includes(q) ||
+        (b.genre || '').toLowerCase().includes(q)
+      )
+    })
+    .sort((a, b) => {
+      if (sortBy === 'title') return (a.title || '').localeCompare(b.title || '')
+      if (sortBy === 'author') return (a.author || '').localeCompare(b.author || '')
+      return new Date(b.date || 0) - new Date(a.date || 0)
+    })
+
+  const toggleSelected = (id) => {
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredBooks.length) {
+      setSelectedIds([])
+      return
+    }
+    setSelectedIds(filteredBooks.map((b) => b._id))
+  }
+
+  const bulkDelete = async () => {
+    if (!selectedIds.length) return
+    if (!confirm(`Delete ${selectedIds.length} selected books?`)) return
+    for (const id of selectedIds) {
+      // eslint-disable-next-line no-await-in-loop
+      await authFetch(`${API_BASE_URL}/api/books/${id}`, { method: 'DELETE' }).catch(() => {})
+    }
+    setBooks((prev) => prev.filter((b) => !selectedIds.includes(b._id)))
+    setSelectedIds([])
+  }
+
+  const bulkExport = () => {
+    const rows = filteredBooks.filter((b) => selectedIds.includes(b._id))
+    const blob = new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'books-export.json'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <AdminLayout title="Manage Books">
-      <div className="catalog-section-intro" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
-        <p className="catalog-intro" style={{ margin: 0 }}>
-          Total books: <span style={{ fontWeight: 700 }}>{books.length}</span>
-        </p>
-        <button type="button" className="btn btn-primary" onClick={() => { setEditingBook(null); setAddModalOpen(true) }}>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <label className="relative min-w-64 flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search title, author, genre..."
+            className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.04] pl-9 pr-3 text-sm text-stone-100 placeholder:text-stone-500 outline-none transition focus:border-orange-300/50 focus:ring-2 focus:ring-orange-500/20"
+          />
+        </label>
+        <select className="h-11 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm text-stone-100" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="newest">Newest</option>
+          <option value="title">Title</option>
+          <option value="author">Author</option>
+        </select>
+        <button type="button" className="rounded-xl border border-orange-300/35 bg-orange-500/90 px-4 py-2.5 text-sm font-semibold text-white" onClick={() => { setEditingBook(null); setAddModalOpen(true) }}>
           Add book
         </button>
       </div>
 
-      <section aria-label="Book management" style={{ marginTop: '1rem' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+      {selectedIds.length > 0 && (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-orange-300/35 bg-orange-500/10 px-3 py-2">
+          <p className="text-sm text-orange-200">{selectedIds.length} selected</p>
+          <div className="flex gap-2">
+            <button type="button" className="inline-flex items-center gap-1 rounded-lg border border-white/15 bg-white/10 px-2.5 py-1.5 text-xs text-stone-100" onClick={bulkExport}>
+              <Download className="h-3.5 w-3.5" /> Export
+            </button>
+            <button type="button" className="inline-flex items-center gap-1 rounded-lg border border-rose-400/35 bg-rose-500/10 px-2.5 py-1.5 text-xs text-rose-200" onClick={bulkDelete}>
+              <Trash2 className="h-3.5 w-3.5" /> Delete
+            </button>
+          </div>
+        </div>
+      )}
+
+      <section aria-label="Book management">
+        <div className="overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.03]">
+          <table className="w-full min-w-[980px] border-collapse">
             <thead>
-              <tr>
-                <th style={{ textAlign: 'left', padding: '0.75rem 0.5rem', borderBottom: '1px solid var(--glass-border-subtle)' }}>Cover</th>
-                <th style={{ textAlign: 'left', padding: '0.75rem 0.5rem', borderBottom: '1px solid var(--glass-border-subtle)' }}>Title</th>
-                <th style={{ textAlign: 'left', padding: '0.75rem 0.5rem', borderBottom: '1px solid var(--glass-border-subtle)' }}>Author</th>
-                <th style={{ textAlign: 'left', padding: '0.75rem 0.5rem', borderBottom: '1px solid var(--glass-border-subtle)' }}>Published</th>
-                <th style={{ textAlign: 'left', padding: '0.75rem 0.5rem', borderBottom: '1px solid var(--glass-border-subtle)' }}>Pages</th>
-                <th style={{ textAlign: 'right', padding: '0.75rem 0.5rem', borderBottom: '1px solid var(--glass-border-subtle)' }}>Actions</th>
+              <tr className="sticky top-0 z-10 bg-black/60 backdrop-blur-xl">
+                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-[0.1em] text-stone-400">
+                  <input type="checkbox" checked={filteredBooks.length > 0 && selectedIds.length === filteredBooks.length} onChange={toggleSelectAll} />
+                </th>
+                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-[0.1em] text-stone-400">Cover</th>
+                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-[0.1em] text-stone-400">Title / Genre</th>
+                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-[0.1em] text-stone-400">Author</th>
+                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-[0.1em] text-stone-400">Published</th>
+                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-[0.1em] text-stone-400">Pages</th>
+                <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-[0.1em] text-stone-400">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {books.length === 0 ? (
+              {filteredBooks.length === 0 ? (
                 <tr>
-                  <td colSpan="6" style={{ padding: '1.25rem 0.5rem', color: 'var(--color-text-muted)' }}>
+                  <td colSpan="7" className="px-3 py-5 text-sm text-stone-400">
                     No books in the catalog yet.
                   </td>
                 </tr>
               ) : (
-                books.map((book) => (
-                  <tr key={book._id}>
-                    <td style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid var(--glass-border-subtle)' }}>
+                filteredBooks.map((book) => (
+                  <motion.tr
+                    key={book._id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="cursor-pointer border-t border-white/10 odd:bg-white/[0.02] even:bg-transparent transition hover:-translate-y-0.5 hover:bg-white/[0.06]"
+                    onClick={() => setActiveBook(book)}
+                  >
+                    <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                      <input type="checkbox" checked={selectedIds.includes(book._id)} onChange={() => toggleSelected(book._id)} />
+                    </td>
+                    <td className="px-3 py-3">
                       {book.cover ? (
                         <img
                           src={book.cover}
                           alt={`Cover: ${book.title}`}
-                          style={{ width: 44, height: 60, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--glass-border-subtle)' }}
+                          className="h-16 w-12 rounded-md border border-white/10 object-cover transition duration-300 hover:scale-105"
                         />
                       ) : (
-                        <div style={{ width: 44, height: 60, borderRadius: 6, border: '1px solid var(--glass-border-subtle)', background: 'var(--cover-placeholder)' }} />
+                        <div className="h-16 w-12 rounded-md border border-white/10 bg-white/10" />
                       )}
                     </td>
-                    <td style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid var(--glass-border-subtle)' }}>
-                      <button type="button" className="btn btn-secondary" style={{ padding: '0.35rem 0.75rem' }} onClick={() => setDetailsBook(book)}>
-                        {book.title || 'Untitled'}
-                      </button>
+                    <td className="px-3 py-3">
+                      <p className="font-medium text-stone-100">{book.title || 'Untitled'}</p>
+                      <p className="mt-1 text-xs text-stone-400">{book.genre || 'No genre'}</p>
                     </td>
-                    <td style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid var(--glass-border-subtle)' }}>{book.author || 'Unknown author'}</td>
-                    <td style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid var(--glass-border-subtle)' }}>
+                    <td className="px-3 py-3 text-stone-200">{book.author || 'Unknown author'}</td>
+                    <td className="px-3 py-3 text-stone-400">
                       {book.date ? new Date(book.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : '—'}
                     </td>
-                    <td style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid var(--glass-border-subtle)' }}>{book.pageCount != null ? book.pageCount : '—'}</td>
-                    <td style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid var(--glass-border-subtle)', textAlign: 'right' }}>
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', flexWrap: 'wrap' }}>
-                        <button type="button" className="btn btn-secondary" style={{ padding: '0.35rem 0.75rem' }} onClick={() => openEdit(book)}>
-                          Edit
+                    <td className="px-3 py-3 text-stone-400">{book.pageCount != null ? book.pageCount : '—'}</td>
+                    <td className="px-3 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="inline-flex items-center gap-1">
+                        <button type="button" title="View" className="rounded-lg border border-white/10 bg-white/[0.05] p-2 text-stone-200 hover:bg-white/[0.1]" onClick={() => setDetailsBook(book)}>
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button type="button" title="Edit" className="rounded-lg border border-white/10 bg-white/[0.05] p-2 text-stone-200 hover:bg-white/[0.1]" onClick={() => openEdit(book)}>
+                          <Pencil className="h-4 w-4" />
                         </button>
                         <button
                           type="button"
-                          className="btn btn-danger"
-                          style={{ padding: '0.35rem 0.75rem' }}
+                          title="Delete"
+                          className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2 text-rose-200 hover:bg-rose-500/20"
                           onClick={async () => {
                             try {
                               await removeBook(book._id)
@@ -150,17 +252,64 @@ export function ManageBooks() {
                             }
                           }}
                         >
-                          Delete
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))
               )}
             </tbody>
           </table>
         </div>
       </section>
+
+      <AnimatePresence>
+        {activeBook && (
+          <motion.aside
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setActiveBook(null)}
+          >
+            <motion.div
+              initial={{ x: 420 }}
+              animate={{ x: 0 }}
+              exit={{ x: 420 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="absolute right-0 top-0 h-full w-full max-w-md border-l border-white/10 bg-black/85 p-5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-xl font-semibold text-white">{activeBook.title || 'Untitled'}</h3>
+              <p className="mt-1 text-sm text-stone-400">{activeBook.author || 'Unknown author'}</p>
+              <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                {activeBook.cover ? (
+                  <img src={activeBook.cover} alt={`Cover: ${activeBook.title}`} className="mx-auto h-56 w-40 rounded-md object-cover" />
+                ) : (
+                  <div className="mx-auto h-56 w-40 rounded-md bg-white/10" />
+                )}
+              </div>
+              <div className="mt-4 space-y-2 text-sm">
+                <p className="text-stone-300"><span className="text-stone-500">Genre:</span> {activeBook.genre || '—'}</p>
+                <p className="text-stone-300"><span className="text-stone-500">Published:</span> {activeBook.date ? new Date(activeBook.date).toLocaleDateString() : '—'}</p>
+                <p className="text-stone-300"><span className="text-stone-500">Pages:</span> {activeBook.pageCount ?? '—'}</p>
+              </div>
+              <div className="mt-6 flex gap-2">
+                <button type="button" className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-stone-200" onClick={() => setDetailsBook(activeBook)}>
+                  Open details
+                </button>
+                <button type="button" className="rounded-lg border border-orange-300/30 bg-orange-500/90 px-3 py-2 text-xs font-semibold text-white" onClick={() => openEdit(activeBook)}>
+                  Edit
+                </button>
+                <button type="button" className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-stone-200" onClick={() => setActiveBook(null)}>
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
 
       <BookDetailsModal
         book={detailsBook}

@@ -71,7 +71,7 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
     <header className="sticky top-3 z-50 px-4 md:px-6" role="banner">
       <div className="mx-auto flex w-full max-w-6xl justify-center">
         <nav
-          className="flex w-full items-center gap-2 overflow-x-auto rounded-full border border-white/10 bg-black/35 px-2.5 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+          className="flex w-full items-center gap-2 overflow-x-auto rounded-full border border-white/10 bg-black/35 px-2.5 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:overflow-visible"
           aria-label="Primary"
         >
           <Link to="/" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-stone-100" aria-label="Book Catalog Home">
@@ -255,6 +255,14 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
                       </div>
                     </div>
                     <div className="my-1 h-px bg-white/10" />
+                    <Link
+                      to="/profile"
+                      className="mb-1 block w-full rounded-xl px-3 py-2 text-left text-sm text-stone-200 transition hover:bg-white/10 hover:text-white"
+                      role="menuitem"
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      Profile setup
+                    </Link>
                     <button
                       type="button"
                       className="block w-full rounded-xl px-3 py-2 text-left text-sm text-rose-300 transition hover:bg-rose-500/10 hover:text-rose-200"
