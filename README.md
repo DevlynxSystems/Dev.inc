@@ -130,19 +130,6 @@ To create many demo users/admins:
 npm run seed:many-users
 ```
 
-## Deploy frontend to Vercel
-
-1) **Import this repository** in Vercel (not a demo template). Under **Settings → Git**, confirm the connected repo is the one that contains the `Frontend/` folder for this Book Catalog app.
-
-2) **Root Directory**: set to `Frontend` (Project Settings → General, or during import).
-
-3) **Build & output** (Vite builds to `dist`, not `public`):
-   - Prefer **Framework Preset: Vite** if Vercel detects it after the root is `Frontend`.
-   - If the preset stays **Other**, open **Settings → General → Build & Development Settings**, enable **overrides**, and set:
-     - **Build Command**: `npm run build`
-     - **Output Directory**: `dist`
-     - **Install Command**: `npm install` (default is fine)
-
 4) **Environment variables** (Project Settings → Environment Variables):
    - **`VITE_API_BASE_URL`**: your **deployed backend** origin only, e.g. `https://your-api.onrender.com` (no `/api` suffix unless your server is actually mounted that way).  
    - Add for **Production** (and **Preview** if you use preview deployments). **Redeploy** after changing env vars so Vite picks them up at build time.
