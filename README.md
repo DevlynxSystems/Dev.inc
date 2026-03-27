@@ -55,7 +55,36 @@ For the frontend API base URL, set `Frontend/.env`:
 VITE_API_BASE_URL=http://localhost:5000
 ```
 
-## Install
+## Install and Run
+
+Installation & Setup
+Before running the app for the first time, you must install the dependencies for both the frontend and backend folders.
+
+#### Windows:
+
+```PowerShell
+.\manage.bat setup
+```
+#### Unix / macOS / Git Bash:
+
+```Bash
+chmod +x manage.sh
+./manage.sh setup
+```
+Running the Application
+To start both the backend server and the React frontend concurrently:
+
+ #### Windows:
+
+```PowerShell
+.\manage.bat dev
+```
+Unix / macOS / Git Bash:
+
+```Bash
+./manage.sh dev
+```
+### Alternative Install and Run
 
 ```bash
 cd Backend
@@ -67,7 +96,7 @@ cd ../Frontend
 npm install
 ```
 
-## Run (two terminals)
+### (two terminals)
 
 **Terminal 1 — Backend**
 
