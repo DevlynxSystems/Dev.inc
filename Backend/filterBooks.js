@@ -1,9 +1,8 @@
-/*
-filterbooks.js can filter books by genre, author, or title. all are case sensitive since text based
-we check by receiving the filters, and if the filter is filters.genre and it matches, then we can return the result,
-and if not, we dont return the result.
-comment out code below for red. 
-*/
+
+//filterbooks.js can filter books by genre, author, or title. all are case sensitive since text based
+//we check by receiving the filters, and if the filter is filters.genre and it matches, then we can return the result,
+//and if not, we dont return the result.
+//comment out code below for red.
 
 /*
 */
