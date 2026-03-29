@@ -8,7 +8,9 @@
     "seed": "node seed.js",
     "seed:demo-users": "node seedDemoUsers.js",
     "seed:many-users": "node seedManyUsers.js",
-    "test": "jest"
+    "test": "jest",
+    "test:unit": "jest --testPathIgnorePatterns=api.integration",
+    "test:integration": "jest api.integration.test.js"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +26,7 @@
     "mongoose": "^9.2.4"
   },
   "devDependencies": {
-    "jest": "^30.3.0"
+    "jest": "^30.3.0",
+    "supertest": "^7.1.4"
   }
 }
