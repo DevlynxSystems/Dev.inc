@@ -15,6 +15,7 @@ import { ProfilePage } from './pages/ProfilePage'
 import { ManageUsers } from './pages/ManageUsers'
 import { AdminUserProfile } from './pages/AdminUserProfile'
 import { ManageBooks } from './pages/ManageBooks'
+import { Analytics } from '@vercel/analytics/react'
 import './App.css'
 
 export default function App() {
@@ -91,6 +92,8 @@ export default function App() {
       </main>
 
       <Footer />
+
+      <Analytics />
     </div>
   )
 }
