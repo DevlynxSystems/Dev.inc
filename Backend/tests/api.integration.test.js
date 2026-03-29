@@ -3,13 +3,13 @@
  */
 const request = require('supertest');
 
-jest.mock('./models/User', () => ({
+jest.mock('../models/User', () => ({
   findOne: jest.fn(),
   findById: jest.fn(),
   create: jest.fn(),
 }));
 
-jest.mock('./DatabaseManager', () => ({
+jest.mock('../DatabaseManager', () => ({
   connect: jest.fn(),
   disconnect: jest.fn(),
   getAllBooks: jest.fn(),
@@ -19,8 +19,8 @@ jest.mock('./DatabaseManager', () => ({
   deleteBook: jest.fn(),
 }));
 
-const app = require('./app');
-const dataBaseManager = require('./DatabaseManager');
+const app = require('../app');
+const dataBaseManager = require('../DatabaseManager');
 
 describe('API integration', () => {
   beforeEach(() => {
@@ -74,4 +74,15 @@ describe('API integration', () => {
     expect(res.body[0].title).toBe('Dune');
     expect(dataBaseManager.getAllBooks).toHaveBeenCalled();
   });
+
+  // Empty List Test
+  test('IT-08-OB: GET /api/books — empty list', async () => {
+    dataBaseManager.getAllBooks.mockResolvedValue([]);
+
+    const res = await request(app).get('/api/books');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([]);
+  });
+
 });

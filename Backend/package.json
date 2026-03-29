@@ -10,7 +10,7 @@
     "seed:many-users": "node seedManyUsers.js",
     "test": "jest",
     "test:unit": "jest --testPathIgnorePatterns=api.integration",
-    "test:integration": "jest api.integration.test.js"
+    "test:integration": "jest tests/api.integration.test.js"
   },
   "keywords": [],
   "author": "",

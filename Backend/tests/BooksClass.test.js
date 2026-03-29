@@ -4,7 +4,7 @@
 // To run tests, navigate to backend and run npm install --save-dev jest
 // Then, run "npm test"
 
-const Book = require('./BooksClass.js');
+const Book = require('../BooksClass.js');
 
 describe ("Book Class Tests", () => {
 
@@ -100,6 +100,11 @@ describe ("Book Class Tests", () => {
         expect(result).toEqual({ title: "Title1" });
     });
 
+
+    test("set PageCount works", () => {
+        book.PageCount = "250";
+        expect(book.PageCount).toBe("250");
+    });
 
 
 

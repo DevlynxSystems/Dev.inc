@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 
 
 
-
 /**
  * Retrieves the JWT secret key used for signing and verifying tokens.
  *

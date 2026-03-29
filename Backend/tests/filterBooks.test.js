@@ -4,7 +4,7 @@
 //to test, write npx jest filterBooks.test.js
 // TDD - Tests written BEFORE implementation (Red phase)
 
-const { filterBooks } = require('./filterBooks');
+const { filterBooks } = require('../filterBooks');
 
 //Sample Data
 const books = [

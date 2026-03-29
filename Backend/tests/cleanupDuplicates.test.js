@@ -4,9 +4,9 @@
 // To run tests, navigate to backend and run npm install --save-dev jest
 // Then, run "npm test"
 
-const cleanup = require('./cleanupDuplicates');
+const cleanup = require('../cleanupDuplicates');
 
-jest.mock('./DatabaseManager', () => ({
+jest.mock('../DatabaseManager', () => ({
     connect: jest.fn(),
     disconnect: jest.fn(),
     BookModel: {
@@ -15,7 +15,7 @@ jest.mock('./DatabaseManager', () => ({
     }
 }));
 
-const dataBaseManager = require('./DatabaseManager');
+const dataBaseManager = require('../DatabaseManager');
 
 describe("cleanupDuplicates Tests", () => {
 
