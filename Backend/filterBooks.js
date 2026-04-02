@@ -5,7 +5,7 @@
 //comment out code below for red.
 
 /*
-*/
+
 function filterBooks(books, filters = {}) {
   return books.filter(book => {
     if (filters.genre && book.genre.toLowerCase() !== filters.genre.toLowerCase()) {
@@ -22,3 +22,5 @@ function filterBooks(books, filters = {}) {
 }
  
 module.exports = { filterBooks };
+
+*/
