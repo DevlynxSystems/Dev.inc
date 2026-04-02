@@ -23,11 +23,13 @@ IF "%1"=="setup" (
 IF "%1"=="dev" (
 
     echo Starting Backend and Frontend...
+
+
+
+    start "DevLynx" npx concurrently "cd %BACKEND_DIR% && node server.js" "npm run dev"
     timeout /t 5 >nul
     start "" "http://localhost:5173/"
 
-
-    npx concurrently "cd %BACKEND_DIR% && node server.js" "npm run dev"
 
 
 
