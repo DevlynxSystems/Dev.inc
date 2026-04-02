@@ -10,7 +10,7 @@ IF "%1"=="setup" (
 
     cd %BACKEND_DIR% && npm install && cd ..
 
-    echo Installing Frontend dependencies ^(repo root^)...
+    echo Installing Frontend dependencies 
 
     npm install
 
@@ -23,7 +23,7 @@ IF "%1"=="setup" (
 IF "%1"=="dev" (
 
     echo Starting Backend and Frontend...
-    timeout /t 3 >nul
+    timeout /t 5 >nul
     start "" "http://localhost:5173/"
 
 
