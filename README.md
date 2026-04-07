@@ -50,7 +50,7 @@ PORT=5000
 
 Notes:
 - If `MONGO_URI` is missing, the backend falls back to a local MongoDB URL (for dev).
-- If `JWT_SECRET` is missing, a dev-only fallback may be used; set a real secret for anything beyond local development
+- If `JWT_SECRET` is missing, a dev-only fallback may be used; set a real secret for anything beyond local development.
 
 For the frontend API base URL, create `.env` in the **repo root** (same folder as `package.json`):
 
