@@ -189,8 +189,8 @@ sampleBooks in src/data/books.js is an array of such objects; new books get an i
 
 - Box-sizing reset for all elements.
 - *CSS variables* (e.g. in :root):
-  - Colors: --color-bg, --color-surface, --color-navbar-bg, --color-border, --color-text, --color-text-muted, --color-accent, --color-accent-hover, --color-secondary
-  - --shadow, --radius, --navbar-height
+  - Colors: --color-bg, --color-surface, --color-navbar-bg, --color-border, --color-text, --color-text-muted, --color-accent, --color-accent-hover, --color-secondary.
+  - --shadow, --radius, --navbar-height.
 - Body: DM Sans, background and text color from variables, min-height 100vh.
 
 ### App (App.css)
