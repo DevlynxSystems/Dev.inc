@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowRight, BookOpenText, Compass, Eye, ShieldCheck, Sparkles, Layers3, Search } from 'lucide-react';
 import { BookDetailsModal } from '../components/BookDetailsModal';
+import { FeaturedBookSkeletonGrid } from '../components/Skeleton';
 import { sampleBooks } from '../data/books';
 import { useAuth } from '../auth/AuthContext';
 
@@ -291,9 +292,7 @@ export function LandingPage() {
         </motion.div>
 
         {featuredLoading ? (
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-stone-300 backdrop-blur-xl">
-            Loading featured books...
-          </div>
+          <FeaturedBookSkeletonGrid count={6} />
         ) : visibleFeatured.length === 0 ? (
           <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-stone-300 backdrop-blur-xl">
             No featured books yet. Visit the catalog to add books.

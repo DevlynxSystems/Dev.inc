@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Heart, Pencil, Search, SlidersHorizontal, Star, Trash2 } from 'lucide-react';
 import { BookDetailsModal } from '../components/BookDetailsModal';
 import { BookFormModal } from '../components/BookFormModal';
+import { BookCardSkeletonGrid } from '../components/Skeleton';
 import { DATE_FILTER_OPTIONS, SORT_OPTIONS, filterByDateFilter, sortBooks } from '../components/CatalogFilters';
 import { useAuth } from '../auth/AuthContext';
 
@@ -14,6 +15,7 @@ export function CatalogPage({ searchQuery }) {
   const isAdmin = user?.role === 'admin';
 
   const [books, setBooks] = useState([]);
+  const [booksLoading, setBooksLoading] = useState(true);
   const [detailsBook, setDetailsBook] = useState(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
@@ -26,6 +28,7 @@ export function CatalogPage({ searchQuery }) {
   useEffect(() => {
     let cancelled = false;
     async function fetchBooks() {
+      setBooksLoading(true);
       try {
         const response = await fetch(`${API_BASE_URL}/api/books`);
         const data = await response.json();
@@ -33,6 +36,8 @@ export function CatalogPage({ searchQuery }) {
       } catch (err) {
         console.error('Failed to fetch books:', err);
         if (!cancelled) setBooks([]);
+      } finally {
+        if (!cancelled) setBooksLoading(false);
       }
     }
     fetchBooks();
@@ -150,7 +155,13 @@ export function CatalogPage({ searchQuery }) {
               Welcome back, {firstName}
             </h2>
             <p className="mt-2 text-sm text-stone-300">
-              {books.length} {books.length === 1 ? 'book' : 'books'} ready to explore.
+              {booksLoading ? (
+                <span className="inline-block h-4 w-40 animate-pulse rounded bg-white/10 align-middle" aria-hidden />
+              ) : (
+                <>
+                  {books.length} {books.length === 1 ? 'book' : 'books'} ready to explore.
+                </>
+              )}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -205,7 +216,9 @@ export function CatalogPage({ searchQuery }) {
       </motion.div>
 
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" role="list">
-        {books.length === 0 ? (
+        {booksLoading ? (
+          <BookCardSkeletonGrid count={8} className="col-span-full !grid" />
+        ) : books.length === 0 ? (
           <div className="col-span-full rounded-2xl border border-white/10 bg-white/[0.04] p-8 text-center backdrop-blur-xl">
             <p className="text-base text-stone-300">Your library is empty.</p>
             {isAdmin ? (

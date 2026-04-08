@@ -49,8 +49,8 @@ describe('ProfilePage', () => {
 
   it('shows loading state when auth is loading', () => {
     useAuth.mockReturnValue({ user: null, updateProfile: mockUpdateProfile, loading: true })
-    renderProfile()
-    expect(screen.getByText('Loading…')).toBeInTheDocument()
+    const { container } = renderProfile()
+    expect(container.querySelector('.animate-pulse')).toBeTruthy()
   })
 
   it('renders the Complete your profile heading', () => {

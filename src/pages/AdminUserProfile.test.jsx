@@ -49,10 +49,10 @@ describe('AdminUserProfile', () => {
     })
   })
 
-  it('shows Loading while fetching', () => {
+  it('shows skeleton while fetching', () => {
     mockAuthFetch.mockReturnValue(new Promise(() => {}))
-    renderProfile()
-    expect(screen.getByText('Loading…')).toBeInTheDocument()
+    const { container } = renderProfile()
+    expect(container.querySelector('.animate-pulse')).toBeTruthy()
   })
 
   it('renders user name and email after load', async () => {

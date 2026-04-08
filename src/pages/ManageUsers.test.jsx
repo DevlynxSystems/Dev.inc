@@ -70,8 +70,8 @@ describe('ManageUsers', () => {
 
   it('shows loading state initially', () => {
     mockAuthFetch.mockReturnValue(new Promise(() => {}))
-    renderManageUsers()
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
+    const { container } = renderManageUsers()
+    expect(container.querySelector('.animate-pulse')).toBeTruthy()
   })
 
   it('renders user names after load', async () => {

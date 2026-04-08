@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { AdminLayout } from '../components/AdminLayout'
+import { AdminUserDetailSkeleton } from '../components/Skeleton'
 
 function fmt(dt) {
   if (!dt) return '—'
@@ -47,7 +48,7 @@ export function AdminUserProfile() {
       </div>
 
       {loading ? (
-        <p className="catalog-intro">Loading…</p>
+        <AdminUserDetailSkeleton />
       ) : error ? (
         <p className="form-error">{error}</p>
       ) : !user ? (

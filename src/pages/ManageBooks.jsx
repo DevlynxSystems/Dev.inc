@@ -6,11 +6,13 @@ import { BookDetailsModal } from '../components/BookDetailsModal'
 import { useAuth } from '../auth/AuthContext'
 import { AdminLayout } from '../components/AdminLayout'
 import { logAdminEvent } from '../lib/adminAudit'
+import { ManageBooksTableSkeleton } from '../components/Skeleton'
 
 export function ManageBooks() {
   const { API_BASE_URL, authFetch } = useAuth()
 
   const [books, setBooks] = useState([])
+  const [loading, setLoading] = useState(true)
   const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
   const [dateFilter, setDateFilter] = useState('all')
@@ -24,10 +26,16 @@ export function ManageBooks() {
   const [editingBook, setEditingBook] = useState(null)
 
   const loadBooks = async () => {
-    const res = await fetch(`${API_BASE_URL}/api/books`)
-    const data = await res.json()
-    setBooks(Array.isArray(data) ? data : [])
-    logAdminEvent({ type: 'books.refresh', message: 'Refreshed books list', meta: { count: Array.isArray(data) ? data.length : 0 } })
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/books`)
+      const data = await res.json()
+      setBooks(Array.isArray(data) ? data : [])
+      logAdminEvent({ type: 'books.refresh', message: 'Refreshed books list', meta: { count: Array.isArray(data) ? data.length : 0 } })
+    } catch {
+      setBooks([])
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -266,7 +274,9 @@ export function ManageBooks() {
               </tr>
             </thead>
             <tbody>
-              {filteredBooks.length === 0 ? (
+              {loading ? (
+                <ManageBooksTableSkeleton rows={8} />
+              ) : filteredBooks.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="px-3 py-5 text-sm text-stone-400">
                     No books in the catalog yet.

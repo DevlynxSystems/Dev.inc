@@ -5,6 +5,7 @@ import { ArrowUp, Download, Eye, Pencil, Search, Shield, Trash2, Users, UserRoun
 import { useAuth } from '../auth/AuthContext'
 import { AdminLayout } from '../components/AdminLayout'
 import { getAdminEvents, logAdminEvent } from '../lib/adminAudit'
+import { ManageUsersTableSkeleton } from '../components/Skeleton'
 import '../components/BookFormModal.css'
 
 const USER_STATUS_KEY = 'devinc_admin_user_status';
@@ -416,7 +417,7 @@ export function ManageUsers() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="7" className="px-3 py-4 text-sm text-stone-400">Loading...</td></tr>
+              <ManageUsersTableSkeleton rows={6} />
             ) : filtered.length === 0 ? (
               <tr><td colSpan="7" className="px-3 py-4 text-sm text-stone-400">No users found.</td></tr>
             ) : (

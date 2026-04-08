@@ -15,6 +15,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
+import { ProfilePageSkeleton } from '../components/Skeleton';
 
 export function ProfilePage() {
   const navigate = useNavigate();
@@ -122,14 +123,7 @@ export function ProfilePage() {
   };
 
   if (loading) {
-    return (
-      <section className="catalog-section">
-        <div className="catalog-section-intro">
-          <h2 className="catalog-heading">Profile</h2>
-          <p className="catalog-intro">Loading…</p>
-        </div>
-      </section>
-    );
+    return <ProfilePageSkeleton />;
   }
 
   return (

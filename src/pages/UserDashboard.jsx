@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { BookOpen, Flame, Heart, LibraryBig, PlayCircle, Sparkles } from 'lucide-react';
 import { BookDetailsModal } from '../components/BookDetailsModal';
+import { DashboardBookCardSkeleton, StatCardSkeleton } from '../components/Skeleton';
 import { sampleBooks } from '../data/books';
 import { useAuth } from '../auth/AuthContext';
 import { Link } from 'react-router-dom';
@@ -187,35 +188,44 @@ export function UserDashboard() {
               </p>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                {[
-                  { label: 'Books read', value: booksLoading ? '...' : booksRead, icon: BookOpen },
-                  { label: 'Currently reading', value: booksLoading ? '...' : currentlyReadingCount, icon: LibraryBig },
-                  { label: 'Wishlist', value: booksLoading ? '...' : wishlistCount, icon: Heart },
-                  { label: 'Reading streak', value: booksLoading ? '...' : `${readingStreak}d`, icon: Flame },
-                ].map((stat) => {
-                  const Icon = stat.icon;
-                  return (
-                    <div key={stat.label} className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-stone-400">{stat.label}</span>
-                        <Icon className="h-4 w-4 text-orange-300" />
-                      </div>
-                      <div className="mt-1 flex items-center justify-between">
-                        <p className="text-xl font-semibold text-white">{stat.value}</p>
-                        <span className="rounded-full border border-emerald-300/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-200">
-                          Live
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
+                {booksLoading
+                  ? Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
+                  : [
+                      { label: 'Books read', value: booksRead, icon: BookOpen },
+                      { label: 'Currently reading', value: currentlyReadingCount, icon: LibraryBig },
+                      { label: 'Wishlist', value: wishlistCount, icon: Heart },
+                      { label: 'Reading streak', value: `${readingStreak}d`, icon: Flame },
+                    ].map((stat) => {
+                      const Icon = stat.icon;
+                      return (
+                        <div key={stat.label} className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-stone-400">{stat.label}</span>
+                            <Icon className="h-4 w-4 text-orange-300" />
+                          </div>
+                          <div className="mt-1 flex items-center justify-between">
+                            <p className="text-xl font-semibold text-white">{stat.value}</p>
+                            <span className="rounded-full border border-emerald-300/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-200">
+                              Live
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
               </div>
               <p className="mt-3 text-xs text-stone-400">Stats update automatically from your activity and catalog data.</p>
             </div>
 
             <div className="rounded-2xl border border-orange-300/25 bg-gradient-to-br from-orange-500/15 to-black/20 p-4 shadow-[0_0_35px_rgba(249,115,22,0.14)]">
               <p className="text-xs uppercase tracking-[0.18em] text-orange-200">Continue reading</p>
-              {continueReading[0] ? (
+              {booksLoading ? (
+                <div className="mt-3 space-y-3" aria-hidden>
+                  <div className="h-6 w-[80%] max-w-xs animate-pulse rounded bg-white/10" />
+                  <div className="h-4 w-[60%] max-w-[12rem] animate-pulse rounded bg-white/10" />
+                  <div className="mt-4 h-2 w-full animate-pulse rounded-full bg-white/10" />
+                  <div className="mt-4 h-10 w-32 animate-pulse rounded-xl bg-white/10" />
+                </div>
+              ) : continueReading[0] ? (
                 <>
                   <h3 className="mt-2 line-clamp-2 text-xl font-semibold text-white">{continueReading[0].title}</h3>
                   <p className="mt-1 text-sm text-stone-300">{continueReading[0].author || 'Unknown author'}</p>
@@ -242,6 +252,7 @@ export function UserDashboard() {
           title="Continue Reading"
           subtitle="Progress-based reading flow with quick resume."
           books={continueReading}
+          loading={booksLoading}
           empty="No active reads yet. Open a title to start tracking progress."
           onView={viewBook}
           onContinue={bumpProgress}
@@ -254,6 +265,7 @@ export function UserDashboard() {
           title="Recommended for You"
           subtitle="Recommendations based on your recent activity and genres."
           books={recommended}
+          loading={booksLoading}
           empty="Explore a few titles and recommendations will improve."
           onView={viewBook}
           onWishlist={addToWishlist}
@@ -263,10 +275,12 @@ export function UserDashboard() {
           title="Recently Viewed"
           subtitle="Quickly return to books you opened last."
           books={recentlyViewed}
+          loading={booksLoading}
           empty="No recent books yet. Browse the catalog to create history."
           onView={viewBook}
           onWishlist={addToWishlist}
           onProgressChange={setBookProgress}
+          getBookProgress={getBookProgress}
         />
 
         <section aria-label="Wishlist" className="rounded-3xl border border-white/10 bg-black/25 p-5 backdrop-blur-xl md:p-6">
@@ -284,7 +298,13 @@ export function UserDashboard() {
               </Link>
             </div>
           </div>
-          {wishlistBooks.length === 0 ? (
+          {booksLoading ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <DashboardBookCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : wishlistBooks.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-white/20 bg-white/[0.03] px-5 py-8 text-center">
               <Sparkles className="mx-auto h-7 w-7 text-orange-300" />
               <p className="mt-3 text-base font-medium text-stone-200">Your wishlist is empty</p>
@@ -317,7 +337,7 @@ export function UserDashboard() {
   );
 }
 
-function DashboardShelf({ title, subtitle, books, empty, onView, onContinue, onWishlist, onProgressChange, getBookProgress }) {
+function DashboardShelf({ title, subtitle, books, empty, loading, onView, onContinue, onWishlist, onProgressChange, getBookProgress }) {
   return (
     <section className="rounded-3xl border border-white/10 bg-black/25 p-5 backdrop-blur-xl md:p-6">
       <div className="mb-4">
@@ -325,7 +345,13 @@ function DashboardShelf({ title, subtitle, books, empty, onView, onContinue, onW
         <p className="mt-1 text-sm text-stone-400">{subtitle}</p>
       </div>
 
-      {books.length === 0 ? (
+      {loading ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <DashboardBookCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : books.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/20 bg-white/[0.03] px-5 py-8 text-center text-sm text-stone-300">
           {empty}
         </div>

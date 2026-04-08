@@ -6,6 +6,12 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'rec
 import { useAuth } from '../auth/AuthContext'
 import { AdminLayout } from '../components/AdminLayout'
 import { exportAdminEventsCsv, getAdminEvents } from '../lib/adminAudit'
+import {
+  AdminBookListRowSkeleton,
+  AdminListRowSkeleton,
+  AdminSummaryCardSkeleton,
+  ChartAreaSkeleton,
+} from '../components/Skeleton'
 
 export function AdminDashboard() {
   const { API_BASE_URL, authFetch } = useAuth()
@@ -82,31 +88,33 @@ export function AdminDashboard() {
   return (
     <AdminLayout title="Dashboard">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Summary cards">
-        {[
-          { label: 'Total users', value: loading ? '—' : totalUsers, trend: trendUsers, icon: Users2 },
-          { label: 'Total admins', value: loading ? '—' : totalAdmins, trend: trendAdmins, icon: ShieldCheck },
-          { label: 'Total books', value: loading ? '—' : totalBooks, trend: trendBooks, icon: BookText },
-          { label: 'Total reviews', value: loading ? '—' : totalReviews, trend: trendReviews, icon: MessageSquare },
-        ].map((card) => {
-          const Icon = card.icon
-          return (
-            <motion.div
-              key={card.label}
-              whileHover={{ y: -4 }}
-              className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-orange-500/[0.06] p-4 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl"
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-stone-300">{card.label}</p>
-                <Icon className="h-4 w-4 text-orange-300" />
-              </div>
-              <p className="mt-2 text-3xl font-semibold tracking-tight text-white">{card.value}</p>
-              <p className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-300">
-                {card.trend} this month
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </p>
-            </motion.div>
-          )
-        })}
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => <AdminSummaryCardSkeleton key={i} />)
+          : [
+              { label: 'Total users', value: totalUsers, trend: trendUsers, icon: Users2 },
+              { label: 'Total admins', value: totalAdmins, trend: trendAdmins, icon: ShieldCheck },
+              { label: 'Total books', value: totalBooks, trend: trendBooks, icon: BookText },
+              { label: 'Total reviews', value: totalReviews, trend: trendReviews, icon: MessageSquare },
+            ].map((card) => {
+              const Icon = card.icon
+              return (
+                <motion.div
+                  key={card.label}
+                  whileHover={{ y: -4 }}
+                  className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-orange-500/[0.06] p-4 shadow-[0_12px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-stone-300">{card.label}</p>
+                    <Icon className="h-4 w-4 text-orange-300" />
+                  </div>
+                  <p className="mt-2 text-3xl font-semibold tracking-tight text-white">{card.value}</p>
+                  <p className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-300">
+                    {card.trend} this month
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                  </p>
+                </motion.div>
+              )
+            })}
       </div>
 
       <div className="mt-4 grid gap-4 xl:grid-cols-[1.25fr_1.25fr_0.9fr]" aria-label="Recent activity">
@@ -116,6 +124,9 @@ export function AdminDashboard() {
             <span className="text-xs uppercase tracking-[0.12em] text-stone-400">Users vs books (monthly)</span>
           </div>
           <div className="h-56 w-full">
+            {loading ? (
+              <ChartAreaSkeleton />
+            ) : (
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={analytics}>
                 <defs>
@@ -141,6 +152,7 @@ export function AdminDashboard() {
                 <Area type="monotone" dataKey="books" stroke="#60a5fa" fill="url(#booksGradient)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -154,7 +166,11 @@ export function AdminDashboard() {
           <div className="px-4 py-3">
             <ul className="space-y-2">
               {loading ? (
-                <li className="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-stone-400">Loading…</li>
+                <>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <AdminListRowSkeleton key={i} />
+                  ))}
+                </>
               ) : recentUsers.length === 0 ? (
                 <li className="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-stone-400">No users yet.</li>
               ) : (
@@ -196,7 +212,11 @@ export function AdminDashboard() {
           <div className="px-4 py-3">
             <ul className="space-y-2">
               {loading ? (
-                <li className="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-stone-400">Loading…</li>
+                <>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <AdminBookListRowSkeleton key={i} />
+                  ))}
+                </>
               ) : recentBooks.length === 0 ? (
                 <li className="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-stone-400">No books yet.</li>
               ) : (

@@ -87,11 +87,9 @@ describe('AdminDashboard', () => {
     mockAuthFetch.mockReturnValue(new Promise(() => {}))
     global.fetch = vi.fn().mockReturnValue(new Promise(() => {}))
 
-    renderDashboard()
+    const { container } = renderDashboard()
 
-    // Summary cards show "—" when loading
-    const dashes = screen.getAllByText('—')
-    expect(dashes.length).toBeGreaterThanOrEqual(4)
+    expect(container.querySelector('.animate-pulse')).toBeTruthy()
   })
 
   //Summary cards
