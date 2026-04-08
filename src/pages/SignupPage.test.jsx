@@ -63,12 +63,6 @@ describe('SignupPage', () => {
     expect(screen.getByText('Create account')).toBeInTheDocument()
   })
 
-  it('renders role selector', () => {
-    renderSignup()
-    expect(screen.getByText('User')).toBeInTheDocument()
-    expect(screen.getByText('Admin')).toBeInTheDocument()
-  })
-
   it('renders the login link button', () => {
     renderSignup()
     expect(screen.getByText('Already have an account? Login')).toBeInTheDocument()
@@ -87,7 +81,6 @@ describe('SignupPage', () => {
       name: 'Alice',
       email: 'alice@example.com',
       password: 'password123',
-      role: 'user',
     }))
   })
 
@@ -101,18 +94,6 @@ describe('SignupPage', () => {
     await userEvent.click(screen.getByText('Create account'))
 
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true }))
-  })
-
-  it('navigates to /admin for admin user after signup', async () => {
-    mockSignup.mockResolvedValue({ role: 'admin' })
-    renderSignup()
-
-    await userEvent.type(screen.getByPlaceholderText('Enter your name'), 'Bob')
-    await userEvent.type(screen.getByPlaceholderText('Enter your email address'), 'bob@example.com')
-    await userEvent.type(screen.getByPlaceholderText('Create a password (6+ chars)'), 'password123')
-    await userEvent.click(screen.getByText('Create account'))
-
-    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/admin', { replace: true }))
   })
 
   it('shows error message when signup fails', async () => {

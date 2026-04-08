@@ -10,7 +10,6 @@ export function SignupPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('user');
 
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -79,13 +78,12 @@ export function SignupPage() {
     setSubmitting(true);
     setError('');
     try {
-      const createdUser = await signup({
+      await signup({
         name: name.trim(),
         email: email.trim().toLowerCase(),
         password,
-        role,
       });
-      navigate(createdUser?.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.message || 'Signup failed');
     } finally {
@@ -134,17 +132,6 @@ export function SignupPage() {
       <span className="w-1/2 h-[100dvh] flex flex-col justify-center items-center max-lg:w-full max-lg:px-[10%]">
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         <div className="w-full max-w-md">
-          <div className="flex items-center justify-between mb-3">
-            <label className="text-sm font-medium">Role</label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="h-10 rounded-md border px-3 bg-transparent"
-            >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
           <AuthTabs
             formFields={formFields}
             goTo={(ev) => {

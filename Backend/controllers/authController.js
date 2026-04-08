@@ -31,15 +31,10 @@ function toUserResponse(userDoc) {
 
 async function signup(req, res) {
   try {
-    const { name, email, password, role } = req.body || {};
+    const { name, email, password } = req.body || {};
 
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'name, email, and password are required' });
-    }
-
-    const requestedRole = role || 'user';
-    if (!['user', 'admin'].includes(requestedRole)) {
-      return res.status(400).json({ error: 'role must be either "user" or "admin"' });
     }
 
     if (String(password).length < 6) {
@@ -57,7 +52,7 @@ async function signup(req, res) {
       name: String(name).trim(),
       email: String(email).toLowerCase().trim(),
       password: hashedPassword,
-      role: requestedRole,
+      role: 'user',
     });
 
     const token = jwt.sign(

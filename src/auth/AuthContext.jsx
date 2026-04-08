@@ -63,12 +63,12 @@ export function AuthProvider({ children }) {
     return data.user;
   };
 
-  const signup = async ({ name, email, password, role }) => {
+  const signup = async ({ name, email, password }) => {
     setError('');
     const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password, role }),
+      body: JSON.stringify({ name, email, password }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {

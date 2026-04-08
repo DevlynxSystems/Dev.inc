@@ -21,6 +21,7 @@ jest.mock('../DatabaseManager', () => ({
 
 const app = require('../app');
 const dataBaseManager = require('../DatabaseManager');
+const User = require('../models/User');
 
 describe('API integration', () => {
   beforeEach(() => {
@@ -43,16 +44,34 @@ describe('API integration', () => {
     expect(res.body.error).toMatch(/required/i);
   });
 
-  test('IT-03-OB: POST /api/auth/signup — invalid role', async () => {
+  test('IT-03-OB: POST /api/auth/signup — ignores client role, always user', async () => {
+    User.findOne.mockResolvedValue(null);
+    User.create.mockResolvedValue({
+      _id: '507f1f77bcf86cd799439011',
+      name: 'Test',
+      email: 't@t.com',
+      role: 'user',
+      toObject: function () {
+        return { _id: this._id, name: this.name, email: this.email, role: this.role };
+      },
+    });
+
     const res = await request(app)
       .post('/api/auth/signup')
       .send({
         name: 'Test',
         email: 't@t.com',
         password: 'secret1',
-        role: 'superadmin',
+        role: 'admin',
       });
-    expect(res.status).toBe(400);
+
+    expect(res.status).toBe(201);
+    expect(res.body.user.role).toBe('user');
+    expect(User.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        role: 'user',
+      })
+    );
   });
 
   test('IT-04-CB: GET /api/auth/me — missing Authorization', async () => {
