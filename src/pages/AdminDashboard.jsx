@@ -57,11 +57,10 @@ export function AdminDashboard() {
   const totalUsers = users.length
   const totalAdmins = users.filter((u) => u.role === 'admin').length
   const totalBooks = books.length
-  const totalReviews = 0
+  const totalReviews = 'Coming soon'
   const trendUsers = totalUsers > 0 ? '+12%' : '+0%'
   const trendAdmins = totalAdmins > 0 ? '+4%' : '+0%'
   const trendBooks = totalBooks > 0 ? '+18%' : '+0%'
-  const trendReviews = '+0%'
 
   const recentUsers = useMemo(() => {
     return [...users].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).slice(0, 5)
@@ -94,7 +93,7 @@ export function AdminDashboard() {
               { label: 'Total users', value: totalUsers, trend: trendUsers, icon: Users2 },
               { label: 'Total admins', value: totalAdmins, trend: trendAdmins, icon: ShieldCheck },
               { label: 'Total books', value: totalBooks, trend: trendBooks, icon: BookText },
-              { label: 'Total reviews', value: totalReviews, trend: trendReviews, icon: MessageSquare },
+              { label: 'Total reviews', value: totalReviews, icon: MessageSquare, comingSoon: true },
             ].map((card) => {
               const Icon = card.icon
               return (
@@ -108,10 +107,16 @@ export function AdminDashboard() {
                     <Icon className="h-4 w-4 text-orange-300" />
                   </div>
                   <p className="mt-2 text-3xl font-semibold tracking-tight text-white">{card.value}</p>
-                  <p className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-300">
-                    {card.trend} this month
-                    <ArrowUpRight className="h-3.5 w-3.5" />
-                  </p>
+                  {card.comingSoon ? (
+                    <p className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-amber-200">
+                      Feature in progress
+                    </p>
+                  ) : (
+                    <p className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-300">
+                      {card.trend} this month
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                    </p>
+                  )}
                 </motion.div>
               )
             })}
