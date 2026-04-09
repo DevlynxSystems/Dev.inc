@@ -1,5 +1,10 @@
 const User = require('../models/User');
 
+/**
+ * Maps a User mongoose document to a safe API response shape.
+ * @param {import('mongoose').Document & Object} u
+ * @returns {{ id: any, name: string, email: string, role: string, phone: string, address: Object, createdAt: any, updatedAt: any }}
+ */
 function safeUser(u) {
   return {
     id: u._id,
@@ -13,6 +18,15 @@ function safeUser(u) {
   };
 }
 
+/**
+ * Lists users with optional query and role filtering.
+ * Query params:
+ * - q: case-insensitive search on name/email
+ * - role: one of "user" | "admin"
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<import('express').Response>}
+ */
 async function listUsers(req, res) {
   try {
     const { q, role } = req.query || {};
@@ -41,6 +55,12 @@ async function listUsers(req, res) {
   }
 }
 
+/**
+ * Gets a single user by id.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<import('express').Response>}
+ */
 async function getUserById(req, res) {
   try {
     const user = await User.findById(req.params.id).select(
@@ -54,6 +74,13 @@ async function getUserById(req, res) {
   }
 }
 
+/**
+ * Updates editable user fields (name, phone, address).
+ * Returns 400 if payload has no valid updatable fields.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<import('express').Response>}
+ */
 async function updateUser(req, res) {
   try {
     const { name, phone, address } = req.body || {};
@@ -97,6 +124,12 @@ async function updateUser(req, res) {
   }
 }
 
+/**
+ * Deletes a user by id.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<import('express').Response>}
+ */
 async function deleteUser(req, res) {
   try {
     const deleted = await User.findByIdAndDelete(req.params.id);
@@ -108,6 +141,13 @@ async function deleteUser(req, res) {
   }
 }
 
+/**
+ * Updates a user's role.
+ * Accepted values: "user" or "admin".
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<import('express').Response>}
+ */
 async function patchUserRole(req, res) {
   try {
     const { role } = req.body || {};

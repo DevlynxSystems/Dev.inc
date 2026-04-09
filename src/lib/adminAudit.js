@@ -1,6 +1,10 @@
 const AUDIT_KEY = 'devinc_admin_audit_events';
 const MAX_EVENTS = 300;
 
+/**
+ * Reads admin audit events from browser localStorage.
+ * @returns {Array<Object>} Audit events in reverse chronological order.
+ */
 export function getAdminEvents() {
   try {
     const raw = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]');
@@ -10,6 +14,11 @@ export function getAdminEvents() {
   }
 }
 
+/**
+ * Adds a normalized admin event to localStorage.
+ * @param {{ actor?: string, type?: string, message?: string, meta?: Object }} event
+ * @returns {{ id: string, at: string, actor: string, type: string, message: string, meta: Object }}
+ */
 export function logAdminEvent(event) {
   const now = new Date().toISOString();
   const normalized = {
@@ -26,6 +35,11 @@ export function logAdminEvent(event) {
   return normalized;
 }
 
+/**
+ * Exports audit events to a CSV file in the browser.
+ * @param {Array<{ at?: string, actor?: string, type?: string, message?: string, meta?: Object }>} events
+ * @returns {void}
+ */
 export function exportAdminEventsCsv(events) {
   const rows = (events || []).map((e) => ({
     at: e.at,

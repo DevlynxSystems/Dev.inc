@@ -7,6 +7,12 @@ const TOKEN_STORAGE_KEY = 'devinc_auth_token';
 
 const AuthContext = createContext(null);
 
+/**
+ * Provides authentication state and helpers for the app.
+ * Restores sessions from localStorage and exposes authenticated fetch utilities.
+ * @param {{ children: React.ReactNode }} props
+ * @returns {JSX.Element}
+ */
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_STORAGE_KEY));
   const [user, setUser] = useState(null);
@@ -45,6 +51,12 @@ export function AuthProvider({ children }) {
     loadMe();
   }, [token]);
 
+  /**
+   * Logs in a user and stores the JWT token in localStorage.
+   * @param {{ email: string, password: string }} credentials
+   * @returns {Promise<Object|null>} The authenticated user payload.
+   * @throws {Error} When login fails.
+   */
   const login = async ({ email, password }) => {
     setError('');
     const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
@@ -63,6 +75,12 @@ export function AuthProvider({ children }) {
     return data.user;
   };
 
+  /**
+   * Creates a new account and starts an authenticated session.
+   * @param {{ name: string, email: string, password: string }} payload
+   * @returns {Promise<Object|null>} The created user payload.
+   * @throws {Error} When signup fails.
+   */
   const signup = async ({ name, email, password }) => {
     setError('');
     const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
@@ -81,6 +99,10 @@ export function AuthProvider({ children }) {
     return data.user;
   };
 
+  /**
+   * Clears auth state and removes the persisted token.
+   * @returns {void}
+   */
   const logout = () => {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     setToken(null);
@@ -96,6 +118,12 @@ export function AuthProvider({ children }) {
     };
   }, [token]);
 
+  /**
+   * Updates the currently authenticated user's profile.
+   * @param {{ name: string, password?: string, phone?: string, address?: Object }} payload
+   * @returns {Promise<Object|null>} Updated user payload.
+   * @throws {Error} When update fails.
+   */
   const updateProfile = async ({ name, password, phone, address }) => {
     const res = await authFetch(`${API_BASE_URL}/api/auth/me`, {
       method: 'PUT',

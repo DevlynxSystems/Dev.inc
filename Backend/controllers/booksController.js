@@ -1,5 +1,10 @@
 const dataBaseManager = require('../DatabaseManager');
 
+/**
+ * Normalizes mongoose validation errors into a single readable message.
+ * @param {any} err
+ * @returns {string}
+ */
 function formatValidationError(err) {
   if (err?.name === 'ValidationError' && err?.errors) {
     return Object.values(err.errors)
@@ -9,6 +14,12 @@ function formatValidationError(err) {
   return err?.message || 'Request failed';
 }
 
+/**
+ * Returns all books from the catalog.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<import('express').Response>}
+ */
 async function listBooks(req, res) {
   try {
     const books = await dataBaseManager.getAllBooks();
@@ -19,6 +30,12 @@ async function listBooks(req, res) {
   }
 }
 
+/**
+ * Returns a single book by id.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<import('express').Response>}
+ */
 async function getBookById(req, res) {
   try {
     const book = await dataBaseManager.getBookById(req.params.id);
@@ -30,6 +47,12 @@ async function getBookById(req, res) {
   }
 }
 
+/**
+ * Creates a new book.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<import('express').Response>}
+ */
 async function addBook(req, res) {
   try {
     const savedBook = await dataBaseManager.addBook(req.body);
@@ -41,6 +64,12 @@ async function addBook(req, res) {
   }
 }
 
+/**
+ * Updates an existing book by id.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<import('express').Response>}
+ */
 async function updateBook(req, res) {
   try {
     const updated = await dataBaseManager.updateBook(req.params.id, req.body);
@@ -52,6 +81,12 @@ async function updateBook(req, res) {
   }
 }
 
+/**
+ * Deletes a book by id.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @returns {Promise<import('express').Response>}
+ */
 async function deleteBook(req, res) {
   try {
     await dataBaseManager.deleteBook(req.params.id);

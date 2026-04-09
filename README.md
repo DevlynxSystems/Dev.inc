@@ -9,6 +9,8 @@ Full‑stack book catalog with **JWT authentication** and **role‑based access 
 ## Documentation
 
 - **[FrontEnd_Documentation.md](./FrontEnd_Documentation.md)** — React app: routes, auth, catalog, admin UI, scripts, and how the frontend talks to the API
+- **[docs/DEVELOPER_DOCUMENTATION.md](./docs/DEVELOPER_DOCUMENTATION.md)** — contributor guide for README + JSDoc documentation standards
+- **[docs/USER_DOCUMENTATION.md](./docs/USER_DOCUMENTATION.md)** — end-user guide for guests, users, and admins
 - **[docs/TESTING_PLAN.md](./docs/TESTING_PLAN.md)** — testing scope and cases
 
 ## Tech stack
