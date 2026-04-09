@@ -1,30 +1,39 @@
 # Dev.inc — Book Catalog
 
 Full‑stack book catalog with **JWT authentication** and **role‑based access control**:
+
 - Browse the catalog as a guest
 - Sign up / log in as a **user** (dashboard + profile)
-- Log in as an **admin** (manage books + manage users)
+- Log in as an **admin** (admin dashboard, manage books, manage users)
+
+## Documentation
+
+- **[FrontEnd_Documentation.md](./FrontEnd_Documentation.md)** — React app: routes, auth, catalog, admin UI, scripts, and how the frontend talks to the API
+- **[docs/TESTING_PLAN.md](./docs/TESTING_PLAN.md)** — testing scope and cases
 
 ## Tech stack
 
-| Layer   | Stack |
+| Layer | Stack |
 |--------|--------|
-| **Frontend** | React 18, Vite, React Router |
-| **Backend**  | Node.js, Express |
+| **Frontend** | React 18, Vite 5, React Router 7, Tailwind CSS, Vitest + Testing Library, Playwright (E2E) |
+| **Backend** | Node.js, Express |
 | **Database** | MongoDB (Mongoose) |
 
 ## Project structure (high level)
 
 ```
 Dev.inc/
+├── FrontEnd_Documentation.md # Frontend architecture & features
+├── docs/                     # e.g. TESTING_PLAN.md
 ├── src/                      # React + Vite app (repo root)
-│   ├── auth/                 # AuthContext
-│   ├── components/           # Navbar, ProtectedRoute, UI components
-│   └── pages/                # Landing/Login/Signup/Dashboards/Admin pages
+│   ├── auth/                 # AuthContext (JWT, authFetch)
+│   ├── lib/                  # Utilities, client-side admin audit helpers
+│   ├── components/           # Navbar, ProtectedRoute, AdminLayout, modals, …
+│   └── pages/                # Landing, catalog, login/signup, dashboards, admin
 ├── public/                   # Static assets for Vite
 ├── index.html
 ├── vite.config.js
-├── package.json              # Frontend (Vite) dependencies & scripts
+├── package.json              # Frontend dependencies & scripts
 └── Backend/                  # Express API
     ├── controllers/
     ├── middleware/           # JWT auth + role checks
@@ -49,6 +58,7 @@ PORT=5000
 ```
 
 Notes:
+
 - If `MONGO_URI` is missing, the backend falls back to a local MongoDB URL (for dev).
 - If `JWT_SECRET` is missing, a dev-only fallback may be used; set a real secret for anything beyond local development.
 
@@ -58,36 +68,40 @@ For the frontend API base URL, create `.env` in the **repo root** (same folder a
 VITE_API_BASE_URL=http://localhost:5000
 ```
 
-## Install and Run
+Local reference for env names: `.env.example` in the repo root.
 
-Installation & Setup
-Before running the app for the first time, install dependencies for **Backend** and the **repo root** (Vite frontend)
+## Install and run
 
-#### Windows:
+Before running the app for the first time, install dependencies for **Backend** and the **repo root** (Vite frontend).
+
+### Windows
 
 ```PowerShell
 .\manage.bat setup
 ```
-#### Unix / macOS / Git Bash:
+
+### Unix / macOS / Git Bash
 
 ```Bash
 chmod +x manage.sh
 ./manage.sh setup
 ```
-Running the Application
-To start both the backend server and the React frontend concurrently:
 
- #### Windows:
+### Start backend + frontend together
+
+**Windows:**
 
 ```PowerShell
 .\manage.bat dev
 ```
-Unix / macOS / Git Bash:
+
+**Unix / macOS / Git Bash:**
 
 ```Bash
 ./manage.sh dev
 ```
-### Alternative Install and Run
+
+### Alternative: two terminals
 
 ```bash
 cd Backend
@@ -95,8 +109,6 @@ npm install
 cd ..
 npm install
 ```
-
-### (two terminals)
 
 **Terminal 1 — Backend**
 
@@ -115,6 +127,18 @@ npm run dev
 
 Frontend: `http://localhost:5173` (or whatever Vite prints)
 
+## Testing
+
+From the **repo root**:
+
+| Command | Description |
+|---------|-------------|
+| `npm test` | Frontend unit tests (Vitest) |
+| `npm run test:watch` | Vitest watch mode |
+| `npm run test:backend` | Backend tests |
+| `npm run test:e2e` | Playwright E2E |
+| `npm run test:all` | Backend + frontend unit + E2E |
+
 ## Demo seed (optional)
 
 From `Backend/` you can seed demo accounts:
@@ -129,19 +153,19 @@ To create many demo users/admins:
 npm run seed:many-users
 ```
 
-4) **Root directory** (if you deploy on Vercel or similar): set the project **root** to the repository root (where `package.json` and `vite.config.js` live), not a former `Frontend/` subfolder.
+## Deployment (e.g. Vercel)
 
-5) **Environment variables** (Project Settings → Environment Variables):
-   - **`VITE_API_BASE_URL`**: your **deployed backend** origin only, e.g. `https://your-api.onrender.com` (no `/api` suffix unless your server is actually mounted that way).  
+1. **Root directory**: set the project root to the **repository root** (where `package.json` and `vite.config.js` live), not a nested `Frontend/` folder.
+2. **Environment variables** (Project Settings → Environment Variables):
+   - **`VITE_API_BASE_URL`**: your **deployed backend** origin only, e.g. `https://your-api.onrender.com` (no `/api` suffix unless your server is actually mounted that way).
    - Add for **Production** (and **Preview** if you use preview deployments). **Redeploy** after changing env vars so Vite picks them up at build time.
+3. **SPA routing**: `vercel.json` in the repo root rewrites paths to `/` so React Router routes (e.g. `/login`, `/catalog`, `/admin`) work on refresh.
+4. **Build output**: **Output Directory** should be **`dist`**, not `public`.
 
-6) **SPA routing**: `vercel.json` in the repo root rewrites all paths to `/` so React Router routes (e.g. `/login`, `/catalog`) work on refresh.
+### Troubleshooting
 
-7) **Troubleshooting**
-   - If the live site shows a generic **“demo repository”** welcome page, the wrong Git repo is linked or an old deployment is cached—fix the repo link and **Redeploy**.
-   - If the build succeeds but the site is blank or 404s on deep links, double-check **Output Directory** is **`dist`**, not `public`.
-
-Local reference for env names: `.env.example` in the repo root.
+- If the live site shows a generic **“demo repository”** welcome page, the wrong Git repo is linked or an old deployment is cached—fix the repo link and **Redeploy**.
+- If the build succeeds but the site is blank or deep links 404, confirm **Output Directory** is **`dist`**.
 
 ## API overview
 
@@ -167,8 +191,9 @@ Local reference for env names: `.env.example` in the repo root.
 ### Admin (`/api/admin`) — admin only
 
 All endpoints below require:
+
 - `Authorization: Bearer <token>`
-- user role: `admin`
+- User role: `admin`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -182,7 +207,7 @@ All endpoints below require:
 
 - **Guest**: Landing + catalog browsing
 - **User**: User dashboard + profile setup/edit
-- **Admin**: Admin dashboard + manage books + manage users
+- **Admin**: Admin dashboard (`/admin`), manage books (`/admin/books`), manage users (`/admin/users`)
 
 ## License
 
