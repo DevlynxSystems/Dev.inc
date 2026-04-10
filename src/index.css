@@ -40,41 +40,41 @@
 }
 
 :root {
-  --color-bg: #f8f5f0;
-  --color-bg-subtle: #f0ebe3;
-  --color-surface: #fffefc;
-  --color-surface-hover: #faf8f4;
-  --color-navbar-bg: rgba(255, 254, 252, 0.95);
-  --color-border: #e5dfd4;
-  --color-border-strong: #d4cdc0;
-  --color-text: #2c2825;
-  --color-text-muted: #6b6560;
-  --color-accent: #c45c26;
-  --color-accent-hover: #a34a1e;
-  --color-accent-soft: rgba(196, 92, 38, 0.12);
-  --color-secondary: #5c5c5c;
-  --color-danger: #b83d30;
-  --color-danger-hover: #9a3429;
-  --shadow-sm: 0 1px 3px rgba(44, 40, 37, 0.06);
-  --shadow: 0 4px 12px rgba(44, 40, 37, 0.08);
-  --shadow-md: 0 8px 24px rgba(44, 40, 37, 0.1);
-  --shadow-lg: 0 16px 48px rgba(44, 40, 37, 0.12);
+  --color-bg: #f6f8fc;
+  --color-bg-subtle: #edf2f8;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f9fbff;
+  --color-navbar-bg: rgba(255, 255, 255, 0.88);
+  --color-border: #dfe6f1;
+  --color-border-strong: #cdd7e6;
+  --color-text: #1f2937;
+  --color-text-muted: #667085;
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-accent-soft: rgba(37, 99, 235, 0.12);
+  --color-secondary: #64748b;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+  --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 14px 36px rgba(15, 23, 42, 0.1);
+  --shadow-lg: 0 24px 60px rgba(15, 23, 42, 0.14);
   --radius: 10px;
   --radius-sm: 6px;
   --radius-lg: 14px;
   --navbar-height: 4rem;
   --transition: 0.2s ease;
-  --cover-placeholder: linear-gradient(145deg, #ebe7e0 0%, #ddd8cf 100%);
-  --modal-backdrop: rgba(44, 40, 37, 0.45);
-  --danger-soft: rgba(184, 61, 48, 0.08);
-  --danger-border: rgba(184, 61, 48, 0.2);
+  --cover-placeholder: linear-gradient(145deg, #eef3fb 0%, #dbe6f5 100%);
+  --modal-backdrop: rgba(15, 23, 42, 0.35);
+  --danger-soft: rgba(220, 38, 38, 0.1);
+  --danger-border: rgba(220, 38, 38, 0.22);
   /* Glassmorphism */
-  --glass-bg: rgba(255, 254, 252, 0.65);
-  --glass-bg-strong: rgba(255, 254, 252, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.7);
-  --glass-border-subtle: rgba(255, 255, 255, 0.35);
-  --glass-blur: 16px;
-  --glass-blur-strong: 24px;
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-strong: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(148, 163, 184, 0.25);
+  --glass-border-subtle: rgba(148, 163, 184, 0.18);
+  --glass-blur: 18px;
+  --glass-blur-strong: 28px;
 }
 
 /* Dark theme */

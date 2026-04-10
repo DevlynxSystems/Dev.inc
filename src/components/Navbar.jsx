@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { NavLink, useLocation, useNavigate, Link } from 'react-router-dom'
+import { Moon, Sun } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 
 function TabLink({ to, label, icon }) {
@@ -40,6 +41,7 @@ function TabButton({ onClick, label, icon }) {
 
 export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
   const [profileOpen, setProfileOpen] = useState(false)
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark')
   const profileRef = useRef(null)
   const navigate = useNavigate()
   const location = useLocation()
@@ -63,6 +65,13 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
     setProfileOpen(false)
     logout()
     navigate('/')
+  }
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    document.documentElement.setAttribute('data-theme', next)
+    localStorage.setItem('theme', next)
   }
 
   const initial = user?.name?.[0]?.toUpperCase() || '?'
@@ -212,8 +221,18 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
           </div>
 
           <div className="ml-auto">
-            {user && (
-              <div className="relative" ref={profileRef}>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-stone-200 transition hover:border-white/20 hover:bg-white/10"
+                onClick={toggleTheme}
+                aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+                title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
+              >
+                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </button>
+              {user && (
+                <div className="relative" ref={profileRef}>
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-stone-200 transition hover:border-white/20 hover:bg-white/10"
@@ -271,8 +290,9 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
                     </button>
                   </div>
                 )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </nav>
 
