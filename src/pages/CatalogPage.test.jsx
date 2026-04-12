@@ -7,6 +7,7 @@ vi.mock('../auth/AuthContext', () => ({ useAuth: vi.fn() }))
 import { useAuth } from '../auth/AuthContext'
 
 vi.mock('motion/react', () => ({
+  AnimatePresence: ({ children }) => <>{children}</>,
   motion: new Proxy({}, {
     get: (_, tag) => ({ children, ...rest }) => <div {...rest}>{children}</div>,
   }),

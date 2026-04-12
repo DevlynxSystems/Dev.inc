@@ -24,6 +24,7 @@ export function ManageBooks() {
   const [detailsBook, setDetailsBook] = useState(null)
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [editingBook, setEditingBook] = useState(null)
+  const [bookToDelete, setBookToDelete] = useState(null)
 
   const loadBooks = async () => {
     try {
@@ -326,13 +327,7 @@ export function ManageBooks() {
                           type="button"
                           title="Delete"
                           className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-2 text-rose-200 hover:bg-rose-500/20"
-                          onClick={async () => {
-                            try {
-                              await removeBook(book._id)
-                            } catch (e) {
-                              alert(e.message || 'Failed to delete')
-                            }
-                          }}
+                          onClick={() => setBookToDelete(book)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -421,6 +416,59 @@ export function ManageBooks() {
         onSave={saveBook}
         book={editingBook}
       />
+
+      <AnimatePresence>
+        {bookToDelete && (
+          <motion.aside
+            className="fixed inset-0 z-[60] bg-black/55 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setBookToDelete(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.98 }}
+              className="mx-auto mt-36 w-full max-w-md rounded-2xl border border-white/10 bg-black/90 p-5 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-semibold text-white">Remove book from catalog?</h3>
+              <p className="mt-2 text-sm text-stone-300">
+                <span className="font-medium text-stone-100">{bookToDelete.title || 'Untitled'}</span>
+                {bookToDelete.author ? ` · ${bookToDelete.author}` : ''} will be deleted permanently. This cannot be undone.
+              </p>
+              <div className="mt-4 flex justify-end gap-2">
+                <button
+                  type="button"
+                  className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-stone-200"
+                  onClick={() => setBookToDelete(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm font-semibold text-rose-200"
+                  onClick={async () => {
+                    const id = bookToDelete._id
+                    try {
+                      await removeBook(id)
+                      setDetailsBook((b) => (b?._id === id ? null : b))
+                      setEditingBook((b) => (b?._id === id ? null : b))
+                      setActiveBook((b) => (b?._id === id ? null : b))
+                      setBookToDelete(null)
+                    } catch (e) {
+                      alert(e.message || 'Failed to delete')
+                    }
+                  }}
+                >
+                  Delete permanently
+                </button>
+              </div>
+            </motion.div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
     </AdminLayout>
   )
 }
