@@ -1,3 +1,25 @@
+/**
+ * Auth Controller (JWT + Mongoose)
+ *
+ * Handles user authentication and profile management:
+ *
+ * - signup: Registers a new user, hashes password, returns JWT token
+ * - login: Authenticates user, verifies password, returns JWT token
+ * - me: Returns currently authenticated user (from JWT)
+ * - updateMe: Updates user profile fields (name, password, phone, address)
+ *
+ * Uses:
+ * - bcryptjs for password hashing
+ * - jsonwebtoken for JWT authentication
+ * - Mongoose User model for MongoDB operations
+ *
+ * Security:
+ * - Passwords are hashed before storage
+ * - JWT tokens are signed using environment secret
+ * - Sensitive fields (like password) are never returned to client
+ */
+
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
