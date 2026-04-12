@@ -1,3 +1,34 @@
+/**
+ * Navbar Component
+ *
+ * Main navigation bar for the application with authentication-aware routing,
+ * theme switching, and user profile controls.
+ *
+ * Features:
+ * - Dynamic navigation based on user authentication state and role
+ * - Theme toggle (dark/light) with localStorage persistence
+ * - User profile dropdown with logout and profile access
+ * - Search bar (visible on catalog route only)
+ * - Role-based navigation (guest, user, admin)
+ * - Responsive, accessible tab-based navigation
+ *
+ * Params:
+ * @param {string} searchQuery - Current search input value
+ * @param {function} onSearchChange - Callback when search input changes
+ * @param {function} onAddBook - Callback for adding a new book (unused in current UI but reserved)
+ *
+ * State:
+ * - profileOpen: Controls visibility of user dropdown menu
+ * - theme: Current UI theme (dark/light)
+ *
+ * Hooks:
+ * - useLocation: Detects current route for conditional UI rendering
+ * - useNavigate: Handles programmatic navigation
+ * - useAuth: Provides user session and logout function
+ * - useRef: Detects outside clicks for dropdown close behavior
+ * - useEffect: Handles event listeners for profile menu behavior
+ */
+
 import { useState, useRef, useEffect } from 'react'
 import { NavLink, useLocation, useNavigate, Link } from 'react-router-dom'
 import { Moon, Sun } from 'lucide-react'

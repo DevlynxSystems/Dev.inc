@@ -1,3 +1,36 @@
+/**
+ * Catalog Filters Module
+ *
+ * Provides sorting and filtering utilities for a book catalog
+ * as well as a UI component for selecting filter options.
+ *
+ * Features:
+ * - Sorting books by date, title, and page count
+ * - Filtering books by publication date ranges (classic, recent, all)
+ * - Reusable filter UI component with dropdown controls
+ *
+ * Constants:
+ * @constant {Array} SORT_OPTIONS - Available sorting options for catalog
+ * @constant {Array} DATE_FILTER_OPTIONS - Available date filter options
+ *
+ * Functions:
+ * @function filterByDateFilter
+ * Filters books based on selected date category.
+ *
+ * @function sortBooks
+ * Sorts books based on selected sorting option.
+ *
+ * Component:
+ * @function CatalogFilters
+ * Renders dropdown UI for selecting sort and filter options.
+ *
+ * Params
+ * @param {string} sortBy - Current sort option
+ * @param {string} dateFilter - Current date filter option
+ * @param {function} onSortChange - Callback for sort selection change
+ * @param {function} onDateFilterChange - Callback for filter selection change
+ */
+
 import './CatalogFilters.css'
 
 export const SORT_OPTIONS = [

@@ -1,3 +1,20 @@
+/**
+ * FeaturesSection Component
+ *
+ * Displays a marketing section highlighting key features of the Book Catalog app.
+ *
+ * Features:
+ * - Static feature grid layout
+ * - Each feature includes an icon, title, and description
+ * - Accessible semantic structure (section, heading, list roles)
+ * - Designed for landing/home page UI
+ *
+ * Data:
+ * @constant {Array<{title: string, description: string, icon: React.ReactNode}>} FEATURES
+ * - List of feature items rendered in the UI
+ *
+ */
+
 import './FeaturesSection.css'
 
 const FEATURES = [
