@@ -1,3 +1,41 @@
+/**
+ * BookFormModal Component
+ *
+ * Modal form used to create or edit a book entry in the catalog.
+ *
+ * Features:
+ * - Supports both "Add Book" and "Edit Book" modes
+ * - Image upload with drag & drop support
+ * - Client-side image validation and compression
+ * - Floating input fields with icons
+ * - Form validation and error handling
+ * - Responsive animated modal UI
+ *
+ * Params
+ * @param {boolean} open - Controls whether the modal is visible
+ * @param {function} onClose - Closes the modal and resets state
+ * @param {function} onSave - Handles saving book data (create/update)
+ * @param {Object} [book] - Book object being edited (optional)
+ *
+ * Internal State:
+ * - title: Book title input
+ * - author: Book author input
+ * - publishDate: Publication date
+ * - pageNumber: Number of pages
+ * - coverBase64: Compressed image data for backend storage
+ * - coverPreview: Preview image shown in UI
+ * - error: Validation / upload error messages
+ * - uploading: Image processing state
+ * - isDragging: Drag & drop UI state
+ *
+ * Helpers:
+ * - compressImage: Resizes and compresses uploaded images
+ * - isImageFile: Validates image file types
+ * - FloatingField: Reusable input component with animated label
+ */
+
+
+
 import { useState, useRef, useEffect } from 'react'
 import { motion } from 'motion/react'
 import { BookOpenText, CalendarDays, FileText, ImagePlus, PenLine, UserRound } from 'lucide-react'

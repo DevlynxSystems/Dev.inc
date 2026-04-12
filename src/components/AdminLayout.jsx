@@ -1,3 +1,31 @@
+/**
+ * AdminLayout Component
+ *
+ * Provides the main layout shell for the admin dashboard.
+ *
+ * Features:
+ * - Sidebar navigation (Dashboard, Users, Books)
+ * - Admin branding header
+ * - Search input (UI only)
+ * - Notifications dropdown with recent admin events
+ * - User profile access and logout functionality
+ *
+ * Props:
+ * @param {string} title - Page title displayed in the header
+ * @param {React.ReactNode} children - Page content rendered inside layout
+ *
+ * State:
+ * - notifOpen: Controls notification dropdown visibility
+ * - events: Stores recent admin audit events
+ *
+ * Hooks:
+ * - useNavigate: Handles routing actions
+ * - useAuth: Provides user info and logout function
+ * - useEffect: Loads recent admin events on render/title change
+ */
+
+
+
 import { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { Bell, BookCopy, LayoutDashboard, LogOut, Search, Shield, Users } from 'lucide-react'
