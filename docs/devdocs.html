@@ -1,0 +1,366 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Catalog API Docs</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        #sidebar {
+            width: 220px;
+            background: #fff;
+            border-right: 1px solid #ccc;
+            padding: 15px;
+        }
+
+        .nav-item {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .nav-item:hover { background: #eee; }
+        .nav-item.active { background: #ddd; font-weight: bold; }
+
+        #main { flex: 1; padding: 20px; }
+
+        .section { display: none; }
+        .section.active { display: block; }
+
+        .module-card {
+            background: #fff;
+            border: 1px solid #ccc;
+            margin-top: 15px;
+        }
+
+        .module-header {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #ccc;
+            font-weight: bold;
+        }
+
+        .module-body {
+            display: none;
+            padding: 10px;
+        }
+
+        .module-card.open .module-body {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            font-size: 13px;
+        }
+
+        th { background: #eee; }
+
+        .code-block {
+            background: #eee;
+            padding: 10px;
+            font-family: monospace;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="sidebar">
+    <h3>Book Catalog</h3>
+    <div class="nav-item active" onclick="showSection('overview')">Overview</div>
+    <div class="nav-item" onclick="showSection('auth')">Auth</div>
+    <div class="nav-item" onclick="showSection('books')">Books</div>
+    <div class="nav-item" onclick="showSection('admin')">Admin</div>
+    <div class="nav-item" onclick="showSection('database')">Database</div>
+</div>
+
+<div id="main">
+
+    <!-- OVERVIEW -->
+    <div id="section-overview" class="section active">
+        <h2>Overview</h2>
+        <p>REST API for managing users and books.</p>
+
+        <h3>Base URL</h3>
+        <div class="code-block">http://localhost:5000/api</div>
+
+        <h3>Endpoints</h3>
+        <ul>
+            <li>POST /auth/signup</li>
+            <li>POST /auth/login</li>
+            <li>GET /auth/me</li>
+            <li>GET /books</li>
+            <li>GET /books/:id</li>
+            <li>POST /books</li>
+            <li>PUT /books/:id</li>
+            <li>DELETE /books/:id</li>
+            <li>GET /search?q=</li>
+            <li>GET /admin/users</li>
+            <li>GET /admin/events</li>
+            <li>GET /admin/stats</li>
+        </ul>
+    </div>
+
+    <!-- AUTH -->
+    <div id="section-auth" class="section">
+        <h2>Authentication</h2>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggleCard(this)">
+                POST /auth/signup
+            </div>
+            <div class="module-body">
+                <p>Create a new user.</p>
+
+                <table>
+                    <tr><th>Field</th><th>Type</th></tr>
+                    <tr><td>name</td><td>string</td></tr>
+                    <tr><td>email</td><td>string</td></tr>
+                    <tr><td>password</td><td>string</td></tr>
+                </table>
+
+                <p><strong>Response:</strong> 201 Created</p>
+
+                <div class="code-block">
+                    POST /api/auth/signup
+                    { "name": "John", "email": "john@test.com", "password": "123456" }
+                </div>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggleCard(this)">
+                POST /auth/login
+            </div>
+            <div class="module-body">
+                <p>Login user and receive token.</p>
+
+                <table>
+                    <tr><th>Field</th><th>Type</th></tr>
+                    <tr><td>email</td><td>string</td></tr>
+                    <tr><td>password</td><td>string</td></tr>
+                </table>
+
+                <p><strong>Response:</strong> 200 OK (JWT Token)</p>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggleCard(this)">
+                GET /auth/me
+            </div>
+            <div class="module-body">
+                <p>Get current user.</p>
+                <p><strong>Headers:</strong> Authorization: Bearer token</p>
+                <p><strong>Response:</strong> 200 OK</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOOKS -->
+    <div id="section-books" class="section">
+        <h2>Books</h2>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggleCard(this)">
+                GET /books
+            </div>
+            <div class="module-body">
+                <p>Get all books.</p>
+                <p><strong>Response:</strong> 200 OK</p>
+
+                <div class="code-block">
+                    GET /api/books
+                </div>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggleCard(this)">
+                GET /books/:id
+            </div>
+            <div class="module-body">
+                <p>Get a single book.</p>
+                <p><strong>Response:</strong> 200 OK or 404</p>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggleCard(this)">
+                POST /books
+            </div>
+            <div class="module-body">
+                <p>Add a new book.</p>
+
+                <table>
+                    <tr><th>Field</th><th>Type</th></tr>
+                    <tr><td>title</td><td>string</td></tr>
+                    <tr><td>author</td><td>string</td></tr>
+                    <tr><td>cover</td><td>string (URL)</td></tr>
+                    <tr><td>date</td><td>date</td></tr>
+                    <tr><td>pageCount</td><td>number</td></tr>
+                    <tr><td>genre</td><td>string</td></tr>
+                </table>
+
+                <p><strong>Response:</strong> 201 Created</p>
+
+                <div class="code-block">
+                    {
+                    "_id": "123",
+                    "title": "Atomic Habits",
+                    "author": "James Clear",
+                    "cover": "https://...",
+                    "date": "2018-01-01",
+                    "pageCount": 320,
+                    "genre": "Self-help"
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggleCard(this)">
+                PUT /books/:id
+            </div>
+            <div class="module-body">
+                <p>Update a book.</p>
+                <p><strong>Response:</strong> 200 OK</p>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggleCard(this)">
+                DELETE /books/:id
+            </div>
+            <div class="module-body">
+                <p>Delete a book.</p>
+                <p><strong>Response:</strong> 200 OK</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="section-admin" class="section">
+        <h2>Admin</h2>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggleCard(this)">
+                GET /admin/users
+            </div>
+            <div class="module-body">
+                <p>Get all users.</p>
+                <p><strong>Auth Required:</strong> Admin</p>
+                <p><strong>Response:</strong> 200 OK</p>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggleCard(this)">
+                GET /admin/events
+            </div>
+            <div class="module-body">
+                <p>Get admin activity logs.</p>
+                <p><strong>Response:</strong> 200 OK</p>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggleCard(this)">
+                GET /admin/stats
+            </div>
+            <div class="module-body">
+                <p>Get system stats (users, books, activity).</p>
+                <p><strong>Response:</strong> 200 OK</p>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggleCard(this)">
+                GET /search?q=
+            </div>
+            <div class="module-body">
+                <p>Search books, users, and activity.</p>
+                <p><strong>Query:</strong> q (string)</p>
+                <p><strong>Response:</strong> 200 OK</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- DATABASE -->
+    <div id="section-database" class="section">
+        <h2>Database (MongoDB)</h2>
+
+        <p>This API uses MongoDB to store users and books.</p>
+
+        <h3>Book Schema</h3>
+        <div class="code-block">
+            {
+            _id: ObjectId,
+            title: String,
+            author: String,
+            cover: String,
+            date: Date,
+            pageCount: Number,
+            genre: String
+            }
+        </div>
+
+        <h3>User Schema</h3>
+        <div class="code-block">
+            {
+            _id: ObjectId,
+            name: String,
+            email: String,
+            password: String (hashed),
+            role: String (user | admin),
+            createdAt: Date
+            }
+        </div>
+
+        <h3>Example Query</h3>
+        <div class="code-block">
+            db.books.find({ genre: "Fantasy" })
+        </div>
+
+        <h3>Notes</h3>
+        <ul>
+            <li>Passwords are hashed before storing</li>
+            <li>MongoDB automatically generates _id</li>
+            <li>Relationships are handled using IDs</li>
+        </ul>
+    </div>
+
+</div>
+
+<script>
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('section-' + id).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    function toggleCard(header) {
+        header.parentElement.classList.toggle('open');
+    }
+</script>
+
+</body>
+</html>
+```
