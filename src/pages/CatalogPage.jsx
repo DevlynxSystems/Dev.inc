@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { Heart, Pencil, Search, SlidersHorizontal, Star, Trash2 } from 'lucide-react';
 import { BookDetailsModal } from '../components/BookDetailsModal';
 import { BookFormModal } from '../components/BookFormModal';
@@ -24,6 +24,7 @@ export function CatalogPage({ searchQuery }) {
 
   const [sortBy, setSortBy] = useState('newest');
   const [dateFilter, setDateFilter] = useState('all');
+  const [bookToDelete, setBookToDelete] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -318,13 +319,7 @@ export function CatalogPage({ searchQuery }) {
                     <button
                       type="button"
                       className="inline-flex items-center gap-1 rounded-lg border border-rose-400/30 bg-rose-500/10 px-2.5 py-1.5 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20"
-                      onClick={async () => {
-                        try {
-                          await removeBook(book._id);
-                        } catch (e) {
-                          alert(e.message || 'Failed to delete');
-                        }
-                      }}
+                      onClick={() => setBookToDelete(book)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                       Delete
@@ -354,6 +349,57 @@ export function CatalogPage({ searchQuery }) {
         onSave={saveBook}
         book={editingBook}
       />
+
+      <AnimatePresence>
+        {isAdmin && bookToDelete && (
+          <motion.aside
+            className="fixed inset-0 z-[120] bg-black/55 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setBookToDelete(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.98 }}
+              className="mx-auto mt-36 w-full max-w-md rounded-2xl border border-white/10 bg-black/90 p-5 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-semibold text-white">Remove book from catalog?</h3>
+              <p className="mt-2 text-sm text-stone-300">
+                <span className="font-medium text-stone-100">{bookToDelete.title || 'Untitled'}</span>
+                {bookToDelete.author ? ` · ${bookToDelete.author}` : ''} will be deleted permanently. This cannot be undone.
+              </p>
+              <div className="mt-4 flex justify-end gap-2">
+                <button
+                  type="button"
+                  className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-stone-200"
+                  onClick={() => setBookToDelete(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm font-semibold text-rose-200"
+                  onClick={async () => {
+                    try {
+                      await removeBook(bookToDelete._id);
+                      setDetailsBook((b) => (b?._id === bookToDelete._id ? null : b));
+                      setEditingBook((b) => (b?._id === bookToDelete._id ? null : b));
+                      setBookToDelete(null);
+                    } catch (e) {
+                      alert(e.message || 'Failed to delete');
+                    }
+                  }}
+                >
+                  Delete permanently
+                </button>
+              </div>
+            </motion.div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
