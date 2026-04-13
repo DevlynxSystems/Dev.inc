@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Download, Eye, Pencil, Search, Trash2, Upload } from 'lucide-react'
 import { BookFormModal } from '../components/BookFormModal'
@@ -16,6 +16,7 @@ export function ManageBooks() {
   const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
   const [dateFilter, setDateFilter] = useState('all')
+  const [genreFilter, setGenreFilter] = useState('all')
   const [sortBy, setSortBy] = useState('newest')
   const [selectedIds, setSelectedIds] = useState([])
   const [activeBook, setActiveBook] = useState(null)
@@ -107,11 +108,24 @@ export function ManageBooks() {
     setAddModalOpen(false)
   }
 
+  const genreOptions = useMemo(() => {
+    const set = new Set()
+    books.forEach((b) => {
+      const g = (b.genre && String(b.genre).trim()) || ''
+      if (g) set.add(g)
+    })
+    return Array.from(set).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+  }, [books])
+
   const filteredBooks = books
     .filter((b) => {
       const q = search.trim().toLowerCase()
       if (dateFilter === 'recent' && new Date(b.date || 0).getFullYear() < 2000) return false
       if (dateFilter === 'classic' && new Date(b.date || 0).getFullYear() >= 1980) return false
+      if (genreFilter !== 'all') {
+        const g = (b.genre || '').trim().toLowerCase()
+        if (g !== genreFilter.trim().toLowerCase()) return false
+      }
       if (!q) return true
       return (
         (b.title || '').toLowerCase().includes(q) ||
@@ -130,7 +144,7 @@ export function ManageBooks() {
 
   useEffect(() => {
     setPage(1)
-  }, [search, sortBy, dateFilter])
+  }, [search, sortBy, dateFilter, genreFilter])
 
   const toggleSelected = (id) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
@@ -215,6 +229,12 @@ export function ManageBooks() {
             className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.04] pl-9 pr-3 text-sm text-stone-100 placeholder:text-stone-500 outline-none transition focus:border-orange-300/50 focus:ring-2 focus:ring-orange-500/20"
           />
         </label>
+        <select className="h-11 max-w-[11rem] rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm text-stone-100" value={genreFilter} onChange={(e) => setGenreFilter(e.target.value)} aria-label="Filter by genre">
+          <option value="all">All genres</option>
+          {genreOptions.map((g) => (
+            <option key={g} value={g}>{g}</option>
+          ))}
+        </select>
         <select className="h-11 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm text-stone-100" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
           <option value="newest">Newest</option>
           <option value="title">Title</option>

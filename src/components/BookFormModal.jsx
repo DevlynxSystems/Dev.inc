@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion } from 'motion/react'
-import { BookOpenText, CalendarDays, FileText, ImagePlus, PenLine, UserRound } from 'lucide-react'
+import { BookOpenText, CalendarDays, FileText, ImagePlus, PenLine, Tags, UserRound } from 'lucide-react'
 
 const MAX_COVER_PIXELS = 800
 const COVER_JPEG_QUALITY = 0.82
@@ -68,6 +68,7 @@ function compressImage(file) {
 export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
+  const [genre, setGenre] = useState('')
   const [publishDate, setPublishDate] = useState('')
   const [pageNumber, setPageNumber] = useState('')
   const [error, setError] = useState('')
@@ -85,6 +86,7 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
     if (editingBook) {
       setTitle(editingBook.title || '')
       setAuthor(editingBook.author || '')
+      setGenre(editingBook.genre != null ? String(editingBook.genre) : '')
       setPublishDate(editingBook.date ? new Date(editingBook.date).toISOString().slice(0, 10) : '')
       setPageNumber(editingBook.pageCount != null ? String(editingBook.pageCount) : '')
       setCoverBase64(editingBook.cover || null)
@@ -98,6 +100,7 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
   const reset = () => {
     setTitle('')
     setAuthor('')
+    setGenre('')
     setPublishDate('')
     setPageNumber('')
     setCoverBase64(null)
@@ -149,6 +152,7 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
     const payload = {
       title: title.trim(),
       author: author.trim(),
+      genre: genre.trim(),
       pageCount: parseInt(pageNumber, 10) || 0,
       cover: coverBase64 !== null ? coverBase64 : (editingBook?.cover ?? null),
       date: publishDate ? new Date(publishDate) : (editingBook?.date ? new Date(editingBook.date) : new Date())
@@ -279,6 +283,13 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
                   value={author}
                   onChange={setAuthor}
                   required
+                />
+                <FloatingField
+                  id="genre"
+                  label="Genre (optional)"
+                  icon={Tags}
+                  value={genre}
+                  onChange={setGenre}
                 />
               </div>
             </div>

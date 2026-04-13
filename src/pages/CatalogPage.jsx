@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Heart, Pencil, Search, SlidersHorizontal, Star, Trash2 } from 'lucide-react';
+import { Heart, Pencil, Search, SlidersHorizontal, Star, Tag, Trash2 } from 'lucide-react';
 import { BookDetailsModal } from '../components/BookDetailsModal';
 import { BookFormModal } from '../components/BookFormModal';
 import { BookCardSkeletonGrid } from '../components/Skeleton';
-import { DATE_FILTER_OPTIONS, SORT_OPTIONS, filterByDateFilter, sortBooks } from '../components/CatalogFilters';
+import { DATE_FILTER_OPTIONS, SORT_OPTIONS, filterByDateFilter, filterByGenre, sortBooks } from '../components/CatalogFilters';
 import { useAuth } from '../auth/AuthContext';
 
 const RECENT_KEY = 'devinc_recent_books';
@@ -24,6 +24,7 @@ export function CatalogPage({ searchQuery }) {
 
   const [sortBy, setSortBy] = useState('newest');
   const [dateFilter, setDateFilter] = useState('all');
+  const [genreFilter, setGenreFilter] = useState('all');
   const [bookToDelete, setBookToDelete] = useState(null);
 
   useEffect(() => {
@@ -133,10 +134,20 @@ export function CatalogPage({ searchQuery }) {
     );
   }, [books, query]);
 
+  const genreOptions = useMemo(() => {
+    const set = new Set();
+    books.forEach((b) => {
+      const g = (b.genre && String(b.genre).trim()) || '';
+      if (g) set.add(g);
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  }, [books]);
+
   const filteredBooks = useMemo(() => {
-    const dateFiltered = filterByDateFilter(searchFiltered, dateFilter);
+    const byGenre = filterByGenre(searchFiltered, genreFilter);
+    const dateFiltered = filterByDateFilter(byGenre, dateFilter);
     return sortBooks(dateFiltered, sortBy);
-  }, [searchFiltered, sortBy, dateFilter]);
+  }, [searchFiltered, genreFilter, sortBy, dateFilter]);
 
   const firstName = (user?.name || 'Reader').split(' ')[0];
   const previewBooks = filteredBooks.slice(0, 100);
@@ -177,11 +188,30 @@ export function CatalogPage({ searchQuery }) {
               />
             </label>
             <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2">
+              <Tag className="h-4 w-4 shrink-0 text-stone-400" />
+              <select
+                value={genreFilter}
+                onChange={(e) => setGenreFilter(e.target.value)}
+                className="max-w-[10rem] bg-transparent text-sm text-stone-100 outline-none sm:max-w-none"
+                aria-label="Filter by genre"
+              >
+                <option value="all" className="bg-stone-900">
+                  All genres
+                </option>
+                {genreOptions.map((g) => (
+                  <option key={g} value={g} className="bg-stone-900">
+                    {g}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2">
               <SlidersHorizontal className="h-4 w-4 text-stone-400" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="bg-transparent text-sm text-stone-100 outline-none"
+                aria-label="Sort books"
               >
                 {SORT_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value} className="bg-stone-900">

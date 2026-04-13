@@ -25,6 +25,7 @@ vi.mock('../components/CatalogFilters', () => ({
   DATE_FILTER_OPTIONS: [{ value: 'all', label: 'All' }],
   SORT_OPTIONS: [{ value: 'newest', label: 'Newest' }],
   filterByDateFilter: (books) => books,
+  filterByGenre: (books) => books,
   sortBooks: (books) => books,
 }))
 

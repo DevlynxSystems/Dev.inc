@@ -29,6 +29,13 @@ export function filterByDateFilter(books, dateFilter) {
   })
 }
 
+/** @param {string} genreFilter Use `'all'` to skip filtering. */
+export function filterByGenre(books, genreFilter) {
+  if (!genreFilter || genreFilter === 'all') return books
+  const want = String(genreFilter).trim().toLowerCase()
+  return books.filter((b) => (b.genre || '').trim().toLowerCase() === want)
+}
+
 export function sortBooks(books, sortBy) {
   const list = [...books]
   switch (sortBy) {

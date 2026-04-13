@@ -14,6 +14,7 @@ class DatabaseManager{
     bookSchema = new mongoose.Schema({
         title: { type: String, required: [true, "Title is required"] },
         author: { type: String, required: [true, "Author is required"] },
+        genre: { type: String, trim: true, default: '' },
         cover: { type: String }, 
         pageCount: { type: Number, required: [true, "Page count is required"], default: 0 }, 
         date: { type: Date, default: Date.now }
@@ -55,8 +56,9 @@ class DatabaseManager{
         const pageCount = typeof bookData.pageCount === "number" && !Number.isNaN(bookData.pageCount)
             ? bookData.pageCount
             : parseInt(bookData.pageCount, 10) || 0;
+        const genre = bookData.genre != null ? String(bookData.genre).trim() : '';
 
-        const book = new Book(title, date, author, cover, pageCount);
+        const book = new Book(title, date, author, cover, pageCount, genre);
         return await book.insertIntoDatabase(this);
     }
 
@@ -67,6 +69,7 @@ class DatabaseManager{
         if (bookData.cover !== undefined) update.cover = bookData.cover;
         if (bookData.pageCount != null) update.pageCount = typeof bookData.pageCount === "number" ? bookData.pageCount : parseInt(bookData.pageCount, 10) || 0;
         if (bookData.date != null) update.date = typeof bookData.date === "string" ? bookData.date : new Date(bookData.date);
+        if (bookData.genre !== undefined) update.genre = String(bookData.genre || '').trim();
         const updated = await this.BookModel.findByIdAndUpdate(id, { $set: update }, { new: true, runValidators: true });
         if (!updated) throw new Error("Book not found");
         return updated;

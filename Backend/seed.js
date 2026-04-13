@@ -6,6 +6,7 @@
 
 require("dotenv").config();
 const dataBaseManager = require("./DatabaseManager");
+const { KNOWN_TITLE_GENRES, genreForGeneratedIndex } = require("./seedGenres");
 
 // Book cover URLs: Open Library (real covers). Seed value used for consistent placeholder if needed.
 function coverUrl(isbnOrSeed) {
@@ -63,6 +64,7 @@ function buildGeneratedBooks(count = 80) {
     return {
       title: `${theme} ${part} Vol. ${idx}`,
       author,
+      genre: genreForGeneratedIndex(i),
       date: `${year}-${month}-${day}`,
       pageCount,
       cover: coverUrl(isbnSeed),
@@ -70,7 +72,7 @@ function buildGeneratedBooks(count = 80) {
   });
 }
 
-const SEED_BOOKS = [
+const CURATED_BOOKS = [
   { title: "The Great Gatsby", author: "F. Scott Fitzgerald", date: "1925-04-10", pageCount: 180, cover: coverUrl("9780743273565") },
   { title: "To Kill a Mockingbird", author: "Harper Lee", date: "1960-07-11", pageCount: 336, cover: coverUrl("0061120081") },
   { title: "1984", author: "George Orwell", date: "1949-06-08", pageCount: 328, cover: coverUrl("0451524934") },
@@ -80,7 +82,6 @@ const SEED_BOOKS = [
   { title: "The Hobbit", author: "J.R.R. Tolkien", date: "1937-09-21", pageCount: 366, cover: coverUrl("054792822X") },
   { title: "The Lord of the Rings", author: "J.R.R. Tolkien", date: "1954-07-29", pageCount: 1178, cover: coverUrl("0544003411") },
 
-  // Additional books
   { title: "Brave New World", author: "Aldous Huxley", date: "1932-01-01", pageCount: 288, cover: coverUrl("0060850523") },
   { title: "Moby-Dick", author: "Herman Melville", date: "1851-10-18", pageCount: 720, cover: coverUrl("0142437247") },
   { title: "The Odyssey", author: "Homer", date: "0800-01-01", pageCount: 560, cover: coverUrl("0140268863") },
@@ -126,8 +127,29 @@ const SEED_BOOKS = [
   { title: "The Stranger", author: "Albert Camus", date: "1942-01-01", pageCount: 159, cover: coverUrl("0679720200") },
   { title: "The Metamorphosis", author: "Franz Kafka", date: "1915-10-01", pageCount: 201, cover: coverUrl("0553213695") },
   { title: "A Clockwork Orange", author: "Anthony Burgess", date: "1962-01-01", pageCount: 224, cover: coverUrl("0393312836") },
-  ...buildGeneratedBooks(120),
+
+  { title: "Neuromancer", author: "William Gibson", date: "1984-07-01", pageCount: 271, cover: coverUrl("0441569595") },
+  { title: "Foundation", author: "Isaac Asimov", date: "1951-06-01", pageCount: 255, cover: coverUrl("0553293354") },
+  { title: "The Left Hand of Darkness", author: "Ursula K. Le Guin", date: "1969-03-01", pageCount: 304, cover: coverUrl("0441478123") },
+  { title: "Project Hail Mary", author: "Andy Weir", date: "2021-05-04", pageCount: 496, cover: coverUrl("0593135202") },
+  { title: "Circe", author: "Madeline Miller", date: "2018-04-10", pageCount: 393, cover: coverUrl("0316556343") },
+  { title: "Educated", author: "Tara Westover", date: "2018-02-20", pageCount: 334, cover: coverUrl("0399590501") },
+  { title: "Sapiens", author: "Yuval Noah Harari", date: "2015-02-10", pageCount: 443, cover: coverUrl("0062316117") },
+  { title: "Thinking, Fast and Slow", author: "Daniel Kahneman", date: "2011-10-25", pageCount: 499, cover: coverUrl("0374533555") },
+  { title: "The Midnight Library", author: "Matt Haig", date: "2020-08-13", pageCount: 288, cover: coverUrl("0525559474") },
+  { title: "Where the Crawdads Sing", author: "Delia Owens", date: "2018-08-14", pageCount: 384, cover: coverUrl("0735219095") },
+  { title: "The Seven Husbands of Evelyn Hugo", author: "Taylor Jenkins Reid", date: "2017-06-13", pageCount: 400, cover: coverUrl("1501161938") },
+  { title: "The Song of Achilles", author: "Madeline Miller", date: "2012-09-20", pageCount: 416, cover: coverUrl("0062060627") },
+  { title: "Klara and the Sun", author: "Kazuo Ishiguro", date: "2021-03-02", pageCount: 303, cover: coverUrl("0593318171") },
+  { title: "The Thursday Murder Club", author: "Richard Osman", date: "2020-09-03", pageCount: 382, cover: coverUrl("1984889603") },
+  { title: "Tomorrow, and Tomorrow, and Tomorrow", author: "Gabrielle Zevin", date: "2022-07-05", pageCount: 401, cover: coverUrl("0593321201") },
+  ...buildGeneratedBooks(200),
 ];
+
+const SEED_BOOKS = CURATED_BOOKS.map((b) => ({
+  ...b,
+  genre: KNOWN_TITLE_GENRES[b.title] || b.genre || "Fiction",
+}));
 
 async function seed() {
   if (!process.env.MONGO_URI) {

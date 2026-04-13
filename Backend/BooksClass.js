@@ -6,7 +6,8 @@ class Book{
     _Date;
     _Author;
     _Cover;
-    _PageCount
+    _PageCount;
+    _Genre;
 
 
     /**
@@ -16,13 +17,15 @@ class Book{
      * @param {string} Author - Author of the book
      * @param {Buffer|string} Cover - The Cover image
      * @param {number} PageCount - The  Number of pages
+     * @param {string} [Genre] - Genre or category label
      */
-    constructor(Title, date, Author, Cover, PageCount){
+    constructor(Title, date, Author, Cover, PageCount, Genre = ''){
         this._Title = Title;
         this._Date = date;
         this._Author = Author;
         this._Cover = Cover;
         this._PageCount = PageCount;
+        this._Genre = typeof Genre === 'string' ? Genre : '';
     }
 
     /**
@@ -34,6 +37,7 @@ class Book{
         const data = new database.BookModel({
             title: this._Title,
             author: this._Author,
+            genre: this._Genre || '',
             cover: this._Cover,
             pageCount: this._PageCount,
             date: this._Date
@@ -102,6 +106,17 @@ class Book{
             throw new TypeError("name must be a string");
         }
         this._PageCount = value;
+    }
+
+    get Genre() {
+        return this._Genre;
+    }
+
+    set Genre(value) {
+        if (typeof value !== "string") {
+            throw new TypeError("Genre must be a string");
+        }
+        this._Genre = value;
     }
 
     

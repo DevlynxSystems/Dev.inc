@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "seed": "node seed.js",
+    "backfill:genres": "node backfill-genres.js",
     "seed:demo-users": "node seedDemoUsers.js",
     "seed:many-users": "node seedManyUsers.js",
     "test": "jest",

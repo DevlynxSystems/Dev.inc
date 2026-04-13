@@ -20,6 +20,12 @@ describe ("Book Class Tests", () => {
         expect(book.Author).toBe("Author1");
         expect(book.Cover).toBe("cover.png");
         expect(book.PageCount).toBe(100);
+        expect(book.Genre).toBe("");
+    });
+
+    test("constructor accepts optional genre", () => {
+        const b = new Book("T", "2020", "A", "c.png", 50, "Fiction");
+        expect(b.Genre).toBe("Fiction");
     });
 
 
@@ -95,7 +101,9 @@ describe ("Book Class Tests", () => {
 
         const result = await book.insertIntoDatabase(mockDatabase);
 
-        expect(mockDatabase.BookModel).toHaveBeenCalled();
+        expect(mockDatabase.BookModel).toHaveBeenCalledWith(
+            expect.objectContaining({ genre: "" })
+        );
         expect(mockSave).toHaveBeenCalled();
         expect(result).toEqual({ title: "Title1" });
     });
