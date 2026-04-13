@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Book Catalog Docs</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #222;
+            display: flex;
+            font-size: 14px;
+        }
+
+        #sidebar {
+            width: 220px;
+            min-width: 220px;
+            background: #fff;
+            border-right: 1px solid #ddd;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            overflow-y: auto;
+            padding: 12px 10px;
+        }
+
+        #sidebar h2 { font-size: 13px; margin-bottom: 12px; padding: 0 4px; }
+
+        .nav-group { margin-bottom: 10px; }
+        .nav-label { font-size: 10px; font-weight: bold; text-transform: uppercase; color: #aaa; padding: 0 6px; margin-bottom: 3px; letter-spacing: 0.05em; }
+
+        .nav-item {
+            display: block;
+            padding: 5px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #444;
+            text-decoration: none;
+            margin-bottom: 1px;
+        }
+        .nav-item:hover { background: #eee; }
+        .nav-item.active { background: #e0e0e0; font-weight: bold; color: #111; }
+
+        #main { margin-left: 220px; flex: 1; padding: 24px 36px 48px; }
+
+        .section { display: none; }
+        .section.active { display: block; }
+
+        h2.page-title { font-size: 18px; margin-bottom: 6px; }
+        p.page-sub { color: #555; margin-bottom: 20px; font-size: 13px; }
+
+        h3.group { font-size: 12px; font-weight: bold; text-transform: uppercase; color: #888; letter-spacing: 0.05em; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin: 22px 0 10px; }
+        h3.group:first-child { margin-top: 0; }
+
+        .module-card { background: #fff; border: 1px solid #ddd; margin-bottom: 8px; border-radius: 4px; overflow: hidden; }
+
+        .module-header {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 12px;
+            cursor: pointer;
+            background: #fafafa;
+            border-bottom: 1px solid transparent;
+        }
+        .module-header:hover { background: #f0f0f0; }
+        .module-card.open .module-header { border-bottom-color: #eee; }
+
+        .module-header .mh-name { font-size: 13px; font-weight: bold; flex: 1; }
+        .module-header .mh-sub  { font-size: 11px; color: #888; font-family: monospace; }
+        .chevron { font-size: 10px; color: #bbb; transition: transform 0.15s; }
+        .module-card.open .chevron { transform: rotate(180deg); }
+
+        .module-body { display: none; }
+        .module-card.open .module-body { display: block; }
+
+        .mblock { padding: 12px 14px; border-top: 1px solid #eee; }
+        .mblock + .mblock { border-top: 1px solid #eee; }
+
+        .sig { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+        .desc { font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 8px; }
+
+        /* HTTP badges */
+        .badge {
+            font-family: monospace; font-size: 10px; font-weight: bold;
+            padding: 1px 6px; border-radius: 3px; text-transform: uppercase;
+        }
+        .GET    { background: #dbeafe; color: #1e40af; }
+        .POST   { background: #dcfce7; color: #166534; }
+        .PUT    { background: #fef9c3; color: #78350f; }
+        .DELETE { background: #fee2e2; color: #991b1b; }
+        .PATCH  { background: #ede9fe; color: #5b21b6; }
+        .ASYNC  { background: #dbeafe; color: #1e40af; }
+        .CLASS  { background: #ccfbf1; color: #0f766e; }
+        .COMP   { background: #ccfbf1; color: #0f766e; }
+        .PAGE   { background: #ede9fe; color: #5b21b6; }
+        .SCRIPT { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+
+        .route-tag { font-family: monospace; font-size: 11px; color: #777; background: #f0f0f0; padding: 1px 6px; border-radius: 3px; }
+
+        .plabel { font-size: 10px; font-weight: bold; text-transform: uppercase; color: #aaa; margin-top: 10px; margin-bottom: 4px; letter-spacing: 0.05em; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 12px; border: 1px solid #ddd; margin-bottom: 4px; }
+        th { background: #f5f5f5; text-align: left; font-size: 10px; font-weight: bold; text-transform: uppercase; color: #999; padding: 5px 10px; border-bottom: 1px solid #ddd; }
+        td { padding: 6px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+        tr:last-child td { border-bottom: none; }
+
+        .pn { font-family: monospace; color: #1e40af; }
+        .pt { font-family: monospace; color: #166534; }
+        .pd { color: #666; }
+
+        .req { font-size: 9px; padding: 1px 4px; background: #fee2e2; color: #991b1b; border-radius: 2px; margin-left: 4px; }
+        .opt { font-size: 9px; padding: 1px 4px; background: #f3f4f6; color: #9ca3af; border-radius: 2px; margin-left: 4px; }
+
+        .ret { margin-top: 10px; padding: 7px 10px; background: #f5f5f5; border-left: 3px solid #ccc; font-size: 12px; }
+        .ret .rl { font-size: 10px; font-weight: bold; text-transform: uppercase; color: #999; margin-bottom: 1px; }
+        .ret .rv { font-family: monospace; color: #1e40af; }
+
+        .code {
+            background: #282c34; color: #abb2bf;
+            font-family: monospace; font-size: 12px;
+            padding: 12px 14px; border-radius: 4px;
+            overflow-x: auto; margin-top: 8px; line-height: 1.65; white-space: pre;
+        }
+        .code .kw  { color: #c678dd; }
+        .code .fn  { color: #61afef; }
+        .code .str { color: #98c379; }
+        .code .cmt { color: #5c6370; font-style: italic; }
+        .code .k   { color: #e06c75; }
+
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 18px; }
+        .info-card { background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 10px 12px; }
+        .info-card .il { font-size: 10px; font-weight: bold; text-transform: uppercase; color: #bbb; margin-bottom: 3px; }
+        .info-card .iv { font-size: 16px; font-weight: bold; }
+        .info-card .is { font-size: 11px; color: #999; font-family: monospace; margin-top: 1px; }
+
+        .ep-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid #ddd; border-radius: 3px; margin-bottom: 4px; background: #fff; cursor: pointer; }
+        .ep-row:hover { border-color: #999; }
+        .ep-row .ep-p { font-family: monospace; font-size: 12px; flex: 1; }
+        .ep-row .ep-d { font-size: 12px; color: #888; }
+
+        /* script tab style */
+        .tab-row { display: flex; gap: 0; margin-bottom: 0; border-bottom: 1px solid #ddd; }
+        .tab-btn { padding: 6px 14px; font-size: 12px; cursor: pointer; background: #f5f5f5; border: 1px solid #ddd; border-bottom: none; margin-right: -1px; color: #555; }
+        .tab-btn.active { background: #fff; color: #111; font-weight: bold; border-bottom: 1px solid #fff; position: relative; z-index: 1; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-thumb { background: #ccc; }
+    </style>
+</head>
+<body>
+
+<nav id="sidebar">
+    <h2>Book Catalog Docs</h2>
+
+    <div class="nav-group">
+        <div class="nav-label">Getting Started</div>
+        <a class="nav-item active" onclick="show('overview', this)">Overview</a>
+        <a class="nav-item" onclick="show('setup', this)">Setup & Config</a>
+        <a class="nav-item" onclick="show('mgmt', this)">Management Scripts</a>
+    </div>
+
+    <div class="nav-group">
+        <div class="nav-label">Backend</div>
+        <a class="nav-item" onclick="show('auth', this)">Auth Controller</a>
+        <a class="nav-item" onclick="show('books-api', this)">Books Controller</a>
+        <a class="nav-item" onclick="show('admin-api', this)">Admin Controller</a>
+        <a class="nav-item" onclick="show('dbmanager', this)">DatabaseManager</a>
+        <a class="nav-item" onclick="show('booksclass', this)">Book Class</a>
+    </div>
+
+    <div class="nav-group">
+        <div class="nav-label">Frontend</div>
+        <a class="nav-item" onclick="show('app', this)">App & Routing</a>
+        <a class="nav-item" onclick="show('pages', this)">User Pages</a>
+        <a class="nav-item" onclick="show('catalog', this)">Catalog Page</a>
+        <a class="nav-item" onclick="show('admin-pages', this)">Admin Pages</a>
+        <a class="nav-item" onclick="show('auth-pages', this)">Auth Pages</a>
+    </div>
+
+    <div class="nav-group">
+        <div class="nav-label">Scripts</div>
+        <a class="nav-item" onclick="show('seeds', this)">Seed Scripts</a>
+    </div>
+</nav>
+
+<main id="main">
+
+    <!-- ══ OVERVIEW ══ -->
+    <div id="section-overview" class="section active">
+        <h2 class="page-title">DevInc Book Catalog</h2>
+        <p class="page-sub">Full-stack book catalog app. Node/Express backend with MongoDB, React frontend, JWT auth, and admin controls.</p>
+
+        <div class="info-grid">
+            <div class="info-card"><div class="il">Frontend</div><div class="iv">React</div><div class="is">Vite + React Router</div></div>
+            <div class="info-card"><div class="il">Backend</div><div class="iv">Express</div><div class="is">Node.js v5.x</div></div>
+            <div class="info-card"><div class="il">Database</div><div class="iv">MongoDB</div><div class="is">Mongoose 9.x</div></div>
+            <div class="info-card"><div class="il">Auth</div><div class="iv">JWT</div><div class="is">bcryptjs</div></div>
+            <div class="info-card"><div class="il">Animations</div><div class="iv">Framer</div><div class="is">motion/react</div></div>
+            <div class="info-card"><div class="il">Port</div><div class="iv">5000</div><div class="is">env: PORT</div></div>
+        </div>
+
+        <h3 class="group">API Endpoints</h3>
+        <div style="margin-bottom:6px;font-size:11px;color:#888;font-family:monospace">Auth — /api/auth</div>
+        <div class="ep-row" onclick="show('auth',null)"><span class="badge POST">POST</span><span class="ep-p">/api/auth/signup</span><span class="ep-d">Register a new user</span></div>
+        <div class="ep-row" onclick="show('auth',null)"><span class="badge POST">POST</span><span class="ep-p">/api/auth/login</span><span class="ep-d">Authenticate and get token</span></div>
+        <div class="ep-row" onclick="show('auth',null)"><span class="badge GET">GET</span><span class="ep-p">/api/auth/me</span><span class="ep-d">Get current user</span></div>
+        <div class="ep-row" onclick="show('auth',null)"><span class="badge PUT">PUT</span><span class="ep-p">/api/auth/me</span><span class="ep-d">Update own profile</span></div>
+
+        <div style="margin-top:12px;margin-bottom:6px;font-size:11px;color:#888;font-family:monospace">Books — /api/books</div>
+        <div class="ep-row" onclick="show('books-api',null)"><span class="badge GET">GET</span><span class="ep-p">/api/books</span><span class="ep-d">List all books</span></div>
+        <div class="ep-row" onclick="show('books-api',null)"><span class="badge GET">GET</span><span class="ep-p">/api/books/:id</span><span class="ep-d">Get book by ID</span></div>
+        <div class="ep-row" onclick="show('books-api',null)"><span class="badge POST">POST</span><span class="ep-p">/api/books</span><span class="ep-d">Create a new book</span></div>
+        <div class="ep-row" onclick="show('books-api',null)"><span class="badge PUT">PUT</span><span class="ep-p">/api/books/:id</span><span class="ep-d">Update a book</span></div>
+        <div class="ep-row" onclick="show('books-api',null)"><span class="badge DELETE">DELETE</span><span class="ep-p">/api/books/:id</span><span class="ep-d">Delete a book</span></div>
+
+        <div style="margin-top:12px;margin-bottom:6px;font-size:11px;color:#888;font-family:monospace">Admin — /api/admin</div>
+        <div class="ep-row" onclick="show('admin-api',null)"><span class="badge GET">GET</span><span class="ep-p">/api/admin/users</span><span class="ep-d">List users (filterable)</span></div>
+        <div class="ep-row" onclick="show('admin-api',null)"><span class="badge GET">GET</span><span class="ep-p">/api/admin/users/:id</span><span class="ep-d">Get single user</span></div>
+        <div class="ep-row" onclick="show('admin-api',null)"><span class="badge PUT">PUT</span><span class="ep-p">/api/admin/users/:id</span><span class="ep-d">Update user fields</span></div>
+        <div class="ep-row" onclick="show('admin-api',null)"><span class="badge DELETE">DELETE</span><span class="ep-p">/api/admin/users/:id</span><span class="ep-d">Delete a user</span></div>
+        <div class="ep-row" onclick="show('admin-api',null)"><span class="badge PATCH">PATCH</span><span class="ep-p">/api/admin/users/:id/role</span><span class="ep-d">Change user role</span></div>
+
+        <h3 class="group">Frontend Pages</h3>
+        <div class="ep-row" onclick="show('auth-pages',null)"><span class="badge PAGE">PAGE</span><span class="ep-p">/login</span><span class="ep-d">LoginPage</span></div>
+        <div class="ep-row" onclick="show('auth-pages',null)"><span class="badge PAGE">PAGE</span><span class="ep-p">/signup</span><span class="ep-d">SignupPage</span></div>
+        <div class="ep-row" onclick="show('pages',null)"><span class="badge PAGE">PAGE</span><span class="ep-p">/dashboard</span><span class="ep-d">UserDashboard — protected</span></div>
+        <div class="ep-row" onclick="show('catalog',null)"><span class="badge PAGE">PAGE</span><span class="ep-p">/catalog</span><span class="ep-d">CatalogPage</span></div>
+        <div class="ep-row" onclick="show('pages',null)"><span class="badge PAGE">PAGE</span><span class="ep-p">/profile</span><span class="ep-d">ProfilePage — protected</span></div>
+        <div class="ep-row" onclick="show('admin-pages',null)"><span class="badge PAGE">PAGE</span><span class="ep-p">/admin</span><span class="ep-d">AdminDashboard — admin only</span></div>
+        <div class="ep-row" onclick="show('admin-pages',null)"><span class="badge PAGE">PAGE</span><span class="ep-p">/admin/users</span><span class="ep-d">ManageUsers — admin only</span></div>
+        <div class="ep-row" onclick="show('admin-pages',null)"><span class="badge PAGE">PAGE</span><span class="ep-p">/admin/users/:id</span><span class="ep-d">AdminUserProfile — admin only</span></div>
+        <div class="ep-row" onclick="show('admin-pages',null)"><span class="badge PAGE">PAGE</span><span class="ep-p">/admin/books</span><span class="ep-d">ManageBooks — admin only</span></div>
+    </div>
+
+    <!-- ══ SETUP ══ -->
+    <div id="section-setup" class="section">
+        <h2 class="page-title">Setup & Configuration</h2>
+        <p class="page-sub">Environment variables, installation, and npm scripts.</p>
+
+        <h3 class="group">Installation</h3>
+        <div class="code"><span class="cmt"># backend</span>
+            cd Backend
+            npm install
+
+            <span class="cmt"># create Backend/.env</span>
+            <span class="k">MONGO_URI</span>=mongodb+srv://user:pass@cluster.mongodb.net/devinc_book_catalog
+            <span class="k">JWT_SECRET</span>=your-secret-key
+            <span class="k">JWT_EXPIRES_IN</span>=7d
+            <span class="k">PORT</span>=5000
+
+            <span class="cmt"># frontend</span>
+            cd Frontend
+            npm install
+            npm run dev</div>
+
+        <h3 class="group">NPM Scripts (Backend)</h3>
+        <div class="module-card open"><div class="module-body" style="display:block"><div class="mblock">
+            <table>
+                <thead><tr><th>Script</th><th>Command</th><th>Description</th></tr></thead>
+                <tbody>
+                <tr><td class="pn">npm start</td><td class="pt">node server.js</td><td class="pd">Start production server.</td></tr>
+                <tr><td class="pn">npm run seed</td><td class="pt">node seed.js</td><td class="pd">Seed ~170 sample books into the database.</td></tr>
+                <tr><td class="pn">npm run seed:demo-users</td><td class="pt">node seedDemoUsers.js</td><td class="pd">Create or update demo user and admin accounts.</td></tr>
+                <tr><td class="pn">npm run seed:many-users</td><td class="pt">node seedManyUsers.js</td><td class="pd">Bulk-insert N synthetic users. Controlled via env vars.</td></tr>
+                <tr><td class="pn">npm test</td><td class="pt">jest</td><td class="pd">Run full Jest test suite.</td></tr>
+                <tr><td class="pn">npm run test:unit</td><td class="pt">jest --testPathIgnorePatterns</td><td class="pd">Unit tests only, skips integration tests.</td></tr>
+                <tr><td class="pn">npm run test:integration</td><td class="pt">jest tests/api.integration</td><td class="pd">Integration tests only.</td></tr>
+                </tbody>
+            </table>
+        </div></div></div>
+
+        <h3 class="group">Environment Variables</h3>
+        <div class="module-card open"><div class="module-body" style="display:block"><div class="mblock">
+            <table>
+                <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+                <tbody>
+                <tr><td class="pn">MONGO_URI</td><td class="pt">local MongoDB</td><td class="pd">Connection string. Falls back to <code>mongodb://127.0.0.1:27017/devinc_book_catalog</code>.</td></tr>
+                <tr><td class="pn">JWT_SECRET</td><td class="pt">dev-only-secret</td><td class="pd">Signs JWT tokens. Change in production.</td></tr>
+                <tr><td class="pn">JWT_EXPIRES_IN</td><td class="pt">7d</td><td class="pd">Token expiry e.g. 1h, 7d.</td></tr>
+                <tr><td class="pn">PORT</td><td class="pt">5000</td><td class="pd">HTTP port the server listens on.</td></tr>
+                </tbody>
+            </table>
+        </div></div></div>
+    </div>
+
+    <!-- ══ MANAGEMENT SCRIPTS ══ -->
+    <div id="section-mgmt" class="section">
+        <h2 class="page-title">Management Scripts</h2>
+        <p class="page-sub">Cross-platform scripts for setting up, running, and building the project from the repo root. Two versions are provided — <code>manage.sh</code> for Mac/Linux and <code>manage.bat</code> for Windows.</p>
+
+        <h3 class="group">Commands</h3>
+        <div class="module-card open"><div class="module-body" style="display:block"><div class="mblock">
+            <table>
+                <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+                <tbody>
+                <tr><td class="pn">setup</td><td class="pd">Installs Backend dependencies (<code>cd Backend &amp;&amp; npm install</code>) then installs Frontend dependencies (<code>npm install</code>) from the repo root.</td></tr>
+                <tr><td class="pn">dev</td><td class="pd">Starts Backend and Frontend concurrently using <code>npx concurrently</code>. On Windows, also opens <code>http://localhost:5173/</code> in the browser automatically after a 5-second delay.</td></tr>
+                <tr><td class="pn">build</td><td class="pd">Runs <code>npm run build</code> from the repo root to produce a production Frontend build.</td></tr>
+                </tbody>
+            </table>
+        </div></div></div>
+
+        <h3 class="group">Usage</h3>
+
+        <div style="margin-bottom:0">
+            <div class="tab-row">
+                <div class="tab-btn active" onclick="switchTab('win', this)">Windows (.bat)</div>
+                <div class="tab-btn" onclick="switchTab('sh', this)">Mac / Linux (.sh)</div>
+            </div>
+            <div id="tab-win" class="tab-pane active">
+                <div class="code"><span class="cmt"># from the repo root</span>
+                    .\manage.bat setup    <span class="cmt"># install all dependencies</span>
+                    .\manage.bat dev      <span class="cmt"># start backend + frontend, opens browser</span>
+                    .\manage.bat build    <span class="cmt"># production build</span></div>
+            </div>
+            <div id="tab-sh" class="tab-pane">
+                <div class="code"><span class="cmt"># from the repo root — make executable first if needed</span>
+                    chmod +x manage.sh
+
+                    ./manage.sh setup     <span class="cmt"># install all dependencies</span>
+                    ./manage.sh dev       <span class="cmt"># start backend + frontend concurrently</span>
+                    ./manage.sh build     <span class="cmt"># production build</span></div>
+            </div>
+        </div>
+
+        <h3 class="group">manage.bat (Windows)</h3>
+        <div class="module-card open"><div class="module-body" style="display:block"><div class="mblock">
+            <div class="desc">Uses <code>start</code> to launch concurrently in a new window named "DevLynx". After starting dev mode it waits 5 seconds then opens the frontend at <code>http://localhost:5173/</code> automatically.</div>
+            <table>
+                <thead><tr><th>Detail</th><th>Value</th></tr></thead>
+                <tbody>
+                <tr><td class="pn">Backend dir variable</td><td class="pd"><code>SET BACKEND_DIR=Backend</code></td></tr>
+                <tr><td class="pn">Dev window title</td><td class="pd">DevLynx</td></tr>
+                <tr><td class="pn">Browser auto-open</td><td class="pd">Yes — 5s delay via <code>timeout /t 5</code></td></tr>
+                <tr><td class="pn">Frontend URL</td><td class="pd">http://localhost:5173/</td></tr>
+                </tbody>
+            </table>
+        </div></div></div>
+
+        <h3 class="group">manage.sh (Mac / Linux)</h3>
+        <div class="module-card open"><div class="module-body" style="display:block"><div class="mblock">
+            <div class="desc">Uses <code>npx concurrently</code> with named labels (BACKEND in blue, FRONTEND in magenta) for readable terminal output. No browser auto-open — navigate to the Vite dev URL manually.</div>
+            <table>
+                <thead><tr><th>Detail</th><th>Value</th></tr></thead>
+                <tbody>
+                <tr><td class="pn">Backend dir variable</td><td class="pd"><code>BACKEND_DIR="./Backend"</code></td></tr>
+                <tr><td class="pn">Concurrently labels</td><td class="pd">BACKEND (blue), FRONTEND (magenta)</td></tr>
+                <tr><td class="pn">Browser auto-open</td><td class="pd">No</td></tr>
+                <tr><td class="pn">Exit on bad arg</td><td class="pd">Yes — <code>exit 1</code></td></tr>
+                </tbody>
+            </table>
+        </div></div></div>
+    </div>
+
+    <!-- ══ AUTH CONTROLLER ══ -->
+    <div id="section-auth" class="section">
+        <h2 class="page-title">Auth Controller</h2>
+        <p class="page-sub">Handles user registration, login, JWT issuance, and profile management. Routes mounted at <code>/api/auth</code>.</p>
+
+        <div class="module-card open">
+            <div class="module-header" onclick="toggle(this)">
+                <span class="mh-name">signup</span><span class="mh-sub">POST /api/auth/signup</span><span class="chevron">▼</span>
+            </div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge POST">POST</span><span class="route-tag">/api/auth/signup</span></div>
+                <div class="desc">Registers a new user. Hashes the password with bcrypt (salt 10) and returns a signed JWT. Returns 409 if email already in use.</div>
+                <div class="plabel">Request Body</div>
+                <table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">name<span class="req">required</span></td><td class="pt">string</td><td class="pd">Display name for the user.</td></tr>
+                <tr><td class="pn">email<span class="req">required</span></td><td class="pt">string</td><td class="pd">Unique email. Stored lowercased and trimmed.</td></tr>
+                <tr><td class="pn">password<span class="req">required</span></td><td class="pt">string</td><td class="pd">Minimum 6 characters.</td></tr>
+                </tbody></table>
+                <div class="ret"><div class="rl">Returns 201</div><div class="rv">{ token: string, user: UserResponse }</div></div>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)">
+                <span class="mh-name">login</span><span class="mh-sub">POST /api/auth/login</span><span class="chevron">▼</span>
+            </div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge POST">POST</span><span class="route-tag">/api/auth/login</span></div>
+                <div class="desc">Authenticates with email and password. Returns 401 for invalid credentials.</div>
+                <div class="plabel">Request Body</div>
+                <table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">email<span class="req">required</span></td><td class="pt">string</td><td class="pd">Registered email address.</td></tr>
+                <tr><td class="pn">password<span class="req">required</span></td><td class="pt">string</td><td class="pd">Account password.</td></tr>
+                </tbody></table>
+                <div class="ret"><div class="rl">Returns 200</div><div class="rv">{ token: string, user: UserResponse }</div></div>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)">
+                <span class="mh-name">me</span><span class="mh-sub">GET /api/auth/me</span><span class="chevron">▼</span>
+            </div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge GET">GET</span><span class="route-tag">/api/auth/me</span></div>
+                <div class="desc">Returns the authenticated user's profile. Requires <code>Authorization: Bearer &lt;token&gt;</code>.</div>
+                <div class="ret"><div class="rl">Returns 200</div><div class="rv">{ user: UserResponse }</div></div>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)">
+                <span class="mh-name">updateMe</span><span class="mh-sub">PUT /api/auth/me</span><span class="chevron">▼</span>
+            </div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge PUT">PUT</span><span class="route-tag">/api/auth/me</span></div>
+                <div class="desc">Updates the authenticated user's own profile. All fields optional. Password is hashed before storage. Returns 400 if no valid fields supplied.</div>
+                <div class="plabel">Request Body (all optional)</div>
+                <table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">name<span class="opt">optional</span></td><td class="pt">string</td><td class="pd">New display name. Cannot be empty string.</td></tr>
+                <tr><td class="pn">password<span class="opt">optional</span></td><td class="pt">string</td><td class="pd">New password. Min 6 characters.</td></tr>
+                <tr><td class="pn">phone<span class="opt">optional</span></td><td class="pt">string</td><td class="pd">Phone number string.</td></tr>
+                <tr><td class="pn">address<span class="opt">optional</span></td><td class="pt">AddressObject</td><td class="pd">line1, line2, city, state, postalCode, country.</td></tr>
+                </tbody></table>
+                <div class="ret"><div class="rl">Returns 200</div><div class="rv">{ user: UserResponse }</div></div>
+            </div></div>
+        </div>
+
+        <h3 class="group">Type: UserResponse</h3>
+        <div class="module-card open"><div class="module-body" style="display:block"><div class="mblock">
+            <table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody>
+            <tr><td class="pn">id</td><td class="pt">ObjectId</td><td class="pd">MongoDB document _id.</td></tr>
+            <tr><td class="pn">name</td><td class="pt">string</td><td class="pd">Display name.</td></tr>
+            <tr><td class="pn">email</td><td class="pt">string</td><td class="pd">Email address.</td></tr>
+            <tr><td class="pn">role</td><td class="pt">"user" | "admin"</td><td class="pd">Access level.</td></tr>
+            <tr><td class="pn">phone</td><td class="pt">string</td><td class="pd">Empty string if unset.</td></tr>
+            <tr><td class="pn">address</td><td class="pt">AddressObject</td><td class="pd">line1, line2, city, state, postalCode, country.</td></tr>
+            </tbody></table>
+        </div></div></div>
+    </div>
+
+    <!-- ══ BOOKS CONTROLLER ══ -->
+    <div id="section-books-api" class="section">
+        <h2 class="page-title">Books Controller</h2>
+        <p class="page-sub">CRUD operations for the book catalog. All routes mounted at <code>/api/books</code>. Delegates to DatabaseManager.</p>
+
+        <div class="module-card open">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">listBooks</span><span class="mh-sub">GET /api/books</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge GET">GET</span><span class="route-tag">/api/books</span></div>
+                <div class="desc">Returns all books. No auth required. Returns empty array if collection is empty.</div>
+                <div class="ret"><div class="rl">Returns 200</div><div class="rv">Book[]</div></div>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">getBookById</span><span class="mh-sub">GET /api/books/:id</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge GET">GET</span><span class="route-tag">/api/books/:id</span></div>
+                <div class="desc">Fetches a single book by MongoDB ObjectId. Returns 404 if not found, 400 if id is malformed.</div>
+                <div class="ret"><div class="rl">Returns 200</div><div class="rv">Book</div></div>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">addBook</span><span class="mh-sub">POST /api/books</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge POST">POST</span><span class="route-tag">/api/books</span></div>
+                <div class="desc">Creates a new book. Mongoose validation errors are formatted into a readable message and returned as 400.</div>
+                <div class="plabel">Request Body</div>
+                <table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">title<span class="req">required</span></td><td class="pt">string</td><td class="pd">Title of the book.</td></tr>
+                <tr><td class="pn">author<span class="req">required</span></td><td class="pt">string</td><td class="pd">Author's name.</td></tr>
+                <tr><td class="pn">pageCount<span class="req">required</span></td><td class="pt">number</td><td class="pd">Number of pages. Defaults to 0 if unparseable.</td></tr>
+                <tr><td class="pn">date<span class="opt">optional</span></td><td class="pt">string | Date</td><td class="pd">Publication date. Defaults to now.</td></tr>
+                <tr><td class="pn">cover<span class="opt">optional</span></td><td class="pt">string</td><td class="pd">URL or base64 string for cover image.</td></tr>
+                </tbody></table>
+                <div class="ret"><div class="rl">Returns 201</div><div class="rv">Book — the newly created document</div></div>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">updateBook</span><span class="mh-sub">PUT /api/books/:id</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge PUT">PUT</span><span class="route-tag">/api/books/:id</span></div>
+                <div class="desc">Updates fields of an existing book. Only provided fields applied via $set. Returns 404 if not found.</div>
+                <div class="ret"><div class="rl">Returns 200</div><div class="rv">Book — the updated document</div></div>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">deleteBook</span><span class="mh-sub">DELETE /api/books/:id</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge DELETE">DELETE</span><span class="route-tag">/api/books/:id</span></div>
+                <div class="desc">Permanently removes a book by its MongoDB ObjectId.</div>
+                <div class="ret"><div class="rl">Returns 200</div><div class="rv">{ message: "Book deleted successfully" }</div></div>
+            </div></div>
+        </div>
+    </div>
+
+    <!-- ══ ADMIN CONTROLLER ══ -->
+    <div id="section-admin-api" class="section">
+        <h2 class="page-title">Admin Controller</h2>
+        <p class="page-sub">Admin-only endpoints for managing users. Mounted at <code>/api/admin</code>. Requires admin-level JWT.</p>
+
+        <div class="module-card open">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">listUsers</span><span class="mh-sub">GET /api/admin/users</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge GET">GET</span><span class="route-tag">/api/admin/users</span></div>
+                <div class="desc">Returns all users sorted by creation date descending. Supports optional role and text search filtering.</div>
+                <div class="plabel">Query Parameters</div>
+                <table><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">q<span class="opt">optional</span></td><td class="pt">string</td><td class="pd">Case-insensitive regex search on name and email.</td></tr>
+                <tr><td class="pn">role<span class="opt">optional</span></td><td class="pt">"user" | "admin"</td><td class="pd">Filter by exact role value.</td></tr>
+                </tbody></table>
+                <div class="ret"><div class="rl">Returns 200</div><div class="rv">{ users: SafeUser[] }</div></div>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">getUserById</span><span class="mh-sub">GET /api/admin/users/:id</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge GET">GET</span><span class="route-tag">/api/admin/users/:id</span></div>
+                <div class="desc">Fetches a single user by ObjectId. Password field is never returned. Returns 404 if not found.</div>
+                <div class="ret"><div class="rl">Returns 200</div><div class="rv">{ user: SafeUser }</div></div>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">updateUser</span><span class="mh-sub">PUT /api/admin/users/:id</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge PUT">PUT</span><span class="route-tag">/api/admin/users/:id</span></div>
+                <div class="desc">Updates editable user fields (name, phone, address). Role and password cannot be changed here. Returns 400 if no valid fields in payload.</div>
+                <div class="plabel">Request Body (all optional)</div>
+                <table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">name</td><td class="pt">string</td><td class="pd">Cannot be empty string.</td></tr>
+                <tr><td class="pn">phone</td><td class="pt">string</td><td class="pd">Phone number.</td></tr>
+                <tr><td class="pn">address</td><td class="pt">AddressObject</td><td class="pd">Full address object.</td></tr>
+                </tbody></table>
+                <div class="ret"><div class="rl">Returns 200</div><div class="rv">{ user: SafeUser }</div></div>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">deleteUser</span><span class="mh-sub">DELETE /api/admin/users/:id</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge DELETE">DELETE</span><span class="route-tag">/api/admin/users/:id</span></div>
+                <div class="desc">Permanently deletes a user. Returns 404 if not found.</div>
+                <div class="ret"><div class="rl">Returns 200</div><div class="rv">{ message: "User deleted" }</div></div>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">patchUserRole</span><span class="mh-sub">PATCH /api/admin/users/:id/role</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge PATCH">PATCH</span><span class="route-tag">/api/admin/users/:id/role</span></div>
+                <div class="desc">Changes a user's role. Only accepts "user" or "admin". Returns 400 for any other value.</div>
+                <div class="plabel">Request Body</div>
+                <table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">role<span class="req">required</span></td><td class="pt">"user" | "admin"</td><td class="pd">Target role to assign.</td></tr>
+                </tbody></table>
+                <div class="ret"><div class="rl">Returns 200</div><div class="rv">{ user: SafeUser }</div></div>
+            </div></div>
+        </div>
+    </div>
+
+    <!-- ══ DATABASE MANAGER ══ -->
+    <div id="section-dbmanager" class="section">
+        <h2 class="page-title">DatabaseManager</h2>
+        <p class="page-sub">Singleton class managing the Mongoose connection and all book CRUD. Exported as a pre-instantiated singleton.</p>
+
+        <div class="module-card open">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">connect</span><span class="mh-sub">async connect(uri)</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge ASYNC">ASYNC</span></div>
+                <div class="desc">Opens a Mongoose connection. Returns existing connection if already connected. Calls process.exit(1) on failure.</div>
+                <div class="ret"><div class="rl">Returns</div><div class="rv">Promise&lt;Connection&gt;</div></div>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">addBook / updateBook / deleteBook / getAllBooks / getBookById</span><span class="mh-sub">Book CRUD</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <table><thead><tr><th>Method</th><th>Returns</th><th>Notes</th></tr></thead><tbody>
+                <tr><td class="pn">addBook(bookData)</td><td class="pt">Promise&lt;Book&gt;</td><td class="pd">Normalizes inputs, constructs Book instance, calls insertIntoDatabase.</td></tr>
+                <tr><td class="pn">updateBook(id, data)</td><td class="pt">Promise&lt;Book&gt;</td><td class="pd">Partial $set update with runValidators. Throws if not found.</td></tr>
+                <tr><td class="pn">deleteBook(id)</td><td class="pt">Promise&lt;Book|null&gt;</td><td class="pd">findByIdAndDelete. Rethrows errors after logging.</td></tr>
+                <tr><td class="pn">getAllBooks()</td><td class="pt">Promise&lt;Book[]&gt;</td><td class="pd">Returns empty array on error rather than throwing.</td></tr>
+                <tr><td class="pn">getBookById(id)</td><td class="pt">Promise&lt;Book|null&gt;</td><td class="pd">Returns null if id is falsy or no document matches.</td></tr>
+                <tr><td class="pn">disconnect()</td><td class="pt">Promise&lt;void&gt;</td><td class="pd">Closes connection. Used by seed scripts.</td></tr>
+                </tbody></table>
+            </div></div>
+        </div>
+
+        <h3 class="group">Mongoose Schema: Book</h3>
+        <div class="module-card open"><div class="module-body" style="display:block"><div class="mblock">
+            <table><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Default</th></tr></thead><tbody>
+            <tr><td class="pn">title</td><td class="pt">String</td><td class="pt">yes</td><td class="pd">—</td></tr>
+            <tr><td class="pn">author</td><td class="pt">String</td><td class="pt">yes</td><td class="pd">—</td></tr>
+            <tr><td class="pn">cover</td><td class="pt">String</td><td class="pd">no</td><td class="pd">undefined</td></tr>
+            <tr><td class="pn">pageCount</td><td class="pt">Number</td><td class="pt">yes</td><td class="pd">0</td></tr>
+            <tr><td class="pn">date</td><td class="pt">Date</td><td class="pd">no</td><td class="pd">Date.now</td></tr>
+            </tbody></table>
+        </div></div></div>
+    </div>
+
+    <!-- ══ BOOK CLASS ══ -->
+    <div id="section-booksclass" class="section">
+        <h2 class="page-title">Book Class</h2>
+        <p class="page-sub">ES6 class representing a book entity. Used by DatabaseManager to construct and persist records.</p>
+
+        <div class="module-card open">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">constructor</span><span class="mh-sub">new Book(Title, date, Author, Cover, PageCount)</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge CLASS">CONSTRUCTOR</span></div>
+                <div class="desc">Creates a new Book. All fields stored as private properties prefixed with _ and accessed via getters/setters.</div>
+                <div class="plabel">Parameters</div>
+                <table><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">Title</td><td class="pt">string</td><td class="pd">Book title.</td></tr>
+                <tr><td class="pn">date</td><td class="pt">string</td><td class="pd">Publication date.</td></tr>
+                <tr><td class="pn">Author</td><td class="pt">string</td><td class="pd">Author name.</td></tr>
+                <tr><td class="pn">Cover</td><td class="pt">Buffer | string</td><td class="pd">Cover image buffer or URL.</td></tr>
+                <tr><td class="pn">PageCount</td><td class="pt">number</td><td class="pd">Number of pages.</td></tr>
+                </tbody></table>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">insertIntoDatabase</span><span class="mh-sub">async insertIntoDatabase(database)</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge ASYNC">ASYNC</span></div>
+                <div class="desc">Constructs a new BookModel document and calls .save(). The database parameter must expose a BookModel property.</div>
+                <div class="ret"><div class="rl">Returns</div><div class="rv">Promise&lt;Document&gt;</div></div>
+            </div></div>
+        </div>
+
+        <h3 class="group">Getters & Setters</h3>
+        <div class="module-card open"><div class="module-body" style="display:block"><div class="mblock">
+            <table><thead><tr><th>Property</th><th>Type</th><th>Setter Validation</th></tr></thead><tbody>
+            <tr><td class="pn">Title</td><td class="pt">string</td><td class="pd">Throws TypeError if not a string.</td></tr>
+            <tr><td class="pn">Date</td><td class="pt">string</td><td class="pd">Throws TypeError if not a string.</td></tr>
+            <tr><td class="pn">Author</td><td class="pt">string</td><td class="pd">Throws TypeError if not a string.</td></tr>
+            <tr><td class="pn">Cover</td><td class="pt">Buffer | string</td><td class="pd">Throws TypeError if value is a Buffer.</td></tr>
+            <tr><td class="pn">PageCount</td><td class="pt">number</td><td class="pd">Throws TypeError if type check fails.</td></tr>
+            </tbody></table>
+        </div></div></div>
+    </div>
+
+    <!-- ══ APP & ROUTING ══ -->
+    <div id="section-app" class="section">
+        <h2 class="page-title">App & Routing</h2>
+        <p class="page-sub">Root application setup, React Router configuration, theme initialization, and global providers.</p>
+
+        <h3 class="group">main.jsx — Entry Point</h3>
+        <div class="module-card open"><div class="module-body" style="display:block"><div class="mblock">
+            <div class="desc">Bootstraps the app. Reads localStorage.theme or detects OS preference via prefers-color-scheme and sets data-theme on &lt;html&gt; before first render. Wraps app in BrowserRouter and AuthProvider.</div>
+            <div class="code"><span class="cmt">// Provider tree</span>
+                &lt;React.StrictMode&gt;
+                &lt;<span class="fn">BrowserRouter</span>&gt;
+                &lt;<span class="fn">AuthProvider</span>&gt;
+                &lt;<span class="fn">App</span> /&gt;
+                &lt;/AuthProvider&gt;
+                &lt;/BrowserRouter&gt;
+                &lt;/React.StrictMode&gt;</div>
+        </div></div></div>
+
+        <h3 class="group">App.jsx — Routes</h3>
+        <div class="module-card open"><div class="module-body" style="display:block"><div class="mblock">
+            <div class="desc">Manages a shared searchQuery state passed to CatalogPage. Scrolls to top on every route change via useEffect on location.pathname. Renders Navbar and Footer around all routes.</div>
+            <div class="plabel">Route Table</div>
+            <table><thead><tr><th>Path</th><th>Component</th><th>Protection</th></tr></thead><tbody>
+            <tr><td class="pn">/</td><td class="pt">LandingPage</td><td class="pd">Public</td></tr>
+            <tr><td class="pn">/catalog</td><td class="pt">CatalogPage</td><td class="pd">Public</td></tr>
+            <tr><td class="pn">/login</td><td class="pt">LoginPage</td><td class="pd">Public</td></tr>
+            <tr><td class="pn">/signup</td><td class="pt">SignupPage</td><td class="pd">Public</td></tr>
+            <tr><td class="pn">/profile</td><td class="pt">ProfilePage</td><td class="pd">ProtectedRoute</td></tr>
+            <tr><td class="pn">/dashboard</td><td class="pt">UserDashboard</td><td class="pd">ProtectedRoute</td></tr>
+            <tr><td class="pn">/admin</td><td class="pt">AdminDashboard</td><td class="pd">ProtectedRoute + requireAdmin</td></tr>
+            <tr><td class="pn">/admin/users</td><td class="pt">ManageUsers</td><td class="pd">ProtectedRoute + requireAdmin</td></tr>
+            <tr><td class="pn">/admin/users/:id</td><td class="pt">AdminUserProfile</td><td class="pd">ProtectedRoute + requireAdmin</td></tr>
+            <tr><td class="pn">/admin/books</td><td class="pt">ManageBooks</td><td class="pd">ProtectedRoute + requireAdmin</td></tr>
+            <tr><td class="pn">*</td><td class="pt">Navigate → /</td><td class="pd">Catch-all redirect</td></tr>
+            </tbody></table>
+        </div></div></div>
+    </div>
+
+    <!-- ══ USER PAGES ══ -->
+    <div id="section-pages" class="section">
+        <h2 class="page-title">User Pages</h2>
+        <p class="page-sub">Protected pages for authenticated users — the reading dashboard and multi-step profile setup.</p>
+
+        <h3 class="group">UserDashboard — /dashboard</h3>
+        <div class="module-card open">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">UserDashboard</span><span class="mh-sub">Route: /dashboard</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge PAGE">PAGE</span></div>
+                <div class="desc">Main reading hub for authenticated users. Fetches all books from the API on mount, falling back to local sample data if the request fails. Reads recently viewed and wishlist IDs from localStorage.</div>
+                <div class="plabel">LocalStorage Keys</div>
+                <table><thead><tr><th>Key</th><th>Value</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">devinc_recent_books</td><td class="pt">string[]</td><td class="pd">Recently viewed book IDs (max 8).</td></tr>
+                <tr><td class="pn">devinc_wishlist_books</td><td class="pt">string[]</td><td class="pd">Saved wishlist book IDs (max 24).</td></tr>
+                <tr><td class="pn">devinc_reading_progress</td><td class="pt">Record&lt;id, number&gt;</td><td class="pd">Per-book reading progress 0–100%.</td></tr>
+                </tbody></table>
+                <div class="plabel">Sections Rendered</div>
+                <table><thead><tr><th>Section</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">Hero / Stats</td><td class="pd">Total books, wishlist count, estimated books read, reading streak.</td></tr>
+                <tr><td class="pn">Continue Reading</td><td class="pd">Last 3 recently viewed books with interactive progress bars.</td></tr>
+                <tr><td class="pn">Recommended</td><td class="pd">Books matching genres from recent views; falls back to unread books.</td></tr>
+                <tr><td class="pn">Recently Viewed</td><td class="pd">Last 6 books opened from localStorage history.</td></tr>
+                <tr><td class="pn">Wishlist</td><td class="pd">Books saved via the heart button in the catalog.</td></tr>
+                </tbody></table>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">DashboardShelf</span><span class="mh-sub">internal sub-component</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge COMP">COMPONENT</span></div>
+                <div class="desc">Reusable shelf section rendering a grid of DashboardBookCard items. Handles loading skeletons and empty states.</div>
+                <div class="plabel">Props</div>
+                <table><thead><tr><th>Prop</th><th>Type</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">title / subtitle</td><td class="pt">string</td><td class="pd">Section heading and subheading.</td></tr>
+                <tr><td class="pn">books</td><td class="pt">Book[]</td><td class="pd">Books to display.</td></tr>
+                <tr><td class="pn">empty</td><td class="pt">string</td><td class="pd">Message shown when books array is empty.</td></tr>
+                <tr><td class="pn">loading</td><td class="pt">boolean</td><td class="pd">Shows skeleton cards when true.</td></tr>
+                <tr><td class="pn">onView</td><td class="pt">function</td><td class="pd">Called when a book is viewed.</td></tr>
+                <tr><td class="pn">onContinue</td><td class="pt">function</td><td class="pd">Bumps reading progress by 12% and opens detail modal.</td></tr>
+                <tr><td class="pn">onProgressChange</td><td class="pt">function(book, value)</td><td class="pd">Called when the progress slider changes.</td></tr>
+                <tr><td class="pn">getBookProgress</td><td class="pt">function(book) → number</td><td class="pd">Returns current progress 0–100 for a book.</td></tr>
+                </tbody></table>
+            </div></div>
+        </div>
+
+        <h3 class="group">ProfilePage — /profile</h3>
+        <div class="module-card open">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">ProfilePage</span><span class="mh-sub">Route: /profile</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge PAGE">PAGE</span></div>
+                <div class="desc">Multi-step profile setup form. Calls AuthContext.updateProfile on submit and redirects to /dashboard on success. Has a live password strength meter.</div>
+                <div class="plabel">Steps</div>
+                <table><thead><tr><th>Step</th><th>Fields</th><th>Validation</th></tr></thead><tbody>
+                <tr><td class="pn">1 — Basic Info</td><td class="pt">name, email (read-only), phone</td><td class="pd">Name required; phone min 7 chars if provided.</td></tr>
+                <tr><td class="pn">2 — Address</td><td class="pt">line1, line2, city, state, postalCode, country</td><td class="pd">All optional.</td></tr>
+                <tr><td class="pn">3 — Security</td><td class="pt">new password, confirm password</td><td class="pd">Min 6 chars; both must match if provided.</td></tr>
+                </tbody></table>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">FloatingInput</span><span class="mh-sub">internal sub-component</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge COMP">COMPONENT</span></div>
+                <div class="desc">Reusable input with floating label and left icon. Label animates up when the field has a value or is focused (CSS peer selectors).</div>
+                <div class="plabel">Props</div>
+                <table><thead><tr><th>Prop</th><th>Type</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">id</td><td class="pt">string</td><td class="pd">HTML id for label/input linkage.</td></tr>
+                <tr><td class="pn">label</td><td class="pt">string</td><td class="pd">Floating label text.</td></tr>
+                <tr><td class="pn">icon</td><td class="pt">LucideIcon</td><td class="pd">Icon component on the left.</td></tr>
+                <tr><td class="pn">value</td><td class="pt">string</td><td class="pd">Controlled value.</td></tr>
+                <tr><td class="pn">onChange</td><td class="pt">function(string)</td><td class="pd">Called with the new string value (not the event object).</td></tr>
+                <tr><td class="pn">type</td><td class="pt">string</td><td class="pd">Input type. Defaults to "text".</td></tr>
+                <tr><td class="pn">disabled</td><td class="pt">boolean</td><td class="pd">Disables the field. Defaults to false.</td></tr>
+                </tbody></table>
+            </div></div>
+        </div>
+    </div>
+
+    <!-- ══ CATALOG PAGE ══ -->
+    <div id="section-catalog" class="section">
+        <h2 class="page-title">Catalog Page</h2>
+        <p class="page-sub">Main book browsing interface. Supports search, date filtering, sorting, wishlist, and admin CRUD.</p>
+
+        <div class="module-card open">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">CatalogPage</span><span class="mh-sub">Route: /catalog</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge PAGE">PAGE</span></div>
+                <div class="desc">Fetches all books from GET /api/books on mount. Card grid with search, date filters, and sort options. Admins see Edit and Delete buttons. Limited to 100 rendered cards at a time.</div>
+                <div class="plabel">Props</div>
+                <table><thead><tr><th>Prop</th><th>Type</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">searchQuery</td><td class="pt">string</td><td class="pd">Global search query from the Navbar, passed down from App.</td></tr>
+                </tbody></table>
+                <div class="plabel">Filtering & Sorting</div>
+                <table><thead><tr><th>Option</th><th>Behavior</th></tr></thead><tbody>
+                <tr><td class="pn">Search</td><td class="pd">Matches title, author, or genre. Merges global Navbar query with a local search input.</td></tr>
+                <tr><td class="pn">Date Filter</td><td class="pd">all / classic (year &lt; 1980) / recent (year ≥ 2000).</td></tr>
+                <tr><td class="pn">Sort</td><td class="pd">newest, oldest, title A–Z / Z–A, pages asc/desc.</td></tr>
+                </tbody></table>
+                <div class="plabel">Key Internal Functions</div>
+                <table><thead><tr><th>Function</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">saveBook(bookData, bookId?)</td><td class="pd">Creates (POST) or updates (PUT) a book via the API.</td></tr>
+                <tr><td class="pn">removeBook(id)</td><td class="pd">Calls DELETE and removes from local state.</td></tr>
+                <tr><td class="pn">addToWishlist(book)</td><td class="pd">Adds book ID to wishlist in state and localStorage (max 32).</td></tr>
+                <tr><td class="pn">rememberRecent(book)</td><td class="pd">Prepends book ID to recent history in localStorage (max 8).</td></tr>
+                <tr><td class="pn">openEdit(book)</td><td class="pd">Closes detail modal and opens BookFormModal in edit mode.</td></tr>
+                </tbody></table>
+            </div></div>
+        </div>
+    </div>
+
+    <!-- ══ ADMIN PAGES ══ -->
+    <div id="section-admin-pages" class="section">
+        <h2 class="page-title">Admin Pages</h2>
+        <p class="page-sub">Admin-only pages for system overview, book management, and user profile inspection.</p>
+
+        <h3 class="group">AdminDashboard — /admin</h3>
+        <div class="module-card open">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">AdminDashboard</span><span class="mh-sub">Route: /admin</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge PAGE">PAGE</span></div>
+                <div class="desc">System overview for admins. Fetches users and books in parallel on mount. Renders summary cards, a Recharts AreaChart of monthly activity, recent users list, recent books list, quick action links, and an exportable audit event feed.</div>
+                <div class="plabel">Summary Cards</div>
+                <table><thead><tr><th>Card</th><th>Data Source</th></tr></thead><tbody>
+                <tr><td class="pn">Total Users</td><td class="pd">Length of the users array from the admin API.</td></tr>
+                <tr><td class="pn">Total Admins</td><td class="pd">Users filtered by role === "admin".</td></tr>
+                <tr><td class="pn">Total Books</td><td class="pd">Length of the books array.</td></tr>
+                <tr><td class="pn">Total Reviews</td><td class="pd">Placeholder — "Coming soon".</td></tr>
+                </tbody></table>
+                <div class="plabel">Analytics Chart</div>
+                <div class="desc" style="margin-top:4px">Monthly breakdown of users (by createdAt) and books (by date). Stacked AreaChart via Recharts with gradient fills. Recomputed with useMemo when data changes.</div>
+            </div></div>
+        </div>
+
+        <h3 class="group">ManageBooks — /admin/books</h3>
+        <div class="module-card open">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">ManageBooks</span><span class="mh-sub">Route: /admin/books</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge PAGE">PAGE</span></div>
+                <div class="desc">Admin data table for the book catalog. Search (debounced 250ms), date filter, sort, pagination (10 per page), bulk selection, bulk delete, and CSV import/export. All mutations log an audit event via logAdminEvent.</div>
+                <div class="plabel">Key Functions</div>
+                <table><thead><tr><th>Function</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">saveBook(bookData, bookId?)</td><td class="pd">Create or update via API. Logs books.add or books.edit.</td></tr>
+                <tr><td class="pn">removeBook(id)</td><td class="pd">DELETE request + state update + books.delete audit log.</td></tr>
+                <tr><td class="pn">bulkDelete()</td><td class="pd">Iterates selectedIds and deletes each. Logs books.bulk-delete.</td></tr>
+                <tr><td class="pn">bulkExport()</td><td class="pd">Generates CSV from selected books (id, title, author, genre, date, pageCount) and triggers download.</td></tr>
+                <tr><td class="pn">importCsv(file)</td><td class="pd">Reads a CSV file, parses rows, calls saveBook for each valid entry.</td></tr>
+                </tbody></table>
+            </div></div>
+        </div>
+
+        <h3 class="group">AdminUserProfile — /admin/users/:id</h3>
+        <div class="module-card open">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">AdminUserProfile</span><span class="mh-sub">Route: /admin/users/:id</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge PAGE">PAGE</span></div>
+                <div class="desc">Fetches a single user from GET /api/admin/users/:id. Displays name, email, phone, join date, and full address. Includes a placeholder activity panel (wishlist, recent views, reviews).</div>
+                <div class="plabel">Route Params</div>
+                <table><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">id</td><td class="pt">string</td><td class="pd">MongoDB ObjectId of the user, extracted via useParams.</td></tr>
+                </tbody></table>
+            </div></div>
+        </div>
+    </div>
+
+    <!-- ══ AUTH PAGES ══ -->
+    <div id="section-auth-pages" class="section">
+        <h2 class="page-title">Auth Pages</h2>
+        <p class="page-sub">Login and signup pages. Both use a split-screen layout with animated tech orbit visuals on the left and a form on the right.</p>
+
+        <div class="module-card open">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">LoginPage</span><span class="mh-sub">Route: /login</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge PAGE">PAGE</span></div>
+                <div class="desc">Renders a login form via the shared AuthTabs component. On success redirects to /admin for admin users or /dashboard otherwise. Auto-redirects if already authenticated.</div>
+                <div class="plabel">Auth Context Methods Used</div>
+                <table><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">login({ email, password })</td><td class="pd">Authenticates and stores the JWT. Returns the logged-in user.</td></tr>
+                </tbody></table>
+                <div class="plabel">Left Panel Orbit Icons</div>
+                <table><thead><tr><th>Icon</th><th>Radius</th><th>Direction</th></tr></thead><tbody>
+                <tr><td class="pn">React</td><td class="pt">120px</td><td class="pd">Forward</td></tr>
+                <tr><td class="pn">Tailwind CSS</td><td class="pt">180px</td><td class="pd">Reverse</td></tr>
+                <tr><td class="pn">MongoDB</td><td class="pt">240px</td><td class="pd">Forward</td></tr>
+                </tbody></table>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">SignupPage</span><span class="mh-sub">Route: /signup</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="sig"><span class="badge PAGE">PAGE</span></div>
+                <div class="desc">Renders a registration form. On success redirects to /dashboard. Newly created users always get the "user" role.</div>
+                <div class="plabel">Auth Context Methods Used</div>
+                <table><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">signup({ name, email, password })</td><td class="pd">Creates a new account and stores the JWT.</td></tr>
+                </tbody></table>
+                <div class="plabel">Left Panel Orbit Icons</div>
+                <table><thead><tr><th>Icon</th><th>Radius</th><th>Direction</th></tr></thead><tbody>
+                <tr><td class="pn">Node.js</td><td class="pt">120px</td><td class="pd">Forward</td></tr>
+                <tr><td class="pn">Express</td><td class="pt">180px</td><td class="pd">Reverse</td></tr>
+                <tr><td class="pn">Mongoose</td><td class="pt">240px</td><td class="pd">Forward</td></tr>
+                </tbody></table>
+            </div></div>
+        </div>
+
+        <h3 class="group">Shared UI Components</h3>
+        <div class="module-card open"><div class="module-body" style="display:block"><div class="mblock">
+            <table><thead><tr><th>Component</th><th>Source</th><th>Description</th></tr></thead><tbody>
+            <tr><td class="pn">AuthTabs</td><td class="pt">modern-animated-sign-in</td><td class="pd">Renders form fields, submit button, and text-variant link from a formFields config object.</td></tr>
+            <tr><td class="pn">TechOrbitDisplay</td><td class="pt">modern-animated-sign-in</td><td class="pd">Orbiting tech icons around a central label, driven by iconsArray config.</td></tr>
+            <tr><td class="pn">Ripple</td><td class="pt">modern-animated-sign-in</td><td class="pd">Animated concentric ripple rings behind the orbit display.</td></tr>
+            </tbody></table>
+        </div></div></div>
+    </div>
+
+    <!-- ══ SEED SCRIPTS ══ -->
+    <div id="section-seeds" class="section">
+        <h2 class="page-title">Seed Scripts</h2>
+        <p class="page-sub">Standalone Node.js scripts for populating and maintaining the database. Run from the Backend/ folder.</p>
+
+        <div class="module-card open">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">seed.js</span><span class="mh-sub">npm run seed</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="desc">Seeds the database with ~170 books: ~50 classics with real Open Library cover URLs plus 120 auto-generated titles. Skips books that fail validation rather than aborting.</div>
+                <div class="plabel">Key Functions</div>
+                <table><thead><tr><th>Function</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">coverUrl(isbn)</td><td class="pd">Builds an Open Library cover URL from an ISBN or seed integer.</td></tr>
+                <tr><td class="pn">buildGeneratedBooks(count)</td><td class="pd">Generates count synthetic books with rotating title parts, themes, and authors. Default: 80.</td></tr>
+                <tr><td class="pn">seed()</td><td class="pd">Main async entry. Connects, iterates SEED_BOOKS, calls addBook for each, then disconnects.</td></tr>
+                </tbody></table>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">seedDemoUsers.js</span><span class="mh-sub">npm run seed:demo-users</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="desc">Creates or updates two fixed accounts using findOneAndUpdate with upsert. Credentials are printed to the console on completion.</div>
+                <div class="plabel">Default Credentials</div>
+                <table><thead><tr><th>Account</th><th>Email</th><th>Password</th></tr></thead><tbody>
+                <tr><td class="pn">Demo User</td><td class="pt">demo.user@dev.inc</td><td class="pd">DemoUser123!</td></tr>
+                <tr><td class="pn">Demo Admin</td><td class="pt">demo.admin@dev.inc</td><td class="pd">DemoAdmin123!</td></tr>
+                </tbody></table>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">seedManyUsers.js</span><span class="mh-sub">npm run seed:many-users</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="desc">Bulk-inserts N synthetic users via insertMany. Duplicate key errors are silently ignored on re-runs. First SEED_ADMINS_COUNT users get the admin role.</div>
+                <div class="plabel">Env Variables</div>
+                <table><thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead><tbody>
+                <tr><td class="pn">SEED_USERS_COUNT</td><td class="pt">25</td><td class="pd">Total users to insert.</td></tr>
+                <tr><td class="pn">SEED_ADMINS_COUNT</td><td class="pt">2</td><td class="pd">How many get the admin role.</td></tr>
+                <tr><td class="pn">SEED_USERS_PASSWORD</td><td class="pt">DemoUser123!</td><td class="pd">Shared password for all seeded users.</td></tr>
+                <tr><td class="pn">SEED_USERS_DOMAIN</td><td class="pt">dev.inc</td><td class="pd">Email domain for generated addresses.</td></tr>
+                </tbody></table>
+            </div></div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header" onclick="toggle(this)"><span class="mh-name">cleanupDuplicates.js</span><span class="mh-sub">node cleanupDuplicates.js</span><span class="chevron">▼</span></div>
+            <div class="module-body"><div class="mblock">
+                <div class="desc">Removes duplicate book entries for a hardcoded list of titles (DUP_TITLES). Keeps the earliest document by _id ascending and deletes all others. Can also be imported and called programmatically as cleanup().</div>
+            </div></div>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    function show(id, el) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        const sec = document.getElementById('section-' + id);
+        if (sec) sec.classList.add('active');
+        if (el) el.classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    function toggle(header) {
+        const card = header.closest('.module-card');
+        card.classList.toggle('open');
+        const body = card.querySelector('.module-body');
+        if (body) body.style.display = card.classList.contains('open') ? 'block' : 'none';
+    }
+
+    function switchTab(id, btn) {
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    document.querySelectorAll('.module-card.open .module-body').forEach(b => b.style.display = 'block');
+</script>
+</body>
+</html>

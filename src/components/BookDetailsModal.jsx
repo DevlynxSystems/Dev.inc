@@ -1,3 +1,32 @@
+/**
+ * BookDetailsModal Component
+ *
+ * Displays a full-screen modal preview for a selected book with
+ * detailed information, animations, and action controls.
+ *
+ * Features:
+ * - Animated modal using motion/react
+ * - Book cover preview with fallback icon
+ * - Displays metadata (title, author, genre, year, pages, publish date)
+ * - Expandable book description (read more / less)
+ * - Actions: view details, add to wishlist, edit, delete, close
+ * - Click outside or close button dismisses modal
+ *
+ * Params
+ * @param {Object} book - Selected book object
+ * @param {boolean} open - Controls whether modal is visible
+ * @param {function} onClose - Closes the modal
+ * @param {function} [onEdit] - Opens edit flow for book
+ * @param {function} [onDelete] - Deletes the book
+ * @param {function} [onAddWishlist] - Adds book to wishlist
+ * @param {function} [onViewDetails] - Handles deep view navigation
+ *
+ *
+ *
+ */
+
+
+
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { BookOpenText, CalendarDays, FileText, Heart, Pencil, Trash2, X } from 'lucide-react'

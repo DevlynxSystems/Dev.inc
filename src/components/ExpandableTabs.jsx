@@ -1,3 +1,26 @@
+/**
+ * ExpandableTabs Component
+ *
+ * Responsive tab system that supports both desktop tabs and mobile accordion view.
+ *
+ * Features:
+ * - Accessible tab navigation (ARIA roles and keyboard-friendly structure)
+ * - Desktop tab interface with single active panel
+ * - Mobile accordion fallback using <details>
+ * - Maintains active state across both layouts
+ * - Safe handling of empty or invalid items
+ *
+ * Props:
+ * @param {Array<{title: string, content: React.ReactNode}>} items - Tab items to display
+ * @param {number} [defaultIndex=0] - Initial active tab index
+ * @param {string} [ariaLabel='Expandable tabs'] - Accessibility label for the tab group
+ *
+ * State:
+ * - activeIndex: Tracks currently selected tab/accordion section
+ *
+ */
+
+
 import { useId, useMemo, useState } from 'react'
 import './ExpandableTabs.css'
 
