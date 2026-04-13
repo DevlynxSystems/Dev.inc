@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { BookOpenText, CalendarDays, FileText, Heart, Pencil, Trash2, X } from 'lucide-react'
+import { useEscapeKey, usePrefersReducedMotion } from '../lib/a11yHooks'
 
 function formatPages(n) {
   if (n == null) return null
@@ -9,12 +10,17 @@ function formatPages(n) {
 
 export function BookDetailsModal({ book, open, onClose, onEdit, onDelete, onAddWishlist, onViewDetails }) {
   const [expanded, setExpanded] = useState(false)
+  const reducedMotion = usePrefersReducedMotion()
+
+  useEscapeKey(!!(open && book), onClose)
 
   useEffect(() => {
     if (open && book) setExpanded(false)
   }, [book?._id, open])
 
   if (!open || !book) return null
+
+  const tDur = reducedMotion ? 0 : 0.22
 
   const title = book.title ?? 'Untitled'
   const author = book.author ?? 'Unknown author'
@@ -35,6 +41,7 @@ export function BookDetailsModal({ book, open, onClose, onEdit, onDelete, onAddW
       onClick={(e) => e.target === e.currentTarget && onClose()}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
+      transition={{ duration: tDur }}
     >
       <motion.div className="absolute inset-0 bg-black/70 backdrop-blur-xl" aria-hidden="true" />
       <motion.div
@@ -44,7 +51,7 @@ export function BookDetailsModal({ book, open, onClose, onEdit, onDelete, onAddW
         onClick={(e) => e.stopPropagation()}
         initial={{ opacity: 0, y: 18, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.22 }}
+        transition={{ duration: tDur }}
         className="relative z-10 w-full max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-black/50 shadow-[0_28px_90px_rgba(0,0,0,0.6)] backdrop-blur-2xl"
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(249,115,22,0.24),transparent_40%),radial-gradient(circle_at_82%_20%,rgba(59,130,246,0.2),transparent_35%)]" />
@@ -60,8 +67,8 @@ export function BookDetailsModal({ book, open, onClose, onEdit, onDelete, onAddW
         <div className="relative grid gap-6 p-5 md:grid-cols-[1fr_1.15fr] md:p-7">
           <div className="space-y-3">
             <motion.div
-              whileHover={{ rotate: -1.4, y: -4 }}
-              transition={{ duration: 0.25 }}
+              whileHover={reducedMotion ? undefined : { rotate: -1.4, y: -4 }}
+              transition={{ duration: reducedMotion ? 0 : 0.25 }}
               className="relative mx-auto max-w-xs overflow-hidden rounded-2xl border border-white/15 shadow-[0_0_45px_rgba(249,115,22,0.24)]"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-orange-400/10 via-transparent to-blue-400/10" />
