@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { usePrefersReducedMotion } from './lib/a11yHooks'
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Navbar } from './components/Navbar'
 import { Footer } from './components/Footer'
 import { ProtectedRoute } from './components/ProtectedRoute'

@@ -32,9 +32,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { NavLink, useLocation, useNavigate, Link } from 'react-router-dom'
 import { Contrast, Moon, Sun } from 'lucide-react'
+import { useAuth } from '../auth/AuthContext'
 
 const THEME_CYCLE = ['light', 'dark', 'readable']
-import { useAuth } from '../auth/AuthContext'
 
 function TabLink({ to, label, icon }) {
   return (
