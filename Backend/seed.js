@@ -143,6 +143,28 @@ const CURATED_BOOKS = [
   { title: "Klara and the Sun", author: "Kazuo Ishiguro", date: "2021-03-02", pageCount: 303, cover: coverUrl("0593318171") },
   { title: "The Thursday Murder Club", author: "Richard Osman", date: "2020-09-03", pageCount: 382, cover: coverUrl("1984889603") },
   { title: "Tomorrow, and Tomorrow, and Tomorrow", author: "Gabrielle Zevin", date: "2022-07-05", pageCount: 401, cover: coverUrl("0593321201") },
+
+  { title: "The Hitchhiker's Guide to the Galaxy", author: "Douglas Adams", date: "1979-10-12", pageCount: 216, cover: coverUrl("0345391802") },
+  { title: "Ready Player One", author: "Ernest Cline", date: "2011-08-16", pageCount: 374, cover: coverUrl("0307887448") },
+  { title: "The Martian", author: "Andy Weir", date: "2014-02-11", pageCount: 384, cover: coverUrl("0553418025") },
+  { title: "Leviathan Wakes", author: "James S.A. Corey", date: "2011-06-15", pageCount: 592, cover: coverUrl("0316129089") },
+  { title: "Red Rising", author: "Pierce Brown", date: "2014-01-28", pageCount: 382, cover: coverUrl("0345539788") },
+  { title: "The Poppy War", author: "R.F. Kuang", date: "2018-05-01", pageCount: 544, cover: coverUrl("0062662599") },
+  { title: "The Night Circus", author: "Erin Morgenstern", date: "2011-09-13", pageCount: 387, cover: coverUrl("0385534639") },
+  { title: "Gone Girl", author: "Gillian Flynn", date: "2012-06-05", pageCount: 432, cover: coverUrl("0307588378") },
+  { title: "The Silent Patient", author: "Alex Michaelides", date: "2019-02-05", pageCount: 336, cover: coverUrl("1250301696") },
+  { title: "Big Little Lies", author: "Liane Moriarty", date: "2014-07-29", pageCount: 460, cover: coverUrl("0399590075") },
+  { title: "All the Light We Cannot See", author: "Anthony Doerr", date: "2014-05-06", pageCount: 531, cover: coverUrl("1501173219") },
+  { title: "The Nightingale", author: "Kristin Hannah", date: "2015-02-03", pageCount: 440, cover: coverUrl("1250080400") },
+  { title: "The Immortal Life of Henrietta Lacks", author: "Rebecca Skloot", date: "2010-02-02", pageCount: 381, cover: coverUrl("1400052181") },
+  { title: "Becoming", author: "Michelle Obama", date: "2018-11-13", pageCount: 448, cover: coverUrl("1524763136") },
+  { title: "Atomic Habits", author: "James Clear", date: "2018-10-16", pageCount: 320, cover: coverUrl("0735211299") },
+  { title: "The House in the Cerulean Sea", author: "TJ Klune", date: "2020-03-17", pageCount: 400, cover: coverUrl("1250217288") },
+  { title: "Mexican Gothic", author: "Silvia Moreno-Garcia", date: "2020-06-30", pageCount: 320, cover: coverUrl("0525620780") },
+  { title: "The Vanishing Half", author: "Brit Bennett", date: "2020-06-02", pageCount: 352, cover: coverUrl("0525536299") },
+  { title: "Normal People", author: "Sally Rooney", date: "2018-08-28", pageCount: 273, cover: coverUrl("1984822187") },
+  { title: "The Guest List", author: "Lucy Foley", date: "2020-06-02", pageCount: 320, cover: coverUrl("0062868934") },
+
   ...buildGeneratedBooks(200),
 ];
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { usePrefersReducedMotion } from './lib/a11yHooks'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 import { Navbar } from './components/Navbar'
@@ -21,17 +22,23 @@ import './App.css'
 export default function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const location = useLocation()
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   useEffect(() => {
-    // Keep transitions predictable: go to top on route change.
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [location.pathname])
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    })
+  }, [location.pathname, prefersReducedMotion])
 
   return (
     <div className="app-layout">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
       <Navbar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
-      <main className="main home-page">
+      <main id="main-content" className="main home-page" tabIndex={-1}>
         <div className="page-transition" key={location.pathname}>
           <Routes>
             <Route path="/" element={<LandingPage />} />

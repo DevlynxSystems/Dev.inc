@@ -21,9 +21,27 @@ vi.mock('../components/BookFormModal', () => ({
   BookFormModal: () => null,
 }))
 
+vi.mock('../components/RovingTabToolbar', () => ({
+  RovingTabToolbar: ({ children, ariaLabel, className }) => (
+    <div className={className} aria-label={ariaLabel}>
+      {children}
+    </div>
+  ),
+}))
+
+vi.mock('../lib/a11yHooks', () => ({
+  useEscapeKey: () => {},
+  usePrefersReducedMotion: () => false,
+}))
+
 vi.mock('../components/CatalogFilters', () => ({
   DATE_FILTER_OPTIONS: [{ value: 'all', label: 'All' }],
   SORT_OPTIONS: [{ value: 'newest', label: 'Newest' }],
+  GENRE_FILTER_UNCATEGORIZED: '__none__',
+  buildGenreFilterList: (books) => ({
+    genres: [...new Set(books.map((b) => b.genre).filter(Boolean))],
+    hasUncategorized: books.some((b) => !(b.genre && String(b.genre).trim())),
+  }),
   filterByDateFilter: (books) => books,
   filterByGenre: (books) => books,
   sortBooks: (books) => books,

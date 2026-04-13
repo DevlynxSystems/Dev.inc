@@ -1,10 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Heart, Pencil, Search, SlidersHorizontal, Star, Tag, Trash2 } from 'lucide-react';
+import { Heart, Pencil, Search, SlidersHorizontal, Star, Trash2 } from 'lucide-react';
+import { RovingTabToolbar } from '../components/RovingTabToolbar';
+import { useEscapeKey, usePrefersReducedMotion } from '../lib/a11yHooks';
 import { BookDetailsModal } from '../components/BookDetailsModal';
 import { BookFormModal } from '../components/BookFormModal';
 import { BookCardSkeletonGrid } from '../components/Skeleton';
-import { DATE_FILTER_OPTIONS, SORT_OPTIONS, filterByDateFilter, filterByGenre, sortBooks } from '../components/CatalogFilters';
+import {
+  DATE_FILTER_OPTIONS,
+  SORT_OPTIONS,
+  GENRE_FILTER_UNCATEGORIZED,
+  buildGenreFilterList,
+  filterByDateFilter,
+  filterByGenre,
+  sortBooks,
+} from '../components/CatalogFilters';
 import { useAuth } from '../auth/AuthContext';
 
 const RECENT_KEY = 'devinc_recent_books';
@@ -26,6 +36,9 @@ export function CatalogPage({ searchQuery }) {
   const [dateFilter, setDateFilter] = useState('all');
   const [genreFilter, setGenreFilter] = useState('all');
   const [bookToDelete, setBookToDelete] = useState(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  useEscapeKey(isAdmin && !!bookToDelete, () => setBookToDelete(null));
 
   useEffect(() => {
     let cancelled = false;
@@ -134,14 +147,16 @@ export function CatalogPage({ searchQuery }) {
     );
   }, [books, query]);
 
-  const genreOptions = useMemo(() => {
-    const set = new Set();
-    books.forEach((b) => {
-      const g = (b.genre && String(b.genre).trim()) || '';
-      if (g) set.add(g);
-    });
-    return Array.from(set).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
-  }, [books]);
+  const { genres: genreOptions, hasUncategorized } = useMemo(() => buildGenreFilterList(books), [books]);
+
+  useEffect(() => {
+    if (genreFilter === 'all') return;
+    if (genreFilter === GENRE_FILTER_UNCATEGORIZED) {
+      if (!hasUncategorized) setGenreFilter('all');
+      return;
+    }
+    if (!genreOptions.includes(genreFilter)) setGenreFilter('all');
+  }, [genreFilter, genreOptions, hasUncategorized]);
 
   const filteredBooks = useMemo(() => {
     const byGenre = filterByGenre(searchFiltered, genreFilter);
@@ -155,8 +170,9 @@ export function CatalogPage({ searchQuery }) {
   return (
     <section id="catalog" className="mx-auto w-full max-w-[78rem] px-2 sm:px-3 md:px-4" aria-label="Catalog">
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 16 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: prefersReducedMotion ? 0 : 0.25 }}
         className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/35 p-5 shadow-[0_20px_55px_rgba(0,0,0,0.45)] backdrop-blur-xl md:p-6"
       >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_10%,rgba(249,115,22,0.2),transparent_40%),radial-gradient(circle_at_86%_18%,rgba(59,130,246,0.16),transparent_35%)]" />
@@ -184,27 +200,10 @@ export function CatalogPage({ searchQuery }) {
                 value={localQuery}
                 onChange={(e) => setLocalQuery(e.target.value)}
                 placeholder="Search your library..."
+                aria-label="Search catalog by title, author, or genre"
                 className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.04] pl-9 pr-3 text-sm text-stone-100 placeholder:text-stone-500 outline-none transition focus:border-orange-300/50 focus:ring-2 focus:ring-orange-500/20"
               />
             </label>
-            <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2">
-              <Tag className="h-4 w-4 shrink-0 text-stone-400" />
-              <select
-                value={genreFilter}
-                onChange={(e) => setGenreFilter(e.target.value)}
-                className="max-w-[10rem] bg-transparent text-sm text-stone-100 outline-none sm:max-w-none"
-                aria-label="Filter by genre"
-              >
-                <option value="all" className="bg-stone-900">
-                  All genres
-                </option>
-                {genreOptions.map((g) => (
-                  <option key={g} value={g} className="bg-stone-900">
-                    {g}
-                  </option>
-                ))}
-              </select>
-            </div>
             <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2">
               <SlidersHorizontal className="h-4 w-4 text-stone-400" />
               <select
@@ -228,21 +227,81 @@ export function CatalogPage({ searchQuery }) {
           </div>
         </div>
 
-        <div className="relative mt-4 flex flex-wrap gap-2">
-          {DATE_FILTER_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setDateFilter(opt.value)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] transition ${
-                dateFilter === opt.value
-                  ? 'border-orange-300/35 bg-orange-500/15 text-orange-200'
-                  : 'border-white/10 bg-white/[0.04] text-stone-300 hover:border-white/20 hover:bg-white/[0.08]'
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
+        <div className="relative mt-4 space-y-3">
+            <div>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-500" id="catalog-era-label">
+              Era
+            </p>
+            <RovingTabToolbar ariaLabel="Filter books by publication era" className="flex flex-wrap gap-2">
+              {DATE_FILTER_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setDateFilter(opt.value)}
+                  aria-pressed={dateFilter === opt.value}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] transition ${
+                    dateFilter === opt.value
+                      ? 'border-orange-300/35 bg-orange-500/15 text-orange-200'
+                      : 'border-white/10 bg-white/[0.04] text-stone-300 hover:border-white/20 hover:bg-white/[0.08]'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </RovingTabToolbar>
+          </div>
+          {(genreOptions.length > 0 || hasUncategorized) && (
+            <div>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-500">Genre</p>
+              <RovingTabToolbar
+                ariaLabel="Filter books by genre"
+                className="flex max-h-[7.5rem] flex-wrap gap-2 overflow-y-auto pr-1 md:max-h-none"
+              >
+                <button
+                  type="button"
+                  onClick={() => setGenreFilter('all')}
+                  aria-pressed={genreFilter === 'all'}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                    genreFilter === 'all'
+                      ? 'border-sky-400/40 bg-sky-500/15 text-sky-100'
+                      : 'border-white/10 bg-white/[0.04] text-stone-300 hover:border-white/20 hover:bg-white/[0.08]'
+                  }`}
+                >
+                  All genres
+                </button>
+                {hasUncategorized && (
+                  <button
+                    type="button"
+                    onClick={() => setGenreFilter(GENRE_FILTER_UNCATEGORIZED)}
+                    aria-pressed={genreFilter === GENRE_FILTER_UNCATEGORIZED}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                      genreFilter === GENRE_FILTER_UNCATEGORIZED
+                        ? 'border-sky-400/40 bg-sky-500/15 text-sky-100'
+                        : 'border-white/10 bg-white/[0.04] text-stone-300 hover:border-white/20 hover:bg-white/[0.08]'
+                    }`}
+                  >
+                    No genre
+                  </button>
+                )}
+                {genreOptions.map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setGenreFilter(g)}
+                    aria-pressed={genreFilter === g}
+                    className={`max-w-[11rem] truncate rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                      genreFilter === g
+                        ? 'border-sky-400/40 bg-sky-500/15 text-sky-100'
+                        : 'border-white/10 bg-white/[0.04] text-stone-300 hover:border-white/20 hover:bg-white/[0.08]'
+                    }`}
+                    title={g}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </RovingTabToolbar>
+            </div>
+          )}
         </div>
       </motion.div>
 
@@ -274,10 +333,13 @@ export function CatalogPage({ searchQuery }) {
           previewBooks.map((book, index) => (
             <motion.article
               key={book._id}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(index * 0.03, 0.25) }}
-              whileHover={{ y: -6, scale: 1.01 }}
+              transition={{
+                duration: prefersReducedMotion ? 0 : 0.2,
+                delay: prefersReducedMotion ? 0 : Math.min(index * 0.03, 0.25),
+              }}
+              whileHover={prefersReducedMotion ? undefined : { y: -6, scale: 1.01 }}
               className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_12px_30px_rgba(0,0,0,0.34)] backdrop-blur-xl transition hover:border-orange-300/30 hover:shadow-[0_0_35px_rgba(249,115,22,0.14)]"
               role="listitem"
             >
@@ -384,20 +446,28 @@ export function CatalogPage({ searchQuery }) {
         {isAdmin && bookToDelete && (
           <motion.aside
             className="fixed inset-0 z-[120] bg-black/55 backdrop-blur-sm"
+            role="presentation"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setBookToDelete(null)}
           >
             <motion.div
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="catalog-delete-title"
+              aria-describedby="catalog-delete-desc"
               initial={{ opacity: 0, y: 12, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
               className="mx-auto mt-36 w-full max-w-md rounded-2xl border border-white/10 bg-black/90 p-5 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-lg font-semibold text-white">Remove book from catalog?</h3>
-              <p className="mt-2 text-sm text-stone-300">
+              <h3 id="catalog-delete-title" className="text-lg font-semibold text-white">
+                Remove book from catalog?
+              </h3>
+              <p id="catalog-delete-desc" className="mt-2 text-sm text-stone-300">
                 <span className="font-medium text-stone-100">{bookToDelete.title || 'Untitled'}</span>
                 {bookToDelete.author ? ` · ${bookToDelete.author}` : ''} will be deleted permanently. This cannot be undone.
               </p>

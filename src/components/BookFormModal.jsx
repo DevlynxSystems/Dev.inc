@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion } from 'motion/react'
 import { BookOpenText, CalendarDays, FileText, ImagePlus, PenLine, Tags, UserRound } from 'lucide-react'
+import { useEscapeKey, usePrefersReducedMotion } from '../lib/a11yHooks'
+
+const FORM_ERROR_ID = 'book-form-error'
 
 const MAX_COVER_PIXELS = 800
 const COVER_JPEG_QUALITY = 0.82
@@ -77,6 +80,8 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
   const [uploading, setUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef(null)
+  const firstFieldId = 'book-form-title'
+  const reducedMotion = usePrefersReducedMotion()
 
   useEffect(() => {
     if (!open) {
@@ -96,6 +101,14 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
       reset()
     }
   }, [open, editingBook])
+
+  useEffect(() => {
+    if (!open) return
+    const t = requestAnimationFrame(() => {
+      document.getElementById(firstFieldId)?.focus()
+    })
+    return () => cancelAnimationFrame(t)
+  }, [open, editingBook?._id])
 
   const reset = () => {
     setTitle('')
@@ -170,7 +183,11 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
     onClose()
   }
 
+  useEscapeKey(open, handleClose)
+
   if (!open) return null
+
+  const motionDur = reducedMotion ? 0 : 0.2
 
   return (
     <aside
@@ -182,15 +199,17 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
         className="absolute inset-0 bg-black/65 backdrop-blur-xl"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
+        transition={{ duration: motionDur }}
       />
       <motion.div
         role="dialog"
         aria-labelledby="modal-title"
+        aria-describedby="modal-description"
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
         initial={{ opacity: 0, y: 16, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: motionDur }}
         className="relative z-10 w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-black/50 shadow-[0_24px_80px_rgba(0,0,0,0.55)] backdrop-blur-2xl"
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(249,115,22,0.22),transparent_42%),radial-gradient(circle_at_90%_10%,rgba(59,130,246,0.2),transparent_35%)]" />
@@ -200,7 +219,9 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
               <h2 id="modal-title" className="text-2xl font-semibold tracking-tight text-white md:text-3xl">
                 {editingBook ? 'Edit Book' : 'Add New Book'}
               </h2>
-              <p className="mt-1 text-sm text-stone-300">Add a new book to your catalog with complete metadata and a premium cover preview.</p>
+              <p id="modal-description" className="mt-1 text-sm text-stone-300">
+                Add a new book to your catalog with complete metadata and a premium cover preview.
+              </p>
             </div>
 
             <div
@@ -228,6 +249,7 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
                 onClick={() => fileInputRef.current?.click()}
                 className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 border-t border-white/15 bg-black/50 px-3 py-2 text-sm font-medium text-stone-100 opacity-95 transition group-hover:bg-black/65"
                 disabled={uploading}
+                aria-label={coverPreview ? 'Upload or change cover image' : 'Upload cover image'}
               >
                 <ImagePlus className="h-4 w-4" />
                 {uploading ? 'Processing...' : coverPreview ? 'Upload / Change image' : 'Upload cover image'}
@@ -253,13 +275,19 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
               accept={IMAGE_ACCEPT}
               onChange={handleFileChange}
               className="hidden"
-              title="PNG, JPEG, JPG, GIF, WebP, SVG, BMP, and other image types"
+              aria-label="Choose cover image file. PNG, JPEG, WebP, and other common image types."
             />
           </section>
 
           <section className="space-y-4">
             {error && (
-              <p className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
+              <p
+                id={FORM_ERROR_ID}
+                role="alert"
+                aria-live="polite"
+                aria-atomic="true"
+                className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
+              >
                 {error}
               </p>
             )}
@@ -268,28 +296,33 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
               <p className="mb-3 text-xs uppercase tracking-[0.12em] text-stone-400">Basic information</p>
               <div className="space-y-3">
                 <FloatingField
-                  id="title"
+                  id={firstFieldId}
                   label="Book title"
                   icon={PenLine}
                   value={title}
                   onChange={setTitle}
                   required
-                  autoFocus
+                  ariaInvalid={!!error}
+                  ariaDescribedBy={error ? FORM_ERROR_ID : undefined}
                 />
                 <FloatingField
-                  id="author"
+                  id="book-form-author"
                   label="Author"
                   icon={UserRound}
                   value={author}
                   onChange={setAuthor}
                   required
+                  ariaInvalid={!!error}
+                  ariaDescribedBy={error ? FORM_ERROR_ID : undefined}
                 />
                 <FloatingField
-                  id="genre"
+                  id="book-form-genre"
                   label="Genre (optional)"
                   icon={Tags}
                   value={genre}
                   onChange={setGenre}
+                  ariaInvalid={!!error}
+                  ariaDescribedBy={error ? FORM_ERROR_ID : undefined}
                 />
               </div>
             </div>
@@ -298,15 +331,17 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
               <p className="mb-3 text-xs uppercase tracking-[0.12em] text-stone-400">Metadata</p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <FloatingField
-                  id="publishDate"
+                  id="book-form-date"
                   label="Publish date"
                   icon={CalendarDays}
                   value={publishDate}
                   onChange={setPublishDate}
                   type="date"
+                  ariaInvalid={!!error}
+                  ariaDescribedBy={error ? FORM_ERROR_ID : undefined}
                 />
                 <FloatingField
-                  id="pageNumber"
+                  id="book-form-pages"
                   label="Pages"
                   icon={FileText}
                   value={pageNumber}
@@ -314,6 +349,8 @@ export function BookFormModal({ open, onClose, onSave, book: editingBook }) {
                   type="number"
                   min="1"
                   required
+                  ariaInvalid={!!error}
+                  ariaDescribedBy={error ? FORM_ERROR_ID : undefined}
                 />
               </div>
             </div>
@@ -350,10 +387,12 @@ function FloatingField({
   required = false,
   autoFocus = false,
   min,
+  ariaInvalid = false,
+  ariaDescribedBy,
 }) {
   return (
     <div className="relative">
-      <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+      <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" aria-hidden />
       <input
         id={id}
         type={type}
@@ -363,7 +402,9 @@ function FloatingField({
         autoFocus={autoFocus}
         min={min}
         placeholder=" "
-        className="peer h-12 w-full rounded-2xl border border-white/10 bg-white/[0.04] pl-10 pr-3 pt-4 text-sm text-stone-100 outline-none transition placeholder:text-transparent hover:border-white/20 focus:border-orange-300/50 focus:bg-white/[0.06] focus:shadow-[0_0_0_3px_rgba(249,115,22,0.18)]"
+        aria-invalid={ariaInvalid || undefined}
+        aria-describedby={ariaDescribedBy || undefined}
+        className="peer h-12 w-full rounded-2xl border border-white/10 bg-white/[0.04] pl-10 pr-3 pt-4 text-sm text-stone-100 outline-none transition placeholder:text-transparent hover:border-white/20 focus:border-orange-300/50 focus:bg-white/[0.06] focus:shadow-[0_0_0_3px_rgba(249,115,22,0.18)] aria-invalid:border-rose-400/50"
       />
       <label
         htmlFor={id}

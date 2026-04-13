@@ -29,9 +29,62 @@ export function filterByDateFilter(books, dateFilter) {
   })
 }
 
-/** @param {string} genreFilter Use `'all'` to skip filtering. */
+/** Sentinel: show books with no genre set (empty string). */
+export const GENRE_FILTER_UNCATEGORIZED = '__none__'
+
+/** Preferred order for genre pills / dropdowns; unknown labels sort after these. */
+export const GENRE_DISPLAY_ORDER = [
+  'Fiction',
+  'Literary',
+  'Classic',
+  'Sci-Fi',
+  'Fantasy',
+  'Dystopian',
+  'Mystery',
+  'Thriller',
+  'Horror',
+  'Romance',
+  'Historical',
+  'Historical Fiction',
+  'Adventure',
+  'Magical Realism',
+  'Gothic',
+  'Memoir',
+  'Nonfiction',
+]
+
+/**
+ * Unique genres from `books`, sorted for filters (common order first, then A–Z).
+ * @param {Array<{ genre?: string }>} books
+ * @returns {{ genres: string[], hasUncategorized: boolean }}
+ */
+export function buildGenreFilterList(books) {
+  const seen = new Set()
+  let uncategorized = 0
+  for (const b of books) {
+    const g = (b.genre && String(b.genre).trim()) || ''
+    if (!g) uncategorized += 1
+    else seen.add(g)
+  }
+  const genres = Array.from(seen).sort((a, b) => {
+    const ia = GENRE_DISPLAY_ORDER.indexOf(a)
+    const ib = GENRE_DISPLAY_ORDER.indexOf(b)
+    if (ia !== -1 && ib !== -1) return ia - ib
+    if (ia !== -1) return -1
+    if (ib !== -1) return 1
+    return a.localeCompare(b, undefined, { sensitivity: 'base' })
+  })
+  return { genres, hasUncategorized: uncategorized > 0 }
+}
+
+/**
+ * @param {string} genreFilter `'all'` | `GENRE_FILTER_UNCATEGORIZED` | exact genre label from data
+ */
 export function filterByGenre(books, genreFilter) {
   if (!genreFilter || genreFilter === 'all') return books
+  if (genreFilter === GENRE_FILTER_UNCATEGORIZED) {
+    return books.filter((b) => !((b.genre && String(b.genre).trim()) || ''))
+  }
   const want = String(genreFilter).trim().toLowerCase()
   return books.filter((b) => (b.genre || '').trim().toLowerCase() === want)
 }

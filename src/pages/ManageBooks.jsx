@@ -7,6 +7,13 @@ import { useAuth } from '../auth/AuthContext'
 import { AdminLayout } from '../components/AdminLayout'
 import { logAdminEvent } from '../lib/adminAudit'
 import { ManageBooksTableSkeleton } from '../components/Skeleton'
+import {
+  GENRE_FILTER_UNCATEGORIZED,
+  buildGenreFilterList,
+  filterByGenre,
+} from '../components/CatalogFilters'
+import { RovingTabToolbar } from '../components/RovingTabToolbar'
+import { useEscapeKey, usePrefersReducedMotion } from '../lib/a11yHooks'
 
 export function ManageBooks() {
   const { API_BASE_URL, authFetch } = useAuth()
@@ -26,6 +33,10 @@ export function ManageBooks() {
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [editingBook, setEditingBook] = useState(null)
   const [bookToDelete, setBookToDelete] = useState(null)
+  const prefersReducedMotion = usePrefersReducedMotion()
+
+  useEscapeKey(!!bookToDelete, () => setBookToDelete(null))
+  useEscapeKey(!!activeBook, () => setActiveBook(null))
 
   const loadBooks = async () => {
     try {
@@ -108,36 +119,40 @@ export function ManageBooks() {
     setAddModalOpen(false)
   }
 
-  const genreOptions = useMemo(() => {
-    const set = new Set()
-    books.forEach((b) => {
-      const g = (b.genre && String(b.genre).trim()) || ''
-      if (g) set.add(g)
-    })
-    return Array.from(set).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
-  }, [books])
+  const { genres: genreOptions, hasUncategorized } = useMemo(() => buildGenreFilterList(books), [books])
 
-  const filteredBooks = books
-    .filter((b) => {
-      const q = search.trim().toLowerCase()
+  useEffect(() => {
+    if (genreFilter === 'all') return
+    if (genreFilter === GENRE_FILTER_UNCATEGORIZED) {
+      if (!hasUncategorized) setGenreFilter('all')
+      return
+    }
+    if (!genreOptions.includes(genreFilter)) setGenreFilter('all')
+  }, [genreFilter, genreOptions, hasUncategorized])
+
+  const filteredBooks = useMemo(() => {
+    let list = books.filter((b) => {
       if (dateFilter === 'recent' && new Date(b.date || 0).getFullYear() < 2000) return false
       if (dateFilter === 'classic' && new Date(b.date || 0).getFullYear() >= 1980) return false
-      if (genreFilter !== 'all') {
-        const g = (b.genre || '').trim().toLowerCase()
-        if (g !== genreFilter.trim().toLowerCase()) return false
-      }
-      if (!q) return true
-      return (
-        (b.title || '').toLowerCase().includes(q) ||
-        (b.author || '').toLowerCase().includes(q) ||
-        (b.genre || '').toLowerCase().includes(q)
-      )
+      return true
     })
-    .sort((a, b) => {
+    list = filterByGenre(list, genreFilter)
+    const q = search.trim().toLowerCase()
+    if (q) {
+      list = list.filter(
+        (b) =>
+          (b.title || '').toLowerCase().includes(q) ||
+          (b.author || '').toLowerCase().includes(q) ||
+          (b.genre || '').toLowerCase().includes(q)
+      )
+    }
+    const sorted = [...list].sort((a, b) => {
       if (sortBy === 'title') return (a.title || '').localeCompare(b.title || '')
       if (sortBy === 'author') return (a.author || '').localeCompare(b.author || '')
       return new Date(b.date || 0) - new Date(a.date || 0)
     })
+    return sorted
+  }, [books, search, dateFilter, genreFilter, sortBy])
 
   const pagedBooks = filteredBooks.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const totalPages = Math.max(1, Math.ceil(filteredBooks.length / PAGE_SIZE))
@@ -229,12 +244,6 @@ export function ManageBooks() {
             className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.04] pl-9 pr-3 text-sm text-stone-100 placeholder:text-stone-500 outline-none transition focus:border-orange-300/50 focus:ring-2 focus:ring-orange-500/20"
           />
         </label>
-        <select className="h-11 max-w-[11rem] rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm text-stone-100" value={genreFilter} onChange={(e) => setGenreFilter(e.target.value)} aria-label="Filter by genre">
-          <option value="all">All genres</option>
-          {genreOptions.map((g) => (
-            <option key={g} value={g}>{g}</option>
-          ))}
-        </select>
         <select className="h-11 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm text-stone-100" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
           <option value="newest">Newest</option>
           <option value="title">Title</option>
@@ -263,6 +272,59 @@ export function ManageBooks() {
           Add book
         </button>
       </div>
+
+      {(genreOptions.length > 0 || hasUncategorized) && (
+        <div className="mb-4 rounded-2xl border border-white/10 bg-white/[0.02] p-3">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-500">Genre</p>
+          <RovingTabToolbar
+            ariaLabel="Filter books by genre"
+            className="flex max-h-[6.5rem] flex-wrap gap-2 overflow-y-auto md:max-h-none"
+          >
+            <button
+              type="button"
+              onClick={() => setGenreFilter('all')}
+              aria-pressed={genreFilter === 'all'}
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                genreFilter === 'all'
+                  ? 'border-sky-400/40 bg-sky-500/15 text-sky-100'
+                  : 'border-white/10 bg-white/[0.04] text-stone-300 hover:border-white/20 hover:bg-white/[0.08]'
+              }`}
+            >
+              All genres
+            </button>
+            {hasUncategorized && (
+              <button
+                type="button"
+                onClick={() => setGenreFilter(GENRE_FILTER_UNCATEGORIZED)}
+                aria-pressed={genreFilter === GENRE_FILTER_UNCATEGORIZED}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                  genreFilter === GENRE_FILTER_UNCATEGORIZED
+                    ? 'border-sky-400/40 bg-sky-500/15 text-sky-100'
+                    : 'border-white/10 bg-white/[0.04] text-stone-300 hover:border-white/20 hover:bg-white/[0.08]'
+                }`}
+              >
+                No genre
+              </button>
+            )}
+            {genreOptions.map((g) => (
+              <button
+                key={g}
+                type="button"
+                onClick={() => setGenreFilter(g)}
+                aria-pressed={genreFilter === g}
+                className={`max-w-[12rem] truncate rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                  genreFilter === g
+                    ? 'border-sky-400/40 bg-sky-500/15 text-sky-100'
+                    : 'border-white/10 bg-white/[0.04] text-stone-300 hover:border-white/20 hover:bg-white/[0.08]'
+                }`}
+                title={g}
+              >
+                {g}
+              </button>
+            ))}
+          </RovingTabToolbar>
+        </div>
+      )}
 
       {selectedIds.length > 0 && (
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-orange-300/35 bg-orange-500/10 px-3 py-2">
@@ -447,14 +509,21 @@ export function ManageBooks() {
             onClick={() => setBookToDelete(null)}
           >
             <motion.div
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="admin-delete-title"
+              aria-describedby="admin-delete-desc"
               initial={{ opacity: 0, y: 12, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
               className="mx-auto mt-36 w-full max-w-md rounded-2xl border border-white/10 bg-black/90 p-5 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-lg font-semibold text-white">Remove book from catalog?</h3>
-              <p className="mt-2 text-sm text-stone-300">
+              <h3 id="admin-delete-title" className="text-lg font-semibold text-white">
+                Remove book from catalog?
+              </h3>
+              <p id="admin-delete-desc" className="mt-2 text-sm text-stone-300">
                 <span className="font-medium text-stone-100">{bookToDelete.title || 'Untitled'}</span>
                 {bookToDelete.author ? ` · ${bookToDelete.author}` : ''} will be deleted permanently. This cannot be undone.
               </p>

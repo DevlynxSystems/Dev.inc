@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { NavLink, useLocation, useNavigate, Link } from 'react-router-dom'
-import { Moon, Sun } from 'lucide-react'
+import { Contrast, Moon, Sun } from 'lucide-react'
+
+const THEME_CYCLE = ['light', 'dark', 'readable']
 import { useAuth } from '../auth/AuthContext'
 
 function TabLink({ to, label, icon }) {
@@ -41,7 +43,10 @@ function TabButton({ onClick, label, icon }) {
 
 export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
   const [profileOpen, setProfileOpen] = useState(false)
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark')
+  const [theme, setTheme] = useState(() => {
+    const t = localStorage.getItem('theme')
+    return THEME_CYCLE.includes(t) ? t : 'dark'
+  })
   const profileRef = useRef(null)
   const navigate = useNavigate()
   const location = useLocation()
@@ -68,11 +73,20 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
   }
 
   const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark'
+    const i = THEME_CYCLE.indexOf(theme)
+    const idx = i >= 0 ? i : 0
+    const next = THEME_CYCLE[(idx + 1) % THEME_CYCLE.length]
     setTheme(next)
     document.documentElement.setAttribute('data-theme', next)
     localStorage.setItem('theme', next)
   }
+
+  const themeCycleHint =
+    theme === 'light'
+      ? 'Next: dark theme'
+      : theme === 'dark'
+        ? 'Next: readable high-contrast theme'
+        : 'Next: light theme'
 
   const initial = user?.name?.[0]?.toUpperCase() || '?'
 
@@ -226,10 +240,16 @@ export function Navbar({ searchQuery, onSearchChange, onAddBook }) {
                 type="button"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-stone-200 transition hover:border-white/20 hover:bg-white/10"
                 onClick={toggleTheme}
-                aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-                title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
+                aria-label={`Color theme: ${theme}. ${themeCycleHint}.`}
+                title={`Theme: ${theme} (${themeCycleHint})`}
               >
-                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {theme === 'readable' ? (
+                  <Contrast className="h-4 w-4" aria-hidden />
+                ) : theme === 'dark' ? (
+                  <Sun className="h-4 w-4" aria-hidden />
+                ) : (
+                  <Moon className="h-4 w-4" aria-hidden />
+                )}
               </button>
               {user && (
                 <div className="relative" ref={profileRef}>

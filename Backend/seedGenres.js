@@ -88,6 +88,27 @@ const KNOWN_TITLE_GENRES = {
   "Klara and the Sun": "Sci-Fi",
   "The Thursday Murder Club": "Mystery",
   "Tomorrow, and Tomorrow, and Tomorrow": "Fiction",
+
+  "The Hitchhiker's Guide to the Galaxy": "Sci-Fi",
+  "Ready Player One": "Sci-Fi",
+  "The Martian": "Sci-Fi",
+  "Leviathan Wakes": "Sci-Fi",
+  "Red Rising": "Sci-Fi",
+  "The Poppy War": "Fantasy",
+  "The Night Circus": "Fantasy",
+  "Gone Girl": "Thriller",
+  "The Silent Patient": "Thriller",
+  "Big Little Lies": "Fiction",
+  "All the Light We Cannot See": "Historical Fiction",
+  "The Nightingale": "Historical Fiction",
+  "The Immortal Life of Henrietta Lacks": "Nonfiction",
+  Becoming: "Memoir",
+  "Atomic Habits": "Nonfiction",
+  "The House in the Cerulean Sea": "Fantasy",
+  "Mexican Gothic": "Horror",
+  "The Vanishing Half": "Fiction",
+  "Normal People": "Romance",
+  "The Guest List": "Mystery",
 };
 
 function genreForGeneratedIndex(i) {
