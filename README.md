@@ -21,6 +21,14 @@ Full‑stack book catalog with **JWT authentication** and **role‑based access 
 - Sign up / log in as a **user** (dashboard + profile)
 - Log in as an **admin** (admin dashboard, manage books, manage users)
 
+## Core features
+
+- JWT-based authentication with role-aware routing (`guest`, `user`, `admin`)
+- Public catalog browsing with search/filter/sort and detailed book views
+- Admin tools for managing books and users
+- Profile management for authenticated users
+- Automated test coverage across frontend unit, backend unit/integration, and E2E flows
+
 ## Quick links
 
 - Live app: [https://devinc-brown.vercel.app/](https://devinc-brown.vercel.app/)
@@ -53,24 +61,61 @@ Full‑stack book catalog with **JWT authentication** and **role‑based access 
 
 ```
 Dev.inc/
-├── FrontEnd_Documentation.md # Frontend architecture & features
-├── docs/                     # e.g. TESTING_PLAN.md
-├── src/                      # React + Vite app (repo root)
-│   ├── auth/                 # AuthContext (JWT, authFetch)
-│   ├── lib/                  # Utilities, client-side admin audit helpers
-│   ├── components/           # Navbar, ProtectedRoute, AdminLayout, modals, …
-│   └── pages/                # Landing, catalog, login/signup, dashboards, admin
-├── public/                   # Static assets for Vite
+├── .github/workflows/         # GitHub Actions (docs and repo automation)
+├── Backend/                   # Express + MongoDB backend
+│   ├── controllers/           # auth, books, admin handlers
+│   ├── middleware/            # auth + role guards
+│   ├── models/                # Mongoose models
+│   ├── routes/                # API route modules
+│   ├── tests/                 # Jest unit/integration tests
+│   ├── server.js              # Backend entrypoint
+│   ├── app.js                 # Express app
+│   └── package.json
+├── docs/                      # User/dev/testing and static documentation
+├── e2e/                       # Playwright specs
+├── public/                    # Static frontend assets
+├── src/                       # React + Vite frontend source
+│   ├── assets/                # Local images and UI assets
+│   ├── auth/                  # Auth context and auth utilities
+│   ├── components/            # Shared UI components
+│   ├── data/                  # Seed/static frontend data
+│   ├── lib/                   # Frontend helpers and hooks
+│   └── pages/                 # Route-level page components
+├── FrontEnd_Documentation.md
 ├── index.html
-├── vite.config.js
-├── package.json              # Frontend dependencies & scripts
-└── Backend/                  # Express API
-    ├── controllers/
-    ├── middleware/           # JWT auth + role checks
-    ├── models/               # User model
-    ├── routes/               # authRoutes, bookRoutes, adminRoutes
-    └── server.js
+├── manage.bat                 # Windows task runner (setup/dev/build)
+├── manage.sh                  # Unix/macOS task runner (setup/dev/build)
+├── package.json               # Frontend scripts and dependencies
+├── playwright.config.js
+├── tailwind.config.js
+├── vercel.json
+└── vite.config.js
 ```
+
+## Scripts
+
+From the repo root:
+
+| Command | Purpose |
+|---------|---------|
+| `npm run dev` | Start Vite frontend dev server |
+| `npm run build` | Build frontend for production |
+| `npm run preview` | Preview production frontend build |
+| `npm test` | Run frontend unit tests (Vitest) |
+| `npm run test:e2e` | Run Playwright E2E tests |
+| `npm run test:backend` | Run backend Jest tests |
+| `npm run test:all` | Run backend + frontend + E2E suites |
+
+From `Backend/`:
+
+| Command | Purpose |
+|---------|---------|
+| `npm start` | Start Express API server |
+| `npm run seed` | Seed catalog books |
+| `npm run backfill:genres` | Populate missing genres |
+| `npm run seed:demo-users` | Seed demo auth users |
+| `npm run seed:many-users` | Seed many users/admins |
+| `npm test` | Run backend test suite |
 
 ## Prerequisites
 
@@ -196,6 +241,12 @@ npm run seed:many-users
 3. **SPA routing**: `vercel.json` in the repo root rewrites paths to `/` so React Router routes (e.g. `/login`, `/catalog`, `/admin`) work on refresh.
 4. **Build output**: **Output Directory** should be **`dist`**, not `public`.
 
+## CI and automation
+
+- GitHub workflows are configured under `.github/workflows/`
+- `auto-assign.yml` auto-assigns opened issues/PRs
+- `proof-html.yml` validates generated documentation artifacts
+
 ### Troubleshooting
 
 - If the live site shows a generic **“demo repository”** welcome page, the wrong Git repo is linked or an old deployment is cached—fix the repo link and **Redeploy**.
@@ -254,6 +305,155 @@ All endpoints below require:
 ![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=DevlynxSystems&repo=Dev.inc&layout=compact&theme=default)
 
 ![Repo Stats](https://github-readme-stats.vercel.app/api/pin/?username=DevlynxSystems&repo=Dev.inc&theme=default)
+
+## Detailed File Tree
+
+**Generated:** 4/13/2026, 10:37:46 PM  
+**Root Path:** `c:\Users\thaka\OneDrive\Desktop\Dev.inc`
+
+```text
+├── 📁 .github
+│   └── 📁 workflows
+│       ├── ⚙️ auto-assign.yml
+│       └── ⚙️ proof-html.yml
+├── 📁 Backend
+│   ├── 📁 controllers
+│   │   ├── 📄 adminController.js
+│   │   ├── 📄 authController.js
+│   │   └── 📄 booksController.js
+│   ├── 📁 middleware
+│   │   ├── 📄 authMiddleware.js
+│   │   └── 📄 roleMiddleware.js
+│   ├── 📁 models
+│   │   └── 📄 User.js
+│   ├── 📁 routes
+│   │   ├── 📄 adminRoutes.js
+│   │   ├── 📄 authRoutes.js
+│   │   └── 📄 bookRoutes.js
+│   ├── 📁 tests
+│   │   ├── 📄 BooksClass.test.js
+│   │   ├── 📄 DatabaseManager.test.js
+│   │   ├── 📄 api.integration.test.js
+│   │   ├── 📄 cleanupDuplicates.test.js
+│   │   └── 📄 filterBooks.test.js
+│   ├── 📄 BooksClass.js
+│   ├── 📄 DatabaseManager.js
+│   ├── 📄 app.js
+│   ├── 📄 backfill-genres.js
+│   ├── 📄 cleanupDuplicates.js
+│   ├── 📄 filterBooks.js
+│   ├── ⚙️ package-lock.json
+│   ├── ⚙️ package.json
+│   ├── 📝 readme.md
+│   ├── 📄 seed.js
+│   ├── 📄 seedDemoUsers.js
+│   ├── 📄 seedGenres.js
+│   ├── 📄 seedManyUsers.js
+│   └── 📄 server.js
+├── 📁 Frontend
+├── 📁 docs
+│   ├── 📝 DEVELOPER_DOCUMENTATION.md
+│   ├── 📝 TESTING_PLAN.md
+│   ├── 📝 USER_DOCUMENTATION.md
+│   └── 🌐 devdocs.html
+├── 📁 e2e
+│   └── 📄 system.spec.js
+├── 📁 public
+│   ├── 🖼️ cover-1984.png
+│   ├── 🖼️ cover-catcher.png
+│   ├── 🖼️ cover-gatsby.png
+│   ├── 🖼️ cover-mockingbird.png
+│   ├── 🖼️ cover-pride.png
+│   ├── 🖼️ covers-source.png
+│   └── 🖼️ logo.png
+├── 📁 src
+│   ├── 📁 assets
+│   │   ├── 🖼️ cover-1984.png
+│   │   ├── 🖼️ cover-catcher.png
+│   │   ├── 🖼️ cover-gatsby.png
+│   │   ├── 🖼️ cover-mockingbird.png
+│   │   └── 🖼️ cover-pride.png
+│   ├── 📁 auth
+│   │   └── 📄 AuthContext.jsx
+│   ├── 📁 components
+│   │   ├── 📁 ui
+│   │   │   └── 📄 modern-animated-sign-in.jsx
+│   │   ├── 🎨 AdminLayout.css
+│   │   ├── 📄 AdminLayout.jsx
+│   │   ├── 🎨 BookCard.css
+│   │   ├── 📄 BookCard.jsx
+│   │   ├── 🎨 BookDetailsModal.css
+│   │   ├── 📄 BookDetailsModal.jsx
+│   │   ├── 🎨 BookFormModal.css
+│   │   ├── 📄 BookFormModal.jsx
+│   │   ├── 🎨 CatalogFilters.css
+│   │   ├── 📄 CatalogFilters.jsx
+│   │   ├── 🎨 ExpandableTabs.css
+│   │   ├── 📄 ExpandableTabs.jsx
+│   │   ├── 🎨 FeaturesSection.css
+│   │   ├── 📄 FeaturesSection.jsx
+│   │   ├── 🎨 Footer.css
+│   │   ├── 📄 Footer.jsx
+│   │   ├── 🎨 Hero.css
+│   │   ├── 📄 Hero.jsx
+│   │   ├── 🎨 Navbar.css
+│   │   ├── 📄 Navbar.jsx
+│   │   ├── 📄 ProtectedRoute.jsx
+│   │   ├── 📄 ProtectedRoute.test.jsx
+│   │   ├── 📄 RovingTabToolbar.jsx
+│   │   ├── 📄 Skeleton.jsx
+│   │   ├── 🎨 SuggestionsSection.css
+│   │   └── 📄 SuggestionsSection.jsx
+│   ├── 📁 context
+│   ├── 📁 data
+│   │   └── 📄 books.js
+│   ├── 📁 lib
+│   │   ├── 📄 a11yHooks.js
+│   │   ├── 📄 adminAudit.js
+│   │   ├── 📄 adminAudit.test.js
+│   │   ├── 📄 utils.js
+│   │   └── 📄 utils.test.js
+│   ├── 📁 pages
+│   │   ├── 📄 AdminDashboard.jsx
+│   │   ├── 📄 AdminDashboard.test.jsx
+│   │   ├── 📄 AdminUserProfile.jsx
+│   │   ├── 📄 AdminUserProfile.test.jsx
+│   │   ├── 📄 CatalogPage.jsx
+│   │   ├── 📄 CatalogPage.test.jsx
+│   │   ├── 📄 LandingPage.jsx
+│   │   ├── 📄 LandingPage.test.jsx
+│   │   ├── 📄 LoginPage.jsx
+│   │   ├── 📄 LoginPage.test.jsx
+│   │   ├── 📄 ManageBooks.jsx
+│   │   ├── 📄 ManageBooks.test.jsx
+│   │   ├── 📄 ManageUsers.jsx
+│   │   ├── 📄 ManageUsers.test.jsx
+│   │   ├── 📄 ProfilePage.jsx
+│   │   ├── 📄 ProfilePage.test.jsx
+│   │   ├── 📄 SignupPage.jsx
+│   │   ├── 📄 SignupPage.test.jsx
+│   │   ├── 📄 UserDashboard.jsx
+│   │   └── 📄 UserDashboard.test.jsx
+│   ├── 🎨 App.css
+│   ├── 📄 App.jsx
+│   ├── 🎨 index.css
+│   ├── 📄 main.jsx
+│   └── 📄 setupTests.js
+├── ⚙️ .env.example
+├── ⚙️ .gitignore
+├── 📝 FrontEnd_Documentation.md
+├── 📝 README.md
+├── 🌐 index.html
+├── 📄 manage.bat
+├── 📄 manage.sh
+├── ⚙️ package-lock.json
+├── ⚙️ package.json
+├── 📄 playwright.config.js
+├── 📄 postcss.config.js
+├── 📄 tailwind.config.js
+├── ⚙️ vercel.json
+└── 📄 vite.config.js
+```
 
 ## License
 
