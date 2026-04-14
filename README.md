@@ -1,13 +1,35 @@
 # Dev.inc — Book Catalog
 
+[![Live Site](https://img.shields.io/badge/Live-Vercel-black?logo=vercel)](https://devinc-brown.vercel.app/)
+[![Backend](https://img.shields.io/badge/Backend-Render-46E3B7?logo=render&logoColor=white)](https://render.com/)
+[![Database](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Repo Stars](https://img.shields.io/github/stars/DevlynxSystems/Dev.inc?style=social)](https://github.com/DevlynxSystems/Dev.inc/stargazers)
+[![Forks](https://img.shields.io/github/forks/DevlynxSystems/Dev.inc?style=social)](https://github.com/DevlynxSystems/Dev.inc/network/members)
+[![React](https://img.shields.io/badge/React-18-20232A?logo=react&logoColor=61DAFB)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-22-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Playwright](https://img.shields.io/badge/Playwright-E2E-2EAD33?logo=playwright&logoColor=white)](https://playwright.dev/)
+[![Vitest](https://img.shields.io/badge/Vitest-Testing-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev/)
+
 Full‑stack book catalog with **JWT authentication** and **role‑based access control**:
 
 - Browse the catalog as a guest
 - Sign up / log in as a **user** (dashboard + profile)
 - Log in as an **admin** (admin dashboard, manage books, manage users)
 
+## Quick links
+
+- Live app: [https://devinc-brown.vercel.app/](https://devinc-brown.vercel.app/)
+- Frontend docs: [FrontEnd_Documentation.md](./FrontEnd_Documentation.md)
+- Full static docs: [docs/devdocs.html](./docs/devdocs.html)
+- Testing plan: [docs/TESTING_PLAN.md](./docs/TESTING_PLAN.md)
+
 ## Documentation
-- **[devdocs.html](./docs/devdocs.html)** - Complete Static Web file with documentation for frontend + backend
+- **[devdocs.html](./docs/devdocs.html)** — complete static documentation for frontend + backend
 - **[FrontEnd_Documentation.md](./FrontEnd_Documentation.md)** — React app: routes, auth, catalog, admin UI, scripts, and how the frontend talks to the API
 - **[docs/DEVELOPER_DOCUMENTATION.md](./docs/DEVELOPER_DOCUMENTATION.md)** — contributor guide for README + JSDoc documentation standards
 - **[docs/USER_DOCUMENTATION.md](./docs/USER_DOCUMENTATION.md)** — end-user guide for guests, users, and admins
@@ -53,7 +75,7 @@ Dev.inc/
 ## Prerequisites
 
 - **Node.js** (v18+ recommended)
-- **MongoDB** (local or [MongoDB Atlas](https://www.mongodb.com/cloud/atlas))
+- **MongoDB** (only needed for local backend development; cloud deployment uses Render)
 
 ## Environment variables
 
@@ -221,6 +243,18 @@ All endpoints below require:
 - **User**: User dashboard + profile setup/edit
 - **Admin**: Admin dashboard (`/admin`), manage books (`/admin/books`), manage users (`/admin/users`)
 
+## Contribution Charts
+
+![Contributors](https://contrib.rocks/image?repo=DevlynxSystems/Dev.inc)
+
+[![Repo Activity Graph](https://github-readme-activity-graph.vercel.app/graph?username=DevlynxSystems&theme=github-compact)](https://github.com/DevlynxSystems/Dev.inc/graphs/contributors)
+
+## Technology Insights
+
+![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=DevlynxSystems&repo=Dev.inc&layout=compact&theme=default)
+
+![Repo Stats](https://github-readme-stats.vercel.app/api/pin/?username=DevlynxSystems&repo=Dev.inc&theme=default)
+
 ## License
 
-MIT
+[MIT](https://opensource.org/licenses/MIT)
