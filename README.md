@@ -13,6 +13,12 @@ Full‑stack book catalog with **JWT authentication** and **role‑based access 
 - **[docs/USER_DOCUMENTATION.md](./docs/USER_DOCUMENTATION.md)** — end-user guide for guests, users, and admins
 - **[docs/TESTING_PLAN.md](./docs/TESTING_PLAN.md)** — testing scope and cases
 
+## Live demo
+
+- Frontend (Vercel): [https://devinc-brown.vercel.app/](https://devinc-brown.vercel.app/)
+- Backend API: hosted on Render
+- Database: hosted on Render
+
 ## Tech stack
 
 | Layer | Stack |
@@ -155,11 +161,15 @@ To create many demo users/admins:
 npm run seed:many-users
 ```
 
-## Deployment (e.g. Vercel)
+## Deployment (Vercel + Render)
+
+- **Live frontend (Vercel):** [https://devinc-brown.vercel.app/](https://devinc-brown.vercel.app/)
+- **Backend:** hosted on **Render**
+- **Database:** hosted on **Render**
 
 1. **Root directory**: set the project root to the **repository root** (where `package.json` and `vite.config.js` live), not a nested `Frontend/` folder.
 2. **Environment variables** (Project Settings → Environment Variables):
-   - **`VITE_API_BASE_URL`**: your **deployed backend** origin only, e.g. `https://your-api.onrender.com` (no `/api` suffix unless your server is actually mounted that way).
+   - **`VITE_API_BASE_URL`**: set this to your deployed Render backend origin (no `/api` suffix unless your server is mounted that way).
    - Add for **Production** (and **Preview** if you use preview deployments). **Redeploy** after changing env vars so Vite picks them up at build time.
 3. **SPA routing**: `vercel.json` in the repo root rewrites paths to `/` so React Router routes (e.g. `/login`, `/catalog`, `/admin`) work on refresh.
 4. **Build output**: **Output Directory** should be **`dist`**, not `public`.
