@@ -7,7 +7,7 @@ Full‑stack book catalog with **JWT authentication** and **role‑based access 
 - Log in as an **admin** (admin dashboard, manage books, manage users)
 
 ## Documentation
-
+- **[devdocs.html](./docs/devdocs.html)** - Complete Static Web file with documentation for frontend + backend
 - **[FrontEnd_Documentation.md](./FrontEnd_Documentation.md)** — React app: routes, auth, catalog, admin UI, scripts, and how the frontend talks to the API
 - **[docs/DEVELOPER_DOCUMENTATION.md](./docs/DEVELOPER_DOCUMENTATION.md)** — contributor guide for README + JSDoc documentation standards
 - **[docs/USER_DOCUMENTATION.md](./docs/USER_DOCUMENTATION.md)** — end-user guide for guests, users, and admins
